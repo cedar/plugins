@@ -1,0 +1,4 @@
+DECLARE_SCRIPT
+(
+  ...
+)

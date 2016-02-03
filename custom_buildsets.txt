@@ -1,0 +1,4 @@
+DECLARE_SET(MyPluginBaby)
+BUILD_ADD(MyPluginBaby "Category = Utilities")
+BUILD_ADD(MyPluginBaby "Step=cedar.proc.utilities.Blubb")
+BUILD_EXCLUDE(MyPluginBaby "...")
