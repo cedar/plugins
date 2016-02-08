@@ -44,6 +44,33 @@ set(SELECTED_BUILDSET "buildset.cmake")
 include_directories(${CMAKE_SOURCE_DIR})
 
 
+## Wrapper around QT4/5 macros ##
+
+macro(qt_wrap_cpp)
+  if(QT_VERSION GREATER 4)
+    qt5_wrap_cpp(${ARGN})
+  else(QT_VERSION GREATER 4)
+    qt4_wrap_cpp(${ARGN})
+  endif(QT_VERSION GREATER 4)
+endmacro(qt_wrap_cpp)
+
+macro(qt_add_resources)
+  if(QT_VERSION GREATER 4)
+    qt5_add_resources(${ARGV})
+  else(QT_VERSION GREATER 4)
+    qt4_add_resources(${ARGV})
+  endif(QT_VERSION GREATER 4)
+endmacro(qt_add_resources)
+
+macro(qt_wrap_ui ${ARGV})
+  if(QT_VERSION GREATER 4)
+    qt5_wrap_ui(${ARGV})
+  else(QT_VERSION GREATER 4)
+    qt4_wrap_ui(${ARGV})
+  endif(QT_VERSION GREATER 4)
+endmacro(qt_wrap_ui)
+
+
 ## General setup & linking to cedar ##
 
 # Read the user's settings
@@ -132,6 +159,7 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   # TODO check if this file exists; if not, don't add it
 #  set("source_files_${NORMALIZED_CLASS_NAME}" "" PARENT_SCOPE)
   list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
+  # these headers are used to add them to the generated plugin.cpp file
   list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
   
   set(STATE_NONE 0)
@@ -143,6 +171,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
     message("DEBUG arg: ${arg}")
     if (arg STREQUAL "CATEGORY")
       set(CURRENT_STATE ${STATE_CATEGORY})
+    elseif(arg STREQUAL "MOC")
+      list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
       set("CATEGORY_${NORMALIZED_CLASS_NAME}" ${arg})
     endif()
@@ -160,6 +190,12 @@ macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
   list(APPEND PLUGIN_SOURCE_FILES ${SOURCE_FILES})
   set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} { cedar::proc::ElementDeclarationPtr declaration(new cedar::proc::ElementDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")); plugin->add(declaration); }\n")
+  
+  list(LENGTH "moc_headers_${NORMALIZED_CLASS_NAME}" list_length)
+  if (list_length GREATER 0)
+    qt_wrap_cpp(moc_sources ${moc_headers_${NORMALIZED_CLASS_NAME}})
+    list(APPEND PLUGIN_SOURCE_FILES ${moc_sources})
+  endif()
   
   foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
     set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
@@ -214,3 +250,5 @@ list(APPEND PLUGIN_SOURCE_FILES ${CMAKE_CURRENT_BINARY_DIR}/plugin.cpp)
 message("DEBUG selected source files: ${PLUGIN_SOURCE_FILES}")
 # TODO
 add_library(${PLUGIN_TARGET_NAME} SHARED ${PLUGIN_SOURCE_FILES})
+
+
