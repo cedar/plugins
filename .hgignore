@@ -1,0 +1,4 @@
+syntax:glob
+build/*
+project.conf
+buildset.cmake
