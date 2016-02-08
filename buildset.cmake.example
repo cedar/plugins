@@ -3,5 +3,5 @@
 #BUILD_ADD(MyPluginBaby "Step=cedar.proc.utilities.Blubb")
 #BUILD_EXCLUDE(MyPluginBaby "...")
 
-DECLARE_BUILDSET(Plugin)
-ADD_TO_BUILDSET(Plugin STEP cedar::proc::steps::MatrixThreadDecoupler)
+DECLARE_PLUGIN(Plugin)
+ADD_TO_PLUGIN(STEPS cedar::proc::steps::MatrixThreadDecoupler)
