@@ -81,11 +81,11 @@ macro(print_message msg)
 endmacro(print_message)
 
 macro(print_error error)
-  message(SEND_ERROR "EE ${error}")
+  message(SEND_ERROR "${error}")
 endmacro(print_error)
 
 macro(print_fatal_error error)
-  message(FATAL_ERROR "FE ${error}")
+  message(FATAL_ERROR "${error}")
 endmacro(print_fatal_error)
 
 ## General setup & linking to cedar ##
@@ -197,6 +197,7 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   set(STATE_CATEGORY 1)
   set(STATE_DESCRIPTION 2)
   set(STATE_MAINTAINER 3)
+  set(STATE_REQUIRES_LIBRARIES 4)
   
   set(CURRENT_STATE ${STATE_NONE})
   
@@ -207,6 +208,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       set(CURRENT_STATE ${STATE_DESCRIPTION})
     elseif (arg STREQUAL "MAINTAINER")
       set(CURRENT_STATE ${STATE_MAINTAINER})
+    elseif (arg STREQUAL "REQUIRES_LIBRARIES" OR arg STREQUAL "REQUIRES_LIBRARY")
+      set(CURRENT_STATE ${STATE_REQUIRES_LIBRARIES})
     elseif(arg STREQUAL "MOC")
       list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
@@ -215,6 +218,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${arg})
     elseif(CURRENT_STATE EQUAL STATE_MAINTAINER)
       set("MAINTAINER_${NORMALIZED_CLASS_NAME}" ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_REQUIRES_LIBRARIES)
+      set("REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}" ${arg})
     endif()
   endforeach()
   if(NOT DESCRIPTION_${NORMALIZED_CLASS_NAME})
@@ -231,6 +236,9 @@ macro(DECLARE_PLUGIN PLUGIN_NAME)
   set(PLUGIN_TARGET_NAME ${PLUGIN_NAME})
 endmacro(DECLARE_PLUGIN)
 
+#
+# macro ADD_STEP_SOURCES_TO_BUILD
+#
 macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
   set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
@@ -244,6 +252,7 @@ macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   # add description, if set
   set(description ${DESCRIPTION_${NORMALIZED_CLASS_NAME}})
   if (description)
+    string(REPLACE "\"" "\\\"" description ${description})
     set(decl "${decl}    declaration->setDescription(\"${description}\");\n")
   endif()
   
@@ -262,6 +271,10 @@ macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   if (list_length GREATER 0)
     qt_wrap_cpp(moc_sources ${moc_headers_${NORMALIZED_CLASS_NAME}})
     list(APPEND PLUGIN_SOURCE_FILES ${moc_sources})
+  endif()
+  
+  if (REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME})
+    list(APPEND PLUGIN_REQUIRES_LIBRARIES ${REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}})
   endif()
   
   foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
@@ -319,6 +332,30 @@ endforeach()
 
 include(${SELECTED_BUILDSET})
 
+## Find and compile all required external libraries ##
+if (PLUGIN_REQUIRES_LIBRARIES)
+  list(REMOVE_DUPLICATES PLUGIN_REQUIRES_LIBRARIES)
+  
+  foreach (required_library ${PLUGIN_REQUIRES_LIBRARIES})
+    print_message("Looking for external library ${required_library}")
+    set(include_file "${CMAKE_SOURCE_DIR}/external_libraries/${required_library}.cmake")
+    if (EXISTS "${include_file}")
+      include (${include_file})
+      
+      string(TOUPPER ${required_library} required_library_upper)
+      if (${required_library_upper}_FOUND)
+        message("DEBUG: incl: ${${required_library_upper}_INCLUDE}")
+        include_directories(${${required_library_upper}_INCLUDE})
+        list(APPEND PLUGIN_LINKED_LIBRARIES ${${required_library_upper}_LIBS})
+      else()
+        print_fatal_error("Required library ${required_library} was not found.")
+      endif()
+    else()
+      print_fatal_error("${required_library}.cmake not found in external_libraries folder.")
+    endif()
+  endforeach()
+endif()
+
 ## generate the plugin.cpp file ##
 
 configure_file(${CMAKE_SOURCE_DIR}/plugin.cpp.in plugin.cpp)
@@ -335,4 +372,4 @@ list(APPEND PLUGIN_SOURCE_FILES ${compiled_resource_paths})
 # TODO
 add_library(${PLUGIN_TARGET_NAME} SHARED ${PLUGIN_SOURCE_FILES})
 
-
+target_link_libraries(${PLUGIN_TARGET_NAME} ${PLUGIN_LINKED_LIBRARIES})

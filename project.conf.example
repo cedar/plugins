@@ -45,3 +45,7 @@ set(CMAKE_BUILD_TYPE debug)
 
 # Specify the build directory of cedar (defaults to "build" if not given)
 # set(CEDAR_BUILD_DIR build)
+
+# specify where the plugin build system looks for include paths
+# set(EXTERNAL_LIBRARY_INCLUDE_PATHS "path1" "path2" "..." "pathN")
+# set(EXTERNAL_LIBRARY_PATHS "path1" "path2" "..." "pathN")
