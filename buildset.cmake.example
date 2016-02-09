@@ -1,7 +1,8 @@
-#DECLARE_SET(MyPluginBaby)
-#BUILD_ADD(MyPluginBaby "Category = Utilities")
-#BUILD_ADD(MyPluginBaby "Step=cedar.proc.utilities.Blubb")
-#BUILD_EXCLUDE(MyPluginBaby "...")
-
+# Declare your buildset's name:
 DECLARE_PLUGIN(Plugin)
-ADD_TO_PLUGIN(STEPS cedar::proc::steps::MatrixThreadDecoupler)
+
+# Then add steps using one or more of the following commands:
+# ADD_TO_PLUGIN(STEPS cedar::proc::steps::Multiplexer)
+# ADD_TO_PLUGIN(CATEGORIES Utilities Sources)
+# ADD_TO_PLUGIN(NAMESPACES cedar::proc::steps)
+# ADD_TO_PLUGIN(ALL_STEPS)
