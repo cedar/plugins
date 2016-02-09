@@ -1,0 +1,11 @@
+# Welcome to the cedar plugin collection #
+
+@WELCOME_TEXT@
+
+# Steps included in the plugin #
+
+@STEP_LIST_TEXT@
+
+# External libraries used by the plugin #
+
+@EXTERNAL_LIBRARIES_TEXT@
