@@ -30,6 +30,8 @@ TODO describe plugin configurations, show examples
 
 ## Utilities ##
 
+**AttentionSlice**: A step that determines the location of the maximum in an activation matrix and cuts out a region around this location from an input image.
+
 **Demultiplexer**: Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).
 
 **MatrixThreadDecoupler**: A looped step that makes a copy of its input matrix. This may help make threads more independent of each other.
