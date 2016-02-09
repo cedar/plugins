@@ -162,6 +162,10 @@ macro(NORMALIZE_CLASS_NAME FULL_CLASS_NAME)
   string(REGEX REPLACE "::" "__" NORMALIZED_CLASS_NAME ${FULL_CLASS_NAME})
 endmacro(NORMALIZE_CLASS_NAME)
 
+macro(EXTRACT_CLASS_NAME FULL_CLASS_NAME)
+  string(REGEX REPLACE ".*::([[A-Za-z0-9_]*)$" "\\1" CLASS_NAME ${FULL_CLASS_NAME})
+endmacro(EXTRACT_CLASS_NAME)
+
 # This is a macro called by step description files.
 #
 # It automatically generates build information required for the step, namely, the cpp and header files, icon,
@@ -175,7 +179,7 @@ endmacro(NORMALIZE_CLASS_NAME)
 #             )
 macro(DECLARE_STEP FULL_CLASS_NAME)
   # extract the class name, without the namespace
-  string(REGEX REPLACE ".*::([[A-Za-z0-9_]*)$" "\\1" CLASS_NAME ${FULL_CLASS_NAME})
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
   # normalize the class name so it can be used to declare variables
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
   
@@ -214,6 +218,7 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
       set("CATEGORY_${NORMALIZED_CLASS_NAME}" ${arg})
+      list(APPEND CATEGORIES ${arg})
     elseif(CURRENT_STATE EQUAL STATE_DESCRIPTION)
       set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${arg})
     elseif(CURRENT_STATE EQUAL STATE_MAINTAINER)
@@ -344,7 +349,6 @@ if (PLUGIN_REQUIRES_LIBRARIES)
       
       string(TOUPPER ${required_library} required_library_upper)
       if (${required_library_upper}_FOUND)
-        message("DEBUG: incl: ${${required_library_upper}_INCLUDE}")
         include_directories(${${required_library_upper}_INCLUDE})
         list(APPEND PLUGIN_LINKED_LIBRARIES ${${required_library_upper}_LIBS})
       else()
@@ -373,3 +377,45 @@ list(APPEND PLUGIN_SOURCE_FILES ${compiled_resource_paths})
 add_library(${PLUGIN_TARGET_NAME} SHARED ${PLUGIN_SOURCE_FILES})
 
 target_link_libraries(${PLUGIN_TARGET_NAME} ${PLUGIN_LINKED_LIBRARIES})
+
+
+## Generate the documentation ##
+
+# generate the welcome text #
+#WELCOME_TEXT
+file(READ ${CMAKE_SOURCE_DIR}/cmake/readme_src/welcome.md WELCOME_TEXT)
+
+# generate the step list #
+
+list(REMOVE_DUPLICATES CATEGORIES)
+list(SORT CATEGORIES)
+
+foreach (category ${CATEGORIES})
+  set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\#\# ${category} \#\#\n\n")
+  list(SORT known_steps)
+  foreach (FULL_CLASS_NAME ${known_steps})
+    NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+    EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+    set(step_category ${CATEGORY_${NORMALIZED_CLASS_NAME}})
+    set(description ${DESCRIPTION_${NORMALIZED_CLASS_NAME}})
+    if (NOT description)
+      set(description "no description.")
+    endif()
+    
+    if (category STREQUAL step_category)
+      set(STEP_LIST_TEXT "${STEP_LIST_TEXT}**${CLASS_NAME}**: ${description}\n\n")
+    endif()
+  endforeach()
+  set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\n\n")
+endforeach()
+
+# generate the descriptions for external libraries #
+
+file(GLOB_RECURSE ext_descriptions "${CMAKE_SOURCE_DIR}/external_libraries/*.md")
+list(SORT ext_descriptions)
+foreach (description ${ext_descriptions})
+  file(READ ${description} description_md)
+  set(EXTERNAL_LIBRARIES_TEXT "${EXTERNAL_LIBRARIES_TEXT}${description_md}")
+endforeach()
+
+configure_file(${CMAKE_SOURCE_DIR}/cmake/readme_src/readme.md.in ${CMAKE_SOURCE_DIR}/readme.md)
