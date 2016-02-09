@@ -14,6 +14,14 @@ TODO describe plugin configurations, show examples
 
 # Steps included in the plugin #
 
+## Motion detection ##
+
+**CounterChangeCombination**: The inputs have to be 3D toward and away matrices from a single edge filtered video or camera input. The first dimension of the input matrices is considered as the edge orientation dimension. The input matrices are shifted orthogonal the edge orientation by the size of the configurable shift parameter. Output matrices are two 3D matrices that reflect the combination of toward and away signals according to the counter-change rule. The first dimension is assigned to the motion direction. The two matrices represent the polarity if a dark pattern moves on bright ground (BtW: Black to White motion) or the other way around (WtB: White to Black motion)
+
+**MotionGradient**: This class provides a cedar processing step implementing the OpenCV function calcMotionGradient.
+
+
+
 ## Nao ##
 
 **NaoCamera**: Nao's camera.
@@ -35,6 +43,8 @@ TODO describe plugin configurations, show examples
 **BufferThief**: This step can grab any buffer from a step in the same architecture and output the data in the buffer. Use with caution, as this may lead to issues due to unsafe/unlocked data.
 
 **Demultiplexer**: Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).
+
+**ElementwiseDivide**: To input matrices Nom and Denom will be divided elementwisely. The output is Nom/(Denom + scalar). "scalar" is a scalar and configurable parameter. This value is added to all elements in the Denom matrix to prevent dividing by zero or very small values.
 
 **MatrixThreadDecoupler**: A looped step that makes a copy of its input matrix. This may help make threads more independent of each other.
 
