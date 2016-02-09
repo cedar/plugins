@@ -45,6 +45,10 @@
 #              CATEGORY "YourCategory"
 #              DESCRIPTION "Describe what the step does."
 #              MAINTAINER "Your Name" # to let people know who to contact about this step
+#              DEPRECATED_NAME some::old::Name
+#              [or: DEPRECATED_NAMES some::old::Name some::other::old::Name]
+#              REQUIRES_LIBRARY some_lib_from_the_external_libraries_folder
+#              [or: REQUIRES_LIBRARIES lib1 lib2 ...]
 #             )
 macro(DECLARE_STEP FULL_CLASS_NAME)
   # extract the class name, without the namespace
@@ -71,6 +75,7 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   set(STATE_DESCRIPTION 2)
   set(STATE_MAINTAINER 3)
   set(STATE_REQUIRES_LIBRARIES 4)
+  set(STATE_DEPRECATED_NAMES 5)
   
   set(CURRENT_STATE ${STATE_NONE})
   
@@ -83,6 +88,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       set(CURRENT_STATE ${STATE_MAINTAINER})
     elseif (arg STREQUAL "REQUIRES_LIBRARIES" OR arg STREQUAL "REQUIRES_LIBRARY")
       set(CURRENT_STATE ${STATE_REQUIRES_LIBRARIES})
+    elseif (arg STREQUAL "DEPRECATED_NAME" OR arg STREQUAL "DEPRECATED_NAMES")
+      set(CURRENT_STATE ${STATE_DEPRECATED_NAMES})
     elseif(arg STREQUAL "MOC")
       list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
@@ -93,7 +100,9 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
     elseif(CURRENT_STATE EQUAL STATE_MAINTAINER)
       set("MAINTAINER_${NORMALIZED_CLASS_NAME}" ${arg})
     elseif(CURRENT_STATE EQUAL STATE_REQUIRES_LIBRARIES)
-      set("REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}" ${arg})
+      list(APPEND "REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}" ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_DEPRECATED_NAMES)
+      list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${arg})
     endif()
   endforeach()
   if(NOT DESCRIPTION_${NORMALIZED_CLASS_NAME})
