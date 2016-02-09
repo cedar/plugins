@@ -1,12 +1,10 @@
 # all options that are specified with a keyword are optional (e.g., MOC
 DECLARE_STEP(cedar::proc::steps::Multiplexer # the class name as used in the code; will be added to the plugin.cpp
 #  ADDITIONAL_SOURCES my_source.cpp
-#  ICON             "bla.svg" # the icon to be used, if any
              CATEGORY         "Utilities" # the category in which the step appears in cedar
              MOC
 #  ADDITIONAL_MOC_HEADERS my_special_field.h # we may also want to moc some headers for the step (usually just one)
-#  AUTHOR           Some Guy
-#  DESCRIPTION      "This does something, I swear!"
+  DESCRIPTION      "Joins several scalars (1x1 matrices) into a vector (nx1 matrix)."
 #  MAINTAINER       "Dr. Whoeverisresponsible"
 #  REQUIRES         # section for specifying different requirements
 #    CEDAR          DEVELOPMENT # this step requires cedar development; maybe also/instead something like VERSION >= 5.0.0, and development always has a higher version than release?

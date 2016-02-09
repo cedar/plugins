@@ -1,18 +1,5 @@
-# all options that are specified with a keyword are optional (e.g., MOC
-DECLARE_STEP(cedar::proc::steps::MatrixThreadDecoupler # the class name as used in the code; will be added to the plugin.cpp
-##remove                   "MatrixThreadDecoupler.cpp" # followed by a list of source files belonging to a step (usually, a single cpp)
-#  ADDITIONAL_SOURCES my_source.cpp
-#  MOC              my_special_field.h # we may also want to moc some headers for the step (usually just one)
-#  ICON             "bla.svg" # the icon to be used, if any
-  CATEGORY         "Utilities" # the category in which the step appears in cedar
-#  AUTHOR           Some Guy
-#  DESCRIPTION      "This does something, I swear!"
-#  MAINTAINER       "Dr. Whoeverisresponsible"
-#  REQUIRES         # section for specifying different requirements
-#    CEDAR          DEVELOPMENT # this step requires cedar development; maybe also/instead something like VERSION >= 5.0.0, and development always has a higher version than release?
-#    LIBS           KEYPOINTS # an external library needed by this step
-#  DEPRECATED       "Don't use this step any more."
-#  DEPRECATED_NAMES
-#  OS               UNIX WINDOWS
-#  DEPENDS_ON       cedar::proc::steps::SomeOtherStep
-)
+DECLARE_STEP(cedar::proc::steps::MatrixThreadDecoupler
+             CATEGORY         "Utilities"
+             DESCRIPTION      "A looped step that makes a copy of its input matrix. This may help make threads more independent of each other."
+             MAINTAINER       "Oliver Lomp"
+            )

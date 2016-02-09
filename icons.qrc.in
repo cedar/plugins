@@ -1,0 +1,4 @@
+<!DOCTYPE RCC><RCC version="1.0">
+ <qresource prefix="/cedar/plugins">
+@PLUGIN_ICONS@ </qresource>
+ </RCC>

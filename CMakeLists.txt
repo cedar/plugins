@@ -70,6 +70,23 @@ macro(qt_wrap_ui ${ARGV})
   endif(QT_VERSION GREATER 4)
 endmacro(qt_wrap_ui)
 
+# Some macros for nicer message/warning/error printing
+
+macro(print_warning warning)
+  message("!! Warning: ${warning}")
+endmacro(print_warning)
+
+macro(print_message msg)
+  message("-- ${msg}")
+endmacro(print_message)
+
+macro(print_error error)
+  message(SEND_ERROR "EE ${error}")
+endmacro(print_error)
+
+macro(print_fatal_error error)
+  message(FATAL_ERROR "FE ${error}")
+endmacro(print_fatal_error)
 
 ## General setup & linking to cedar ##
 
@@ -80,10 +97,10 @@ file(GLOB conf_check "project.conf")
 if (NOT conf_check)
   file(GLOB conf_example_check "project.conf.example")
   if (conf_example_check)
-    message(WARNING "Configuration file not found. Using example file, please check correctness of the paths!")
+    print_warning("Configuration file not found. Using example file, please check correctness of the paths!")
     configure_file("project.conf.example" "${CMAKE_CURRENT_SOURCE_DIR}/project.conf" COPYONLY)
   else()
-    message(FATAL_ERROR "Neither the project.conf nor the project.conf.example file could be found. Please provide configuration files!")
+    print_fatal_error("Neither the project.conf nor the project.conf.example file could be found. Please provide configuration files!")
   endif()
 endif()
 
@@ -96,7 +113,7 @@ endif()
 
 # include cedar variables/directories when CEDAR_HOME is specified
 if(CEDAR_HOME)
-  message("-- Using local cedar version in ${CEDAR_HOME}")
+  print_message("Using local cedar version in ${CEDAR_HOME}")
   # Add include directories
   include_directories("${CEDAR_HOME}" "${CEDAR_HOME}/${CEDAR_BUILD_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -108,7 +125,7 @@ if(CEDAR_HOME)
   
 # include cedar variables/directories when CEDAR_HOME_INSTALLED is specified
 elseif(CEDAR_HOME_INSTALLED)
-  message("-- Using installed cedar version in ${CEDAR_HOME_INSTALLED}")
+  print_message("Using installed cedar version in ${CEDAR_HOME_INSTALLED}")
   # Add include directories
   include_directories("${CEDAR_HOME_INSTALLED}/include" "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -123,7 +140,7 @@ endif(CEDAR_HOME)
 set (OpenCV_DIR ${CEDAR_OPENCV_CMAKE_DIR})
 find_package(OpenCV REQUIRED)
 if (NOT OpenCV_FOUND)
-  message("Could not find opencv. You may experience problems linking to this library.")
+  print_warning("Could not find opencv. You may experience problems linking to this library.")
 endif ()
 
 
@@ -145,13 +162,20 @@ macro(NORMALIZE_CLASS_NAME FULL_CLASS_NAME)
   string(REGEX REPLACE "::" "__" NORMALIZED_CLASS_NAME ${FULL_CLASS_NAME})
 endmacro(NORMALIZE_CLASS_NAME)
 
-# TODO describe syntax
+# This is a macro called by step description files.
+#
+# It automatically generates build information required for the step, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional. Here is an example call with a list of 
+# all possible parameters:
+# DECLARE_STEP(cedar::proc::steps::YourClass # automatically includes YourClass.cpp and YourClass.h to be compiled
+#              MOC # if specified, the class header will be moced.
+#              CATEGORY "YourCategory"
+#              DESCRIPTION "Describe what the step does."
+#              MAINTAINER "Your Name" # to let people know who to contact about this step
+#             )
 macro(DECLARE_STEP FULL_CLASS_NAME)
   # extract the class name, without the namespace
   string(REGEX REPLACE ".*::([[A-Za-z0-9_]*)$" "\\1" CLASS_NAME ${FULL_CLASS_NAME})
-  message("DEBUG step declaration ${FULL_CLASS_NAME}")
-  message("DEBUG step declaration ${CLASS_NAME}")
-  message("DEBUG dir: ${CMAKE_CURRENT_LIST_DIR}")
   # normalize the class name so it can be used to declare variables
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
   
@@ -160,26 +184,38 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   
   # append the auto-determined cpp file for the class
   # TODO check if this file exists; if not, don't add it
-#  set("source_files_${NORMALIZED_CLASS_NAME}" "" PARENT_SCOPE)
   list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
   # these headers are used to add them to the generated plugin.cpp file
   list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
   
+  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+    list(APPEND "icon_${NORMALIZED_CLASS_NAME}" "${CLASS_NAME}.svg")
+    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+  endif()
+  
   set(STATE_NONE 0)
   set(STATE_CATEGORY 1)
+  set(STATE_DESCRIPTION 2)
+  set(STATE_MAINTAINER 3)
   
   set(CURRENT_STATE ${STATE_NONE})
   
   foreach (arg ${ARGN})
-    message("DEBUG arg: ${arg}")
     if (arg STREQUAL "CATEGORY")
       set(CURRENT_STATE ${STATE_CATEGORY})
+    elseif (arg STREQUAL "DESCRIPTION")
+      set(CURRENT_STATE ${STATE_DESCRIPTION})
+    elseif (arg STREQUAL "MAINTAINER")
+      set(CURRENT_STATE ${STATE_MAINTAINER})
     elseif(arg STREQUAL "MOC")
       list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
       set("CATEGORY_${NORMALIZED_CLASS_NAME}" ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_DESCRIPTION)
+      set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_MAINTAINER)
+      set("MAINTAINER_${NORMALIZED_CLASS_NAME}" ${arg})
     endif()
-    
   endforeach()
 endmacro(DECLARE_STEP)
 
@@ -192,7 +228,30 @@ macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
   set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
   list(APPEND PLUGIN_SOURCE_FILES ${SOURCE_FILES})
-  set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} { cedar::proc::ElementDeclarationPtr declaration(new cedar::proc::ElementDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")); plugin->add(declaration); }\n")
+  set(decl " {\n")
+  set(decl "${decl}    cedar::proc::ElementDeclarationPtr declaration\n")
+  set(decl "${decl}    (\n")
+  set(decl "${decl}      new cedar::proc::ElementDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")\n")
+  set(decl "${decl}    );\n")
+  
+  # add description, if set
+  set(description ${DESCRIPTION_${NORMALIZED_CLASS_NAME}})
+  if (description)
+    set(decl "${decl}    declaration->setDescription(\"${description}\");\n")
+  else()
+    print_warning("The step ${FULL_CLASS_NAME} has no description.")
+  endif()
+  
+  set(icon ${icon_${NORMALIZED_CLASS_NAME}})
+  set(icon_path ${icon_path_${NORMALIZED_CLASS_NAME}})
+  if (icon)
+    set(decl "${decl}    declaration->setIconPath(\":/cedar/plugins/${icon}\");\n")
+    set(PLUGIN_ICONS "${PLUGIN_ICONS}     <file alias=\"${icon}\">${icon_path}</file>\n")
+  endif()
+  
+  set(decl "${decl}    plugin->add(declaration);\n")
+  set(decl "${decl}  }\n")
+  set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
   
   list(LENGTH "moc_headers_${NORMALIZED_CLASS_NAME}" list_length)
   if (list_length GREATER 0)
@@ -212,7 +271,6 @@ macro(ADD_TO_PLUGIN)
   set(STATE_CATEGORIES 2)
   set(CURRENT_STATE ${STATE_NONE})
   foreach (arg ${ARGN})
-    message("DEBUG ${arg}")
     if (arg STREQUAL "STEPS" OR arg STREQUAL "STEP")
       set(CURRENT_STATE ${STATE_STEPS})
     elseif (arg STREQUAL "CATEGORIES" OR arg STREQUAL "CATEGORY")
@@ -223,7 +281,7 @@ macro(ADD_TO_PLUGIN)
         ADD_STEP_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
       endforeach()
     elseif (CURRENT_STATE EQUAL ${STATE_NONE})
-      message("Syntax error in ADD_TO_PLUGIN: prefix with STEPS, CATEGORIES, ...")
+      print_error("Syntax error in ADD_TO_PLUGIN: prefix with STEPS, CATEGORIES, ...")
     elseif (CURRENT_STATE EQUAL ${STATE_STEPS})
       ADD_STEP_SOURCES_TO_BUILD(${arg})
     elseif (CURRENT_STATE EQUAL ${STATE_CATEGORIES})
@@ -244,11 +302,9 @@ list(APPEND code_directories steps)
 
 # go through all directories that contain code
 foreach (directory ${code_directories})
-  message("DEBUG Looking into ${CMAKE_SOURCE_DIR}/${directory}")
   # in each directory, look for cmake files; these should contain declarations
   file(GLOB_RECURSE files "${CMAKE_SOURCE_DIR}/${directory}/*.cmake")
   foreach (file ${files})
-    message ("DEBUG found ${file}")
     # load the declaration
     include(${file})
   endforeach()
@@ -263,9 +319,14 @@ include(${SELECTED_BUILDSET})
 configure_file(${CMAKE_SOURCE_DIR}/plugin.cpp.in plugin.cpp)
 list(APPEND PLUGIN_SOURCE_FILES ${CMAKE_CURRENT_BINARY_DIR}/plugin.cpp)
 
+## generate the icons.qrc file ##
+
+configure_file(${CMAKE_SOURCE_DIR}/icons.qrc.in icons.qrc)
+qt_add_resources(compiled_resource_paths ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
+list(APPEND PLUGIN_SOURCE_FILES ${compiled_resource_paths})
+
 ## Generate the plugin target ##
 
-message("DEBUG selected source files: ${PLUGIN_SOURCE_FILES}")
 # TODO
 add_library(${PLUGIN_TARGET_NAME} SHARED ${PLUGIN_SOURCE_FILES})
 

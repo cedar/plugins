@@ -50,6 +50,6 @@ CEDAR_DECLARE_PROC_PLUGIN_FUNCTION(void pluginDeclaration(cedar::aux::PluginDecl
 
 void pluginDeclaration(cedar::aux::PluginDeclarationListPtr plugin)
 {
-  @PLUGIN_DECLARATIONS@
+@PLUGIN_DECLARATIONS@
 }
 
