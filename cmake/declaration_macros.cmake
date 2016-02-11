@@ -105,14 +105,67 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${arg})
     endif()
   endforeach()
+  
+  CHECK_DESCRIPTION(${FULL_CLASS_NAME} ${NORMALIZED_CLASS_NAME} "step")
+endmacro(DECLARE_STEP)
+
+# This is a macro called by kernel description files.
+#
+# It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional.
+# TODO this macro is highly redundant with DECLARE_STEP
+macro(DECLARE_KERNEL FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  # register the step with the list of steps
+  list(APPEND known_kernels ${FULL_CLASS_NAME})
+  
+  # append the auto-determined cpp file for the class
+  # TODO check if this file exists; if not, don't add it
+  list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
+  # these headers are used to add them to the generated plugin.cpp file
+  list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+  
+  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+    list(APPEND "icon_${NORMALIZED_CLASS_NAME}" "${CLASS_NAME}.svg")
+    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+  endif()
+  
+  set(STATE_NONE 0)
+  set(STATE_DESCRIPTION 1)
+  set(STATE_DEPRECATED_NAMES 2)
+  
+  set(CURRENT_STATE ${STATE_NONE})
+  
+  foreach (arg ${ARGN})
+    if (arg STREQUAL "DESCRIPTION")
+      set(CURRENT_STATE ${STATE_DESCRIPTION})
+    elseif(arg STREQUAL "MOC")
+      list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+    elseif (arg STREQUAL "DEPRECATED_NAME" OR arg STREQUAL "DEPRECATED_NAMES")
+      set(CURRENT_STATE ${STATE_DEPRECATED_NAMES})
+    elseif(CURRENT_STATE EQUAL STATE_DESCRIPTION)
+      set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_DEPRECATED_NAMES)
+      list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${arg})
+    endif()
+  endforeach()
+  
+  CHECK_DESCRIPTION(${FULL_CLASS_NAME} ${NORMALIZED_CLASS_NAME} "kernel")
+endmacro(DECLARE_KERNEL)
+
+macro(CHECK_DESCRIPTION FULL_CLASS_NAME NORMALIZED_CLASS_NAME THING)
   if(NOT DESCRIPTION_${NORMALIZED_CLASS_NAME})
     set(maintainer_warning "")
     if (MAINTAINER_${NORMALIZED_CLASS_NAME})
       set(maintainer_warning " (maintainer is ${MAINTAINER_${NORMALIZED_CLASS_NAME}})")
     endif()
-    print_warning("The step ${FULL_CLASS_NAME} has no description${maintainer_warning}.")
+    print_warning("The ${THING} ${FULL_CLASS_NAME} has no description${maintainer_warning}.")
   endif()
-endmacro(DECLARE_STEP)
+endmacro(CHECK_DESCRIPTION)
 
 # TODO describe syntax
 macro(DECLARE_PLUGIN PLUGIN_NAME)
@@ -124,10 +177,14 @@ macro(ADD_TO_PLUGIN)
   set(STATE_NONE 0)
   set(STATE_STEPS 1)
   set(STATE_CATEGORIES 2)
+  set(STATE_KERNELS 3)
+  
   set(CURRENT_STATE ${STATE_NONE})
   foreach (arg ${ARGN})
     if (arg STREQUAL "STEPS" OR arg STREQUAL "STEP")
       set(CURRENT_STATE ${STATE_STEPS})
+    elseif (arg STREQUAL "KERNELS" OR arg STREQUAL "KERNEL")
+      set(CURRENT_STATE ${STATE_KERNELS})
     elseif (arg STREQUAL "CATEGORIES" OR arg STREQUAL "CATEGORY")
       set(CURRENT_STATE ${STATE_CATEGORIES})
     elseif(arg STREQUAL "ALL_STEPS")
@@ -135,10 +192,17 @@ macro(ADD_TO_PLUGIN)
         NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
         ADD_STEP_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
       endforeach()
+    elseif(arg STREQUAL "ALL_KERNELS")
+      foreach (FULL_CLASS_NAME ${known_kernels})
+        NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+        ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
+      endforeach()
     elseif (CURRENT_STATE EQUAL ${STATE_NONE})
       print_error("Syntax error in ADD_TO_PLUGIN: prefix with STEPS, CATEGORIES, ...")
     elseif (CURRENT_STATE EQUAL ${STATE_STEPS})
       ADD_STEP_SOURCES_TO_BUILD(${arg})
+    elseif (CURRENT_STATE EQUAL ${STATE_KERNELS})
+      ADD_KERNEL_SOURCES_TO_BUILD(${arg})
     elseif (CURRENT_STATE EQUAL ${STATE_CATEGORIES})
       foreach (FULL_CLASS_NAME ${known_steps})
         NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
