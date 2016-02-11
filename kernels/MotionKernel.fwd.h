@@ -1,7 +1,7 @@
 /*======================================================================================================================
 
-    Copyright 2011, 2012, 2013, 2014 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
-
+    Copyright 2011, 2012, 2013, 2014, 2015, 2016 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
+ 
     This file is part of cedar.
 
     cedar is free software: you can redistribute it and/or modify it under
@@ -22,13 +22,11 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        Plugin.cpp
+    File:        MotionGradient.fwd.h
 
     Maintainer:  Oliver Lomp
-
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
-
-    Date:        2016 02 05
+    Date:        2016 02 09
 
     Description:
 
@@ -36,34 +34,35 @@
 
 ======================================================================================================================*/
 
-// PROJECT INCLUDES
-@PLUGIN_INCLUDE_FILES@
-@NONPLUGIN_INCLUDE_FILES@
+#ifndef CEDAR_AUX_KERNEL_MOTION_KERNEL_FWD_H
+#define CEDAR_AUX_KERNEL_MOTION_KERNEL_FWD_H
+
+// CEDAR CONFIGURATION
+#include "cedar/configuration.h"
+#include "cedar/defines.h"
 
 // CEDAR INCLUDES
-#include <cedar/processing/ElementDeclaration.h>
-#include <cedar/auxiliaries/PluginDeclarationList.h>
-#include <cedar/auxiliaries/FactoryManager.h>
 
 // SYSTEM INCLUDES
+#ifndef Q_MOC_RUN
+  #include <boost/smart_ptr.hpp>
+#endif // Q_MOC_RUN
 
 
-CEDAR_DECLARE_PROC_PLUGIN_FUNCTION(void pluginDeclaration(cedar::aux::PluginDeclarationListPtr plugin));
-
-namespace
+namespace cedar
 {
-  bool declare()
+  namespace aux
   {
-    // these classes cannot (yet) be declared as a plugin; instead, they are added whenever the shared object/dll/dylib
-    // is loaded
-@NONPLUGIN_DECLARATIONS@
+    namespace kernel
+    {
+      //!@cond SKIPPED_DOCUMENTATION
+      class MotionKernel;
+      CEDAR_GENERATE_POINTER_TYPES(MotionKernel);
+      //!@endcond
+    }
   }
-  
-  bool declared = declare();
 }
 
-void pluginDeclaration(cedar::aux::PluginDeclarationListPtr plugin)
-{
-@PLUGIN_DECLARATIONS@
-}
+
+#endif // CEDAR_AUX_KERNEL_MOTION_KERNEL_FWD_H
 

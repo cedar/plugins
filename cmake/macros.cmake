@@ -142,3 +142,35 @@ macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
     set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
   endforeach()
 endmacro(ADD_STEP_SOURCES_TO_BUILD)
+
+#
+# macro ADD_KERNEL_SOURCES_TO_BUILD
+#
+macro(ADD_KERNEL_SOURCES_TO_BUILD FULL_CLASS_NAME)
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
+  list(APPEND PLUGIN_SOURCE_FILES ${SOURCE_FILES})
+  set(decl "   {\n")
+  set(decl "${decl}      cedar::aux::kernel::FactoryManagerSingleton::getInstance()->registerType<${FULL_CLASS_NAME}Ptr>();\n")
+
+  set(deprecated_names "${DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}}")
+  if (deprecated_names)
+    foreach (deprecated_name ${deprecated_names})
+      string(REPLACE "::" "." deprecated_name ${deprecated_names})
+      set(decl "${decl}      cedar::aux::kernel::FactoryManagerSingleton::getInstance()->addDeprecatedName<${FULL_CLASS_NAME}Ptr>(\"${deprecated_name}\");\n")
+    endforeach()
+  endif()
+  
+  set(decl "${decl}    }\n")
+  set(NONPLUGIN_DECLARATIONS "${NONPLUGIN_DECLARATIONS} ${decl}")
+  
+  list(LENGTH "moc_headers_${NORMALIZED_CLASS_NAME}" list_length)
+  if (list_length GREATER 0)
+    qt_wrap_cpp(moc_sources ${moc_headers_${NORMALIZED_CLASS_NAME}})
+    list(APPEND PLUGIN_SOURCE_FILES ${moc_sources})
+  endif()
+    
+  foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
+    set(NONPLUGIN_INCLUDE_FILES "${NONPLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
+  endforeach()
+endmacro(ADD_KERNEL_SOURCES_TO_BUILD)

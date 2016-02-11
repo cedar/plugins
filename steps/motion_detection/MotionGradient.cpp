@@ -155,7 +155,7 @@ void cedar::proc::steps::MotionGradient::inputConnectionChanged(const std::strin
 
 void cedar::proc::steps::MotionGradient::compute(const cedar::proc::Arguments&)
 {
-
+#if CV_MAJOR_VERSION < 3
   // set ptr to the input data
   const cv::Mat& in = this->mInput->getData();
   // set ptr to the output data
@@ -164,10 +164,8 @@ void cedar::proc::steps::MotionGradient::compute(const cedar::proc::Arguments&)
 
   // MotionGradient
 //  cv::
-//#if CV_MAJOR_VERSION >= 3
-//  motempl::
-//#endif
-//  calcMotionGradient(in, out_mask, out_orient, this->getDelta1(), this->getDelta2(), this->getSobelSize());
+  calcMotionGradient(in, out_mask, out_orient, this->getDelta1(), this->getDelta2(), this->getSobelSize());
+#endif
 }
 
 void cedar::proc::steps::MotionGradient::sobelSizeChanged()
