@@ -46,11 +46,15 @@ TODO describe plugin configurations, show examples
 
 **ElementwiseDivide**: To input matrices Nom and Denom will be divided elementwisely. The output is Nom/(Denom + scalar). "scalar" is a scalar and configurable parameter. This value is added to all elements in the Denom matrix to prevent dividing by zero or very small values.
 
+**Integrator**: A looped step that integrates nx1 inputs across time.
+
 **MatrixThreadDecoupler**: A looped step that makes a copy of its input matrix. This may help make threads more independent of each other.
 
 **Multiplexer**: Joins several scalars (1x1 matrices) into a vector (nx1 matrix).
 
 **ShiftedAddition**: no description.
+
+**WeightedSum**: A looped step that multiplies each input value with a given weight and sums them up across each input dimension. The given weight function encodes the distance from the center of the input matrix. This step is used to calculate a velocity signal dependent on the distance between a peak position and the center of the input matrix.
 
 
 
