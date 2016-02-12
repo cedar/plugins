@@ -88,14 +88,32 @@ macro(EXTRACT_CLASS_NAME FULL_CLASS_NAME)
   string(REGEX REPLACE ".*::([[A-Za-z0-9_]*)$" "\\1" CLASS_NAME ${FULL_CLASS_NAME})
 endmacro(EXTRACT_CLASS_NAME)
 
+#
+# adds the source files, headers, moc headers and required libraries for a given class to the build
+#
+macro(ADD_COMMON_CLASS_FILES_TO_BUILD FULL_CLASS_NAME)
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
+  list(APPEND PLUGIN_SOURCE_FILES ${SOURCE_FILES})
+  
+  list(LENGTH "moc_headers_${NORMALIZED_CLASS_NAME}" list_length)
+  if (list_length GREATER 0)
+    qt_wrap_cpp(moc_sources ${moc_headers_${NORMALIZED_CLASS_NAME}})
+    list(APPEND PLUGIN_SOURCE_FILES ${moc_sources})
+  endif()
+  
+  if (REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME})
+    list(APPEND PLUGIN_REQUIRES_LIBRARIES ${REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}})
+  endif()
+endmacro(ADD_COMMON_CLASS_FILES_TO_BUILD)
 
 #
 # macro ADD_STEP_SOURCES_TO_BUILD
 #
 macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-  set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
-  list(APPEND PLUGIN_SOURCE_FILES ${SOURCE_FILES})
+  ADD_COMMON_CLASS_FILES_TO_BUILD(${FULL_CLASS_NAME})
+  
   set(decl " {\n")
   set(decl "${decl}    cedar::proc::ElementDeclarationPtr declaration\n")
   set(decl "${decl}    (\n")
@@ -127,17 +145,7 @@ macro(ADD_STEP_SOURCES_TO_BUILD FULL_CLASS_NAME)
   set(decl "${decl}    plugin->add(declaration);\n")
   set(decl "${decl}  }\n")
   set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
-  
-  list(LENGTH "moc_headers_${NORMALIZED_CLASS_NAME}" list_length)
-  if (list_length GREATER 0)
-    qt_wrap_cpp(moc_sources ${moc_headers_${NORMALIZED_CLASS_NAME}})
-    list(APPEND PLUGIN_SOURCE_FILES ${moc_sources})
-  endif()
-  
-  if (REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME})
-    list(APPEND PLUGIN_REQUIRES_LIBRARIES ${REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}})
-  endif()
-  
+    
   foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
     set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
   endforeach()
@@ -148,8 +156,7 @@ endmacro(ADD_STEP_SOURCES_TO_BUILD)
 #
 macro(ADD_KERNEL_SOURCES_TO_BUILD FULL_CLASS_NAME)
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-  set(SOURCE_FILES "${source_files_${NORMALIZED_CLASS_NAME}}")
-  list(APPEND PLUGIN_SOURCE_FILES ${SOURCE_FILES})
+  ADD_COMMON_CLASS_FILES_TO_BUILD(${FULL_CLASS_NAME})
   set(decl "   {\n")
   set(decl "${decl}      cedar::aux::kernel::FactoryManagerSingleton::getInstance()->registerType<${FULL_CLASS_NAME}Ptr>();\n")
 
@@ -163,17 +170,15 @@ macro(ADD_KERNEL_SOURCES_TO_BUILD FULL_CLASS_NAME)
   
   set(decl "${decl}    }\n")
   set(NONPLUGIN_DECLARATIONS "${NONPLUGIN_DECLARATIONS} ${decl}")
-  
-  list(LENGTH "moc_headers_${NORMALIZED_CLASS_NAME}" list_length)
-  if (list_length GREATER 0)
-    qt_wrap_cpp(moc_sources ${moc_headers_${NORMALIZED_CLASS_NAME}})
-    list(APPEND PLUGIN_SOURCE_FILES ${moc_sources})
-  endif()
     
   foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
     set(NONPLUGIN_INCLUDE_FILES "${NONPLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
   endforeach()
 endmacro(ADD_KERNEL_SOURCES_TO_BUILD)
+
+macro(ADD_DATA_STRUCTURES_TO_BUILD FULL_CLASS_NAME)
+  ADD_COMMON_CLASS_FILES_TO_BUILD(${FULL_CLASS_NAME})
+endmacro(ADD_DATA_STRUCTURES_TO_BUILD)
 
 macro(GENERATE_DESCRIPTION_LIST_ENTRY FULL_CLASS_NAME)
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
@@ -185,3 +190,51 @@ macro(GENERATE_DESCRIPTION_LIST_ENTRY FULL_CLASS_NAME)
   
   set(DESCRIPTION_LIST_TEXT "| *${CLASS_NAME}* | ${description} |\n")
 endmacro(GENERATE_DESCRIPTION_LIST_ENTRY)
+
+# Adds all files for a class to the appropriate lists, i.e., the list of headers and cpp files per class.
+macro(DECLARE_CLASS_FILES FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  # TODO check if this file exists; if not, don't add it
+  list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
+  # these headers are used to add them to the generated plugin.cpp file
+  list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+  
+  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+    list(APPEND "icon_${NORMALIZED_CLASS_NAME}" "${CLASS_NAME}.svg")
+    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+  endif()
+endmacro(DECLARE_CLASS_FILES)
+
+macro(DECLARE_MOC_HEADERS FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+endmacro(DECLARE_MOC_HEADERS)
+
+macro(DECLARE_CLASS_DESCRIPTION FULL_CLASS_NAME DESCRIPTION)
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${DESCRIPTION})
+endmacro(DECLARE_CLASS_DESCRIPTION)
+
+macro(DECLARE_DEPRECATED_NAME FULL_CLASS_NAME DEPRECATED_NAME)
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${DEPRECATED_NAME})
+endmacro(DECLARE_DEPRECATED_NAME)
+
+macro(DECLARE_REQUIRED_LIBRARY FULL_CLASS_NAME REQUIRED_LIBRARY)
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  list(APPEND "REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}" ${REQUIRED_LIBRARY})
+endmacro(DECLARE_REQUIRED_LIBRARY)

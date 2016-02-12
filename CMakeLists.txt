@@ -48,7 +48,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/setup.cmake)
 
 ## Find and read all step declarations ##
 
-list(APPEND code_directories steps kernels)
+list(APPEND code_directories steps kernels data_structures)
 
 # go through all directories that contain code
 foreach (directory ${code_directories})
@@ -133,7 +133,7 @@ endforeach()
 set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\n\n")
 
 # generate the kernel list #
-list(SORT CATEGORIES)
+list(SORT known_kernels)
 
 set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}| kernel   | description |\n")
 set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}|----------|-------------|\n")
@@ -142,6 +142,17 @@ foreach (FULL_CLASS_NAME ${known_kernels})
   set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}${DESCRIPTION_LIST_TEXT}")
 endforeach()
 set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}\n\n")
+
+# generate the data structures list #
+list(SORT known_data_structures)
+
+set(DATA_STRUCTURES_LIST_TEXT "${DATA_STRUCTURES_LIST_TEXT}| data structure | description |\n")
+set(DATA_STRUCTURES_LIST_TEXT "${DATA_STRUCTURES_LIST_TEXT}|----------------|-------------|\n")
+foreach (FULL_CLASS_NAME ${known_data_structures})
+  GENERATE_DESCRIPTION_LIST_ENTRY(${FULL_CLASS_NAME})
+  set(DATA_STRUCTURES_LIST_TEXT "${DATA_STRUCTURES_LIST_TEXT}${DESCRIPTION_LIST_TEXT}")
+endforeach()
+set(DATA_STRUCTURES_LIST_TEXT "${DATA_STRUCTURES_LIST_TEXT}\n\n")
 
 # generate the descriptions for external libraries #
 

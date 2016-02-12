@@ -59,16 +59,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   # register the step with the list of steps
   list(APPEND known_steps ${FULL_CLASS_NAME})
   
-  # append the auto-determined cpp file for the class
-  # TODO check if this file exists; if not, don't add it
-  list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
-  # these headers are used to add them to the generated plugin.cpp file
-  list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
-  
-  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
-    list(APPEND "icon_${NORMALIZED_CLASS_NAME}" "${CLASS_NAME}.svg")
-    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
-  endif()
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
   
   set(STATE_NONE 0)
   set(STATE_CATEGORY 1)
@@ -91,18 +83,18 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
     elseif (arg STREQUAL "DEPRECATED_NAME" OR arg STREQUAL "DEPRECATED_NAMES")
       set(CURRENT_STATE ${STATE_DEPRECATED_NAMES})
     elseif(arg STREQUAL "MOC")
-      list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+      DECLARE_MOC_HEADERS(${FULL_CLASS_NAME})
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
       set("CATEGORY_${NORMALIZED_CLASS_NAME}" ${arg})
       list(APPEND CATEGORIES ${arg})
     elseif(CURRENT_STATE EQUAL STATE_DESCRIPTION)
-      set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${arg})
+      DECLARE_CLASS_DESCRIPTION(${FULL_CLASS_NAME} ${arg})
     elseif(CURRENT_STATE EQUAL STATE_MAINTAINER)
       set("MAINTAINER_${NORMALIZED_CLASS_NAME}" ${arg})
     elseif(CURRENT_STATE EQUAL STATE_REQUIRES_LIBRARIES)
-      list(APPEND "REQUIRES_LIBRARIES_${NORMALIZED_CLASS_NAME}" ${arg})
+      DECLARE_REQUIRED_LIBRARY(${FULL_CLASS_NAME} ${arg})
     elseif(CURRENT_STATE EQUAL STATE_DEPRECATED_NAMES)
-      list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${arg})
+      DECLARE_DEPRECATED_NAME(${FULL_CLASS_NAME} ${arg})
     endif()
   endforeach()
   
@@ -123,16 +115,8 @@ macro(DECLARE_KERNEL FULL_CLASS_NAME)
   # register the step with the list of steps
   list(APPEND known_kernels ${FULL_CLASS_NAME})
   
-  # append the auto-determined cpp file for the class
-  # TODO check if this file exists; if not, don't add it
-  list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
-  # these headers are used to add them to the generated plugin.cpp file
-  list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
-  
-  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
-    list(APPEND "icon_${NORMALIZED_CLASS_NAME}" "${CLASS_NAME}.svg")
-    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
-  endif()
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
   
   set(STATE_NONE 0)
   set(STATE_DESCRIPTION 1)
@@ -144,18 +128,63 @@ macro(DECLARE_KERNEL FULL_CLASS_NAME)
     if (arg STREQUAL "DESCRIPTION")
       set(CURRENT_STATE ${STATE_DESCRIPTION})
     elseif(arg STREQUAL "MOC")
-      list(APPEND "moc_headers_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+      DECLARE_MOC_HEADERS(${FULL_CLASS_NAME})
     elseif (arg STREQUAL "DEPRECATED_NAME" OR arg STREQUAL "DEPRECATED_NAMES")
       set(CURRENT_STATE ${STATE_DEPRECATED_NAMES})
     elseif(CURRENT_STATE EQUAL STATE_DESCRIPTION)
-      set("DESCRIPTION_${NORMALIZED_CLASS_NAME}" ${arg})
+      DECLARE_CLASS_DESCRIPTION(${FULL_CLASS_NAME} ${arg})
     elseif(CURRENT_STATE EQUAL STATE_DEPRECATED_NAMES)
-      list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${arg})
+      DECLARE_DEPRECATED_NAME(${FULL_CLASS_NAME} ${arg})
     endif()
   endforeach()
   
   CHECK_DESCRIPTION(${FULL_CLASS_NAME} ${NORMALIZED_CLASS_NAME} "kernel")
 endmacro(DECLARE_KERNEL)
+
+# This is a macro called by kernel description files.
+#
+# It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional.
+# TODO this macro is highly redundant with DECLARE_STEP
+macro(DECLARE_DATA_STRUCTURE FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  # register the step with the list of steps
+  list(APPEND known_data_structures ${FULL_CLASS_NAME})
+  
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
+    
+  set(STATE_NONE 0)
+  set(STATE_DESCRIPTION 1)
+  set(STATE_DEPRECATED_NAMES 2)
+  set(STATE_REQUIRED_LIBRARIES 3)
+  
+  set(CURRENT_STATE ${STATE_NONE})
+  
+  foreach (arg ${ARGN})
+    if (arg STREQUAL "DESCRIPTION")
+      set(CURRENT_STATE ${STATE_DESCRIPTION})
+    elseif(arg STREQUAL "MOC")
+      DECLARE_MOC_HEADERS(${FULL_CLASS_NAME})
+    elseif (arg STREQUAL "DEPRECATED_NAME" OR arg STREQUAL "DEPRECATED_NAMES")
+      set(CURRENT_STATE ${STATE_DEPRECATED_NAMES})
+    elseif (arg STREQUAL "REQUIRES_LIBRARY" OR arg STREQUAL "REQUIRES_LIBRARIES")
+      set(CURRENT_STATE ${STATE_REQUIRED_LIBRARIES})
+    elseif(CURRENT_STATE EQUAL STATE_DESCRIPTION)
+      DECLARE_CLASS_DESCRIPTION(${FULL_CLASS_NAME} ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_DEPRECATED_NAMES)
+      DECLARE_DEPRECATED_NAME(${FULL_CLASS_NAME} ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_REQUIRED_LIBRARIES)
+      DECLARE_REQUIRED_LIBRARY(${FULL_CLASS_NAME} ${arg})
+    endif()
+  endforeach()
+  
+  CHECK_DESCRIPTION(${FULL_CLASS_NAME} ${NORMALIZED_CLASS_NAME} "kernel")
+endmacro(DECLARE_DATA_STRUCTURE)
 
 macro(CHECK_DESCRIPTION FULL_CLASS_NAME NORMALIZED_CLASS_NAME THING)
   if(NOT DESCRIPTION_${NORMALIZED_CLASS_NAME})
@@ -178,6 +207,7 @@ macro(ADD_TO_PLUGIN)
   set(STATE_STEPS 1)
   set(STATE_CATEGORIES 2)
   set(STATE_KERNELS 3)
+  set(STATE_DATA_STRUCTURES 4)
   
   set(CURRENT_STATE ${STATE_NONE})
   foreach (arg ${ARGN})
@@ -187,6 +217,8 @@ macro(ADD_TO_PLUGIN)
       set(CURRENT_STATE ${STATE_KERNELS})
     elseif (${arg} STREQUAL "CATEGORIES" OR ${arg} STREQUAL "CATEGORY")
       set(CURRENT_STATE ${STATE_CATEGORIES})
+    elseif (${arg} STREQUAL "DATA_STRUCTURE" OR ${arg} STREQUAL "DATA_STRUCTURES")
+      set(CURRENT_STATE ${STATE_DATA_STRUCTURES})
     elseif(arg STREQUAL "ALL_STEPS")
       foreach (FULL_CLASS_NAME ${known_steps})
         NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
@@ -197,12 +229,19 @@ macro(ADD_TO_PLUGIN)
         NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
         ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
       endforeach()
+    elseif(arg STREQUAL "ALL_DATA_STRUCTURES")
+      foreach (FULL_CLASS_NAME ${known_data_structures})
+        NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+        ADD_DATA_STRUCTURES_TO_BUILD(${FULL_CLASS_NAME})
+      endforeach()
     elseif (CURRENT_STATE EQUAL ${STATE_NONE})
       print_error("Syntax error in ADD_TO_PLUGIN: prefix with STEPS, CATEGORIES, ..., Got ${arg}." )
     elseif (CURRENT_STATE EQUAL ${STATE_STEPS})
       ADD_STEP_SOURCES_TO_BUILD(${arg})
     elseif (CURRENT_STATE EQUAL ${STATE_KERNELS})
       ADD_KERNEL_SOURCES_TO_BUILD(${arg})
+    elseif (CURRENT_STATE EQUAL ${STATE_DATA_STRUCTURES})
+      ADD_DATA_STRUCTURES_TO_BUILD(${arg})
     elseif (CURRENT_STATE EQUAL ${STATE_CATEGORIES})
       foreach (FULL_CLASS_NAME ${known_steps})
         NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
