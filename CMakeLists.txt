@@ -116,24 +116,32 @@ file(READ ${CMAKE_SOURCE_DIR}/cmake/readme_src/welcome.md WELCOME_TEXT)
 list(REMOVE_DUPLICATES CATEGORIES)
 list(SORT CATEGORIES)
 
+set(STEP_LIST_TEXT "${STEP_LIST_TEXT}| step     | description |\n")
+set(STEP_LIST_TEXT "${STEP_LIST_TEXT}|----------|-------------|\n")
 foreach (category ${CATEGORIES})
-  set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\#\# ${category} \#\#\n\n")
+  set(STEP_LIST_TEXT "${STEP_LIST_TEXT}| **${category}** |\n")
   list(SORT known_steps)
   foreach (FULL_CLASS_NAME ${known_steps})
     NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-    EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
     set(step_category ${CATEGORY_${NORMALIZED_CLASS_NAME}})
-    set(description ${DESCRIPTION_${NORMALIZED_CLASS_NAME}})
-    if (NOT description)
-      set(description "no description.")
-    endif()
-    
     if (category STREQUAL step_category)
-      set(STEP_LIST_TEXT "${STEP_LIST_TEXT}**${CLASS_NAME}**: ${description}\n\n")
+      GENERATE_DESCRIPTION_LIST_ENTRY(${FULL_CLASS_NAME})
+      set(STEP_LIST_TEXT "${STEP_LIST_TEXT}${DESCRIPTION_LIST_TEXT}")
     endif()
   endforeach()
-  set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\n\n")
 endforeach()
+set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\n\n")
+
+# generate the kernel list #
+list(SORT CATEGORIES)
+
+set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}| kernel   | description |\n")
+set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}|----------|-------------|\n")
+foreach (FULL_CLASS_NAME ${known_kernels})
+  GENERATE_DESCRIPTION_LIST_ENTRY(${FULL_CLASS_NAME})
+  set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}${DESCRIPTION_LIST_TEXT}")
+endforeach()
+set(KERNEL_LIST_TEXT "${KERNEL_LIST_TEXT}\n\n")
 
 # generate the descriptions for external libraries #
 
