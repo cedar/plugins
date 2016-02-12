@@ -57,6 +57,7 @@ namespace
     // these classes cannot (yet) be declared as a plugin; instead, they are added whenever the shared object/dll/dylib
     // is loaded
 @NONPLUGIN_DECLARATIONS@
+    return true;
   }
   
   bool declared = declare();
