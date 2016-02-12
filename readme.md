@@ -47,9 +47,21 @@ TODO describe plugin configurations, show examples
 
 
 
+# Data structures included in the plugin #
+
+| data structure | description |
+|----------------|-------------|
+| *KeyPointData* | A data structure that holds a vislab::keypoints::KPData object. |
+
+
+
+
 # External libraries used by the plugin #
 
 ## naoqi ##
 
 TODO describe how to get, build and include the naoqi.
+## vislab_toolbox ##
+
+TODO describe how to get, build and include the vision lab toolbox.
 
