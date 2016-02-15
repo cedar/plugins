@@ -49,6 +49,7 @@
 #              [or: DEPRECATED_NAMES some::old::Name some::other::old::Name]
 #              REQUIRES_LIBRARY some_lib_from_the_external_libraries_folder
 #              [or: REQUIRES_LIBRARIES lib1 lib2 ...]
+#              REQUIRES_DATA_STRUCTURES some::data::Structure some::other::DataStructure
 #             )
 macro(DECLARE_STEP FULL_CLASS_NAME)
   # extract the class name, without the namespace
@@ -68,6 +69,7 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   set(STATE_MAINTAINER 3)
   set(STATE_REQUIRES_LIBRARIES 4)
   set(STATE_DEPRECATED_NAMES 5)
+  set(STATE_REQUIRES_DATA_STRUCTURES 6)
   
   set(CURRENT_STATE ${STATE_NONE})
   
@@ -82,6 +84,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       set(CURRENT_STATE ${STATE_REQUIRES_LIBRARIES})
     elseif (arg STREQUAL "DEPRECATED_NAME" OR arg STREQUAL "DEPRECATED_NAMES")
       set(CURRENT_STATE ${STATE_DEPRECATED_NAMES})
+    elseif (arg STREQUAL "REQUIRES_DATA_STRUCTURE" OR arg STREQUAL "REQUIRES_DATA_STRUCTURES")
+      set(CURRENT_STATE ${STATE_REQUIRES_DATA_STRUCTURES})
     elseif(arg STREQUAL "MOC")
       DECLARE_MOC_HEADERS(${FULL_CLASS_NAME})
     elseif(CURRENT_STATE EQUAL STATE_CATEGORY)
@@ -95,6 +99,8 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
       DECLARE_REQUIRED_LIBRARY(${FULL_CLASS_NAME} ${arg})
     elseif(CURRENT_STATE EQUAL STATE_DEPRECATED_NAMES)
       DECLARE_DEPRECATED_NAME(${FULL_CLASS_NAME} ${arg})
+    elseif(CURRENT_STATE EQUAL STATE_REQUIRES_DATA_STRUCTURES)
+      DECLARE_DATA_STRUCTURE_DEPENDENCY(${FULL_CLASS_NAME} ${arg})
     endif()
   endforeach()
   

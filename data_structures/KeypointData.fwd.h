@@ -34,8 +34,8 @@
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_AUX_KEY_POINT_DATA_FWD_H
-#define CEDAR_AUX_KEY_POINT_DATA_FWD_H
+#ifndef CEDAR_AUX_KEYPOINT_DATA_FWD_H
+#define CEDAR_AUX_KEYPOINT_DATA_FWD_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
@@ -53,12 +53,12 @@ namespace cedar
   namespace aux
   {
     //!@cond SKIPPED_DOCUMENTATION
-    class KeyPointData;
-    CEDAR_GENERATE_POINTER_TYPES(KeyPointData);
+    class KeypointData;
+    CEDAR_GENERATE_POINTER_TYPES(KeypointData);
     //!@endcond
   }
 }
 
 
-#endif // CEDAR_AUX_KEY_POINT_DATA_FWD_H
+#endif // CEDAR_AUX_KEYPOINT_DATA_FWD_H
 

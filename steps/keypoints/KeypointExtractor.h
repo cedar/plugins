@@ -22,62 +22,94 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        KeyPointData.h
+    File:        KeypointExtractor.h
 
     Maintainer:  Oliver Lomp
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
     Date:        2014 12 08
 
-    Description: Header file for the class keypoints::KeyPointData.
+    Description: Header file for the class keypoints::KeypointExtractor.
 
     Credits:
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_AUX_KEY_POINT_DATA_H
-#define CEDAR_AUX_KEY_POINT_DATA_H
+#ifndef CEDAR_PROC_STEPS_KEYPOINT_EXTRACTOR_H
+#define CEDAR_PROC_STEPS_KEYPOINT_EXTRACTOR_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
 
+// PROJECT INCLUDES
+#include "data_structures/KeypointData.h"
+#include "data_structures/KeypointListData.h"
+
 // CEDAR INCLUDES
-#include "cedar/auxiliaries/DataTemplate.h"
+#include <cedar/processing/Step.h>
+#include <cedar/processing/InputSlotHelper.h>
+#include <cedar/auxiliaries/MatData.h>
+#include <cedar/auxiliaries/UIntParameter.h>
+#include <cedar/auxiliaries/BoolParameter.h>
+#include <cedar/auxiliaries/DoubleParameter.h>
+#include <cedar/auxiliaries/EnumParameter.h>
+#include <cedar/auxiliaries/EnumType.h>
 
 // FORWARD DECLARATIONS
-#include "data_structures/KeyPointData.fwd.h"
+#include "steps/keypoints/KeypointExtractor.fwd.h"
 
 // SYSTEM INCLUDES
-#include <keypoints/keypoints.h>
-#include <vector>
 
 
-/*!@todo describe.
- *
- * @todo describe more.
+/*!@brief A step that encapsulates the keypoint extraction function of the vision lab toolbox.
  */
-class cedar::aux::KeyPointData : public cedar::aux::DataTemplate<std::vector<vislab::keypoints::KPData>>
+class cedar::proc::steps::KeypointExtractor : public cedar::proc::Step
 {
+  Q_OBJECT
+
   //--------------------------------------------------------------------------------------------------------------------
   // nested types
   //--------------------------------------------------------------------------------------------------------------------
 public:
-  typedef std::vector<vislab::keypoints::KPData> StoredType;
+  class ScaleType
+  {
+  public:
+    //! Type of the enum.
+    typedef cedar::aux::EnumId Id;
 
-private:
-  typedef cedar::aux::DataTemplate<StoredType> Super;
+    //! Pointer to the enumeration type.
+    typedef boost::shared_ptr<cedar::aux::EnumBase> TypePtr;
+
+    //! Constructs the enumeration values.
+    static void construct();
+
+    //! Returns the enum base class.
+    static const cedar::aux::EnumBase& type();
+
+    //! Returns a pointer to the enum base class.
+    static const cedar::proc::steps::KeypointExtractor::ScaleType::TypePtr& typePtr();
+
+    //! Linear scale.
+    static const Id Linear = 0;
+
+    //! Logarithmic scale.
+    static const Id Logarithmic = 1;
+
+  private:
+    static cedar::aux::EnumType<cedar::proc::steps::KeypointExtractor::ScaleType> mType;
+  };
 
   //--------------------------------------------------------------------------------------------------------------------
   // constructors and destructor
   //--------------------------------------------------------------------------------------------------------------------
 public:
   //!@brief The standard constructor.
-  KeyPointData(const StoredType& data = StoredType());
+  KeypointExtractor();
 
   //--------------------------------------------------------------------------------------------------------------------
   // public methods
   //--------------------------------------------------------------------------------------------------------------------
 public:
-  std::string getDescription() const;
+  size_t getScaleIndex(double scale) const;
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -89,7 +121,16 @@ protected:
   // private methods
   //--------------------------------------------------------------------------------------------------------------------
 private:
-  // none yet
+  void compute(const cedar::proc::Arguments& arguments);
+
+  void inputConnectionChanged(const std::string& slotName);
+
+private slots:
+  void recompute();
+
+  void updateAndRecompute();
+
+  void updateLambdas();
 
   //--------------------------------------------------------------------------------------------------------------------
   // members
@@ -97,18 +138,34 @@ private:
 protected:
   // none yet
 private:
-  // none yet
+  //!@brief The input image on which keypoints are extracted.
+  cedar::proc::InputSlotHelper<cedar::aux::MatData> mInput;
+
+  //!@brief The extracted keypoints.
+  cedar::aux::KeypointDataPtr mKeypointData;
+  
+  cedar::aux::KeypointListDataPtr mKeypoints;
+
+  //! Lambdas used by the keypoint extraction.
+  std::vector<double> mLambdas;
 
   //--------------------------------------------------------------------------------------------------------------------
   // parameters
   //--------------------------------------------------------------------------------------------------------------------
-protected:
-  // none yet
-
 private:
-  // none yet
+  cedar::aux::UIntParameterPtr _mOrientations;
 
-}; // class cedar::aux::KeyPointData
+  cedar::aux::BoolParameterPtr _mScale;
 
-#endif // CEDAR_AUX_KEY_POINT_DATA_H
+  cedar::aux::DoubleParameterPtr _mLambdasStart;
+
+  cedar::aux::DoubleParameterPtr _mLambdasEnd;
+
+  cedar::aux::UIntParameterPtr _mNumLambdas;
+
+  cedar::aux::EnumParameterPtr _mScaleType;
+
+}; // class cedar::proc::steps::KeypointExtractor
+
+#endif // CEDAR_PROC_STEPS_KEYPOINT_EXTRACTOR_H
 

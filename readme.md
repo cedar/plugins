@@ -16,6 +16,8 @@ TODO describe plugin configurations, show examples
 
 | step     | description |
 |----------|-------------|
+| **Keypoints** |
+| *KeypointExtractor* | A step that extracts keypoint information. |
 | **Motion detection** |
 | *CounterChangeCombination* | The inputs have to be 3D toward and away matrices from a single edge filtered video or camera input. The first dimension of the input matrices is considered as the edge orientation dimension. The input matrices are shifted orthogonal the edge orientation by the size of the configurable shift parameter. Output matrices are two 3D matrices that reflect the combination of toward and away signals according to the counter-change rule. The first dimension is assigned to the motion direction. The two matrices represent the polarity if a dark pattern moves on bright ground (BtW: Black to White motion) or the other way around (WtB: White to Black motion) |
 | *MotionGradient* | This class provides a cedar processing step implementing the OpenCV function calcMotionGradient. |
@@ -51,7 +53,8 @@ TODO describe plugin configurations, show examples
 
 | data structure | description |
 |----------------|-------------|
-| *KeyPointData* | A data structure that holds a vislab::keypoints::KPData object. |
+| *KeypointData* | A data structure that holds a vislab::keypoints::KPData object. |
+| *KeypointListData* | A std::vector of (open)cv::Keypoints. |
 
 
 
