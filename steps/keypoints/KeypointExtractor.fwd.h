@@ -22,65 +22,45 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        KeyPointData.cpp
+    File:        KeypointExtractor.fwd.h
 
     Maintainer:  Oliver Lomp
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
     Date:        2014 12 08
 
-    Description: Source file for the class keypoints::KeyPointData.
+    Description: Forward declaration file for the class keypoints::KeypointExtractor.
 
     Credits:
 
 ======================================================================================================================*/
 
+#ifndef CEDAR_PROC_STEPS_KEYPOINT_EXTRACTOR_FWD_H
+#define CEDAR_PROC_STEPS_KEYPOINT_EXTRACTOR_FWD_H
+
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
 
-// CLASS HEADER
-#include "data_structures/KeyPointData.h"
-
 // CEDAR INCLUDES
-#include <cedar/auxiliaries/stringFunctions.h>
 
 // SYSTEM INCLUDES
+#ifndef Q_MOC_RUN
+  #include <boost/smart_ptr.hpp>
+#endif // Q_MOC_RUN
 
-//----------------------------------------------------------------------------------------------------------------------
-// constructors and destructor
-//----------------------------------------------------------------------------------------------------------------------
 
-cedar::aux::KeyPointData::KeyPointData(const std::vector<vislab::keypoints::KPData>& data)
-:
-Super(data)
+namespace cedar
 {
+  namespace proc
+  {
+    namespace steps
+    {
+      //!@cond SKIPPED_DOCUMENTATION
+      class KeypointExtractor;
+      //!@endcond
+    }
+  }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-// methods
-//----------------------------------------------------------------------------------------------------------------------
 
-std::string cedar::aux::KeyPointData::getDescription() const
-{
-  auto size = this->getData().size();
-  std::string description;
-  description += "Keypoint data with ";
-  description += cedar::aux::toString(size);
-  description += " scale";
-  if (size == 0 || size > 1)
-  {
-    description += "s";
-  }
-  description += "<br />";
-  description += "The scales are: ";
-  bool first = true;
-  for (const auto kpdata : this->getData())
-  {
-    if (first)
-      first = false;
-    else
-      description += ", ";
-      
-    description += cedar::aux::toString(kpdata.lambda);
-  }
-  return description;
-}
+#endif // CEDAR_PROC_STEPS_KEYPOINT_EXTRACTOR_FWD_H
+
