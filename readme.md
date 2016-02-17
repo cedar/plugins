@@ -17,12 +17,18 @@ TODO describe plugin configurations, show examples
 | step     | description |
 |----------|-------------|
 | **Keypoints** |
+| *DoubleStoppedCellResponses* | Extracts the double-stopped cell responses from keypoint data. |
 | *KeypointExtractor* | A step that extracts keypoint information. |
+| *KeypointLinesAndEdges* | Extracts line- and edge information from a KeypointData object. |
+| *KeypointPatchRescaler* | Rescales a local image patch according to a chosen keypoint size. |
+| *KeypointVisualization* | Draws visualizations for a list of opencv keypoints onto an image. |
 | **Motion detection** |
 | *CounterChangeCombination* | The inputs have to be 3D toward and away matrices from a single edge filtered video or camera input. The first dimension of the input matrices is considered as the edge orientation dimension. The input matrices are shifted orthogonal the edge orientation by the size of the configurable shift parameter. Output matrices are two 3D matrices that reflect the combination of toward and away signals according to the counter-change rule. The first dimension is assigned to the motion direction. The two matrices represent the polarity if a dark pattern moves on bright ground (BtW: Black to White motion) or the other way around (WtB: White to Black motion) |
 | *MotionGradient* | This class provides a cedar processing step implementing the OpenCV function calcMotionGradient. |
 | **Nao** |
 | *NaoCamera* | Nao's camera. |
+| **Object Recognition** |
+| *FeatureStacks* | This step builds localized histograms around keypoints. See Lomp et al. (2014) for details. |
 | **Sources** |
 | *ImageProvider* | A step that outputs an image from a directory based on an index specified via a parameter. |
 | *SpatialPattern* | Outputs a matrix of synaptic weights that correspond to a spatial relational template (e.g., "to the left of"). |
