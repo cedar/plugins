@@ -5,4 +5,5 @@ DECLARE_STEP(cedar::proc::steps::KeypointExtractor
              MAINTAINER               "Oliver Lomp"
              DEPRECATED_NAME          keypoints::KeypointExtractor
              REQUIRES_DATA_STRUCTURES cedar::aux::KeypointListData cedar::aux::KeypointData
+             REQUIRES_LIBRARY "vislab_toolbox"
             )
