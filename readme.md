@@ -51,6 +51,8 @@ Finally, you can add all classes of a kind using these commands:
 
 | step                         | description                                                                    |
 |------------------------------|--------------------------------------------------------------------------------|
+| **Dynamics**                                                                                                  |
+| *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
 | **Keypoints**                                                                                                 |
 | *DoubleStoppedCellResponses* | Extracts the double-stopped cell responses from keypoint data.                 |
 | *KeypointExtractor*          | A step that extracts keypoint information.                                     |
@@ -70,13 +72,16 @@ Finally, you can add all classes of a kind using these commands:
 | **Utilities**                                                                                                 |
 | *AttentionSlice*             | A step that determines the location of the maximum in an activation matrix and cuts out a region around this location from an input image. |
 | *BufferThief*                | This step can grab any buffer from a step in the same architecture and output the data in the buffer. Use with caution, as this may lead to issues due to unsafe/unlocked data. |
+| *CrossCorrelation*           | Calculates the cross correlation in different configurations.                  |
 | *Demultiplexer*              | Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).    |
 | *ElementwiseDivide*          | To input matrices Nom and Denom will be divided elementwisely. The output is Nom/(Denom + scalar). "scalar" is a scalar and configurable parameter. This value is added to all elements in the Denom matrix to prevent dividing by zero or very small values. |
 | *Integrator*                 | A looped step that integrates nx1 inputs across time.                          |
+| *LabelString*                | Outputs a label and ordered list of labels for activation from a label field.  |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
 | *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
 | *ShiftedAddition*            | no description.                                                                |
 | *WeightedSum*                | A looped step that multiplies each input value with a given weight and sums them up across each input dimension. The given weight function encodes the distance from the center of the input matrix. This step is used to calculate a velocity signal dependent on the distance between a peak position and the center of the input matrix. |
+| *WeightedSumOfSlices*        | Calculates a weighted sum of the entries in a 3d or 4d matrix along the first dimension. |
 
 
 
