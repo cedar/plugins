@@ -369,6 +369,58 @@ macro(ADD_STEP_BASE_CLASS_TO_BUILD FULL_CLASS_NAME)
   endif (NOT STEP_BASE_CLASS_IN_BUILD)
 endmacro()
 
+macro(ADD_PLOT_TO_BUILD FULL_CLASS_NAME)
+  IS_CLASS_IN_BUILD(${FULL_CLASS_NAME} PLOT)
+  if (NOT PLOT_IN_BUILD)
+    ADD_CLASS_TO_BUILD_COMMON(${FULL_CLASS_NAME})
+    NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+    
+    set(decl " {\n")
+    set(decl "${decl}    auto declaration = boost::make_shared<\n")
+    set(decl "${decl}              cedar::aux::gui::PlotDeclarationTemplate<${PLOTTED_DATA_${NORMALIZED_CLASS_NAME}}, ${FULL_CLASS_NAME}>\n")
+    set(decl "${decl}              >();\n")
+    
+    set(deprecated_names "${DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}}")
+    if (deprecated_names)
+      foreach (deprecated_name ${deprecated_names})
+        string(REPLACE "::" "." deprecated_name ${deprecated_names})
+        set(decl "${decl}    declaration->deprecatedName(\"${deprecated_name}\");\n")
+      endforeach()
+    endif()
+    
+    set(decl "${decl}    plugin->add(declaration);\n")
+    set(decl "${decl}  }\n")
+    set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
+    
+    foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
+      set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
+    endforeach()
+  endif (NOT PLOT_IN_BUILD)
+endmacro(ADD_PLOT_TO_BUILD)
+
+# TODO move to macros
+macro(ADD_STEP_CATEGORY_TO_PLUGIN CATEGORY_TO_ADD)
+  foreach (FULL_CLASS_NAME ${known_steps})
+    NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+    set(CATEGORY ${CATEGORY_${NORMALIZED_CLASS_NAME}})
+    if (${CATEGORY} STREQUAL ${CATEGORY_TO_ADD})
+      ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
+    endif()
+  endforeach()
+endmacro()
+
+macro(GENERATE_DESCRIPTION_LIST TYPE_STRING LIST_NAME OUTPUT_VAR)
+  list(SORT ${LIST_NAME})
+  set(${OUTPUT_VAR} "")
+  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}| ${TYPE_STRING}   | description |\n")
+  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}|----------|-------------|\n")
+  foreach (FULL_CLASS_NAME ${${LIST_NAME}})
+    GENERATE_DESCRIPTION_LIST_ENTRY(${FULL_CLASS_NAME})
+    set(${OUTPUT_VAR} "${${OUTPUT_VAR}}${DESCRIPTION_LIST_TEXT}")
+  endforeach()
+  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}\n\n")
+endmacro()
+
 macro(GENERATE_DESCRIPTION_LIST_ENTRY FULL_CLASS_NAME)
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
   EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
@@ -387,14 +439,22 @@ macro(DECLARE_CLASS_FILES FULL_CLASS_NAME)
   # normalize the class name so it can be used to declare variables
   NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
   
-  # TODO check if this file exists; if not, don't add it
-  list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
-  # these headers are used to add them to the generated plugin.cpp file
-  list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+  set(CPP_FILE "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.cpp")
+  set(HEADER_FILE "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.h")
+  set(ICON_FILE "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
   
-  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+  if (EXISTS ${CPP_FILE})
+    list(APPEND "source_files_${NORMALIZED_CLASS_NAME}" "${CPP_FILE}")
+  endif()
+  
+  # these headers are used to add them to the generated plugin.cpp file
+  if (EXISTS ${HEADER_FILE})
+    list(APPEND "header_files_${NORMALIZED_CLASS_NAME}" "${HEADER_FILE}")
+  endif()
+  
+  if (EXISTS "${ICON_FILE}")
     list(APPEND "icon_${NORMALIZED_CLASS_NAME}" "${CLASS_NAME}.svg")
-    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CLASS_NAME}.svg")
+    list(APPEND "icon_path_${NORMALIZED_CLASS_NAME}" "${ICON_FILE}")
   endif()
 endmacro(DECLARE_CLASS_FILES)
 

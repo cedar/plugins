@@ -92,10 +92,20 @@ Finally, you can add all classes of a kind using these commands:
 
 # Data structures included in the plugin #
 
-| data structure | description |
-|----------------|-------------|
+| data structure   | description |
+|----------|-------------|
 | *KeypointData* | A data structure that holds a vislab::keypoints::KPData object. |
 | *KeypointListData* | A std::vector of (open)cv::Keypoints. |
+| *StringData* | A data structure that holds a string. |
+
+
+
+
+# Plots included in the plugin #
+
+| plot   | description |
+|----------|-------------|
+| *StringPlot* | A plot that displays a string (cedar::aux::StringData). |
 
 
 

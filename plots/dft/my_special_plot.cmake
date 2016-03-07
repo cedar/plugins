@@ -1,4 +1,0 @@
-DECLARE_STEP
-(
-  ...
-)
