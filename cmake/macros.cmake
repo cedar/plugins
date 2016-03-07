@@ -34,7 +34,6 @@
 #
 #=======================================================================================================================
 
-
 ## Wrapper around QT4/5 macros ##
 
 macro(qt_wrap_cpp)
@@ -409,11 +408,43 @@ macro(ADD_STEP_CATEGORY_TO_PLUGIN CATEGORY_TO_ADD)
   endforeach()
 endmacro()
 
+macro(FILL_STRING STR MIN_LENGTH FILLER OUTPUT_VAR)
+  set(${OUTPUT_VAR} ${STR})
+  string(LENGTH ${OUTPUT_VAR} LEN)
+  while(LEN LESS ${MIN_LENGTH})
+    set(${OUTPUT_VAR} "${${OUTPUT_VAR}}${FILLER}")
+    string(LENGTH ${${OUTPUT_VAR}} LEN)
+  endwhile()
+endmacro(FILL_STRING)
+
+macro(GENERATE_GENERIC_DESCRIPTION_TABLE_ROW LEFT_STRING LEFT_WIDTH RIGHT_STRING RIGHT_WIDTH FILLER SEPARATOR OUTPUT_VAR)
+  FILL_STRING("${FILLER}${LEFT_STRING}" ${LEFT_WIDTH} ${FILLER} FILLED_LEFT_STRING)
+  FILL_STRING("${FILLER}${RIGHT_STRING}" ${RIGHT_WIDTH} ${FILLER} FILLED_RIGHT_STRING)
+  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}${SEPARATOR}${FILLED_LEFT_STRING}${SEPARATOR}${FILLED_RIGHT_STRING}${SEPARATOR}\n")
+endmacro()
+
+macro(GENERATE_DESCRIPTION_TABLE_SEPARATOR OUTPUT_VAR)
+  GENERATE_GENERIC_DESCRIPTION_TABLE_ROW("" 30 "" 80 "-" "|" ${OUTPUT_VAR})
+endmacro()
+
+macro(GENERATE_DESCRIPTION_TABLE_SPAN TEXT OUTPUT_VAR)
+  FILL_STRING(" ${TEXT}" 111 " " FILLED_TEXT)
+  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}|${FILLED_TEXT}|\n")
+endmacro()
+
+macro(GENERATE_DESCRIPTION_TABLE_HEADER LEFT RIGHT OUTPUT_VAR)
+  GENERATE_GENERIC_DESCRIPTION_TABLE_ROW(${LEFT} 30 ${RIGHT} 80 " " "|" ${OUTPUT_VAR})
+endmacro()
+
+macro(GENERATE_DESCRIPTION_TABLE_ROW LEFT RIGHT OUTPUT_VAR)
+  GENERATE_GENERIC_DESCRIPTION_TABLE_ROW(${LEFT} 30 ${RIGHT} 80 " " "|" ${OUTPUT_VAR})
+endmacro()
+
 macro(GENERATE_DESCRIPTION_LIST TYPE_STRING LIST_NAME OUTPUT_VAR)
   list(SORT ${LIST_NAME})
   set(${OUTPUT_VAR} "")
-  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}| ${TYPE_STRING}   | description |\n")
-  set(${OUTPUT_VAR} "${${OUTPUT_VAR}}|----------|-------------|\n")
+  GENERATE_DESCRIPTION_TABLE_HEADER(${TYPE_STRING} "description" ${OUTPUT_VAR})
+  GENERATE_DESCRIPTION_TABLE_SEPARATOR(${OUTPUT_VAR})
   foreach (FULL_CLASS_NAME ${${LIST_NAME}})
     GENERATE_DESCRIPTION_LIST_ENTRY(${FULL_CLASS_NAME})
     set(${OUTPUT_VAR} "${${OUTPUT_VAR}}${DESCRIPTION_LIST_TEXT}")
@@ -429,7 +460,9 @@ macro(GENERATE_DESCRIPTION_LIST_ENTRY FULL_CLASS_NAME)
     set(description "no description.")
   endif()
   
-  set(DESCRIPTION_LIST_TEXT "| *${CLASS_NAME}* | ${description} |\n")
+#  set(DESCRIPTION_LIST_TEXT "| *${CLASS_NAME}* | ${description} |\n")
+  set(DESCRIPTION_LIST_TEXT "")
+  GENERATE_DESCRIPTION_TABLE_ROW("*${CLASS_NAME}*" ${description} DESCRIPTION_LIST_TEXT)
 endmacro(GENERATE_DESCRIPTION_LIST_ENTRY)
 
 # Adds all files for a class to the appropriate lists, i.e., the list of headers and cpp files per class.
