@@ -66,6 +66,8 @@ Finally, you can add all classes of a kind using these commands:
 | *NaoCamera*                  | Nao's camera.                                                                  |
 | **Object Recognition**                                                                                        |
 | *FeatureStacks*              | This step builds localized histograms around keypoints. See Lomp et al. (2014) for details. |
+| *KeypointEdgeHistogramExtractor* | This step builds localized histograms around keypoints using shape features.   |
+| *TopDownReconstruction*      | Reconstructs a shape based object representation.                              |
 | **Sources**                                                                                                   |
 | *ImageProvider*              | A step that outputs an image from a directory based on an index specified via a parameter. |
 | *SpatialPattern*             | Outputs a matrix of synaptic weights that correspond to a spatial relational template (e.g., "to the left of"). |
@@ -75,6 +77,7 @@ Finally, you can add all classes of a kind using these commands:
 | *CrossCorrelation*           | Calculates the cross correlation in different configurations.                  |
 | *Demultiplexer*              | Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).    |
 | *ElementwiseDivide*          | To input matrices Nom and Denom will be divided elementwisely. The output is Nom/(Denom + scalar). "scalar" is a scalar and configurable parameter. This value is added to all elements in the Denom matrix to prevent dividing by zero or very small values. |
+| *HyperAcuteRescaling*        | Rescales an input matrix so that as little information as possible is lost. Note that this step's output is not properly normalized. |
 | *Integrator*                 | A looped step that integrates nx1 inputs across time.                          |
 | *LabelString*                | Outputs a label and ordered list of labels for activation from a label field.  |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
