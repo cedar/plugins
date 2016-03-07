@@ -138,6 +138,34 @@ macro(DECLARE_DATA_STRUCTURE FULL_CLASS_NAME)
   PROCESS_DEPRECATED_NAME_DEFAULT_ARGUMENTS(DATA_STRUCTURE ${FULL_CLASS_NAME})
 endmacro(DECLARE_DATA_STRUCTURE)
 
+# This is a macro called by plot description files.
+#
+# It automatically generates build information required for the plot, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional.
+macro(DECLARE_PLOT FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  # register the step with the list of steps
+  list(APPEND known_plots ${FULL_CLASS_NAME})
+  
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
+    
+  SET_DEFAULT_CLASS_DECLARATION_ARGUMENTS(PLOT)
+  SET_DEPRECATED_NAME_DEFAULT_ARGUMENTS(PLOT)
+  # plots also need to know what data to plot; add that as an option to argument parsing
+  list(APPEND PLOT_ONE_VALUE_OPTIONS "PLOTTED_DATA")
+  PARSE_DEFAULT_ARGUMENTS(PLOT ${ARGN})
+  PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(PLOT ${FULL_CLASS_NAME})
+  PROCESS_DEPRECATED_NAME_DEFAULT_ARGUMENTS(PLOT ${FULL_CLASS_NAME})
+  
+  # store information on what data the plot plots
+  set(PLOTTED_DATA_${NORMALIZED_CLASS_NAME} ${PLOT_PLOTTED_DATA})
+endmacro(DECLARE_PLOT)
+
 macro(CHECK_DESCRIPTION FULL_CLASS_NAME NORMALIZED_CLASS_NAME THING)
   if(NOT DESCRIPTION_${NORMALIZED_CLASS_NAME})
     set(maintainer_warning "")
@@ -153,56 +181,80 @@ macro(DECLARE_PLUGIN PLUGIN_NAME)
   set(PLUGIN_TARGET_NAME ${PLUGIN_NAME})
 endmacro(DECLARE_PLUGIN)
 
+
 # TODO describe syntax
 macro(ADD_TO_PLUGIN)
-  # TODO rewrite this using cmake_parse_arguments
-  set(STATE_NONE 0)
-  set(STATE_STEPS 1)
-  set(STATE_CATEGORIES 2)
-  set(STATE_KERNELS 3)
-  set(STATE_DATA_STRUCTURES 4)
+  set(OPTIONS ALL_STEPS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS)
+  set(ONE_VALUE_OPTIONS STEP CATEGORY KERNEL DATA_STRUCTURE PLOT)
+  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES KERNELS DATA_STRUCTURES PLOTS)
   
-  set(CURRENT_STATE ${STATE_NONE})
-  foreach (arg ${ARGN})
-    if (${arg} STREQUAL "STEPS" OR ${arg} STREQUAL "STEP")
-      set(CURRENT_STATE ${STATE_STEPS})
-    elseif (arg STREQUAL "KERNELS" OR arg STREQUAL "KERNEL")
-      set(CURRENT_STATE ${STATE_KERNELS})
-    elseif (${arg} STREQUAL "CATEGORIES" OR ${arg} STREQUAL "CATEGORY")
-      set(CURRENT_STATE ${STATE_CATEGORIES})
-    elseif (${arg} STREQUAL "DATA_STRUCTURE" OR ${arg} STREQUAL "DATA_STRUCTURES")
-      set(CURRENT_STATE ${STATE_DATA_STRUCTURES})
-    elseif(arg STREQUAL "ALL_STEPS")
-      foreach (FULL_CLASS_NAME ${known_steps})
-        NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-        ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
-      endforeach()
-    elseif(arg STREQUAL "ALL_KERNELS")
-      foreach (FULL_CLASS_NAME ${known_kernels})
-        NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-        ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
-      endforeach()
-    elseif(arg STREQUAL "ALL_DATA_STRUCTURES")
-      foreach (FULL_CLASS_NAME ${known_data_structures})
-        NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-        ADD_DATA_STRUCTURES_TO_BUILD(${FULL_CLASS_NAME})
-      endforeach()
-    elseif (CURRENT_STATE EQUAL ${STATE_NONE})
-      print_error("Syntax error in ADD_TO_PLUGIN: prefix with STEPS, CATEGORIES, ..., Got ${arg}." )
-    elseif (CURRENT_STATE EQUAL ${STATE_STEPS})
-      ADD_STEP_TO_BUILD(${arg})
-    elseif (CURRENT_STATE EQUAL ${STATE_KERNELS})
-      ADD_KERNEL_SOURCES_TO_BUILD(${arg})
-    elseif (CURRENT_STATE EQUAL ${STATE_DATA_STRUCTURES})
-      ADD_DATA_STRUCTURES_TO_BUILD(${arg})
-    elseif (CURRENT_STATE EQUAL ${STATE_CATEGORIES})
-      foreach (FULL_CLASS_NAME ${known_steps})
-        NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
-        set(CATEGORY ${CATEGORY_${NORMALIZED_CLASS_NAME}})
-        if (${CATEGORY} STREQUAL arg)
-          ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
-        endif()
-      endforeach()
-    endif()
-  endforeach()
+  cmake_parse_arguments(ADD_TO_PLUGIN "${OPTIONS}" "${ONE_VALUE_OPTIONS}" "${MULTI_VALUE_OPTIONS}" ${ARGN})
+  
+  if (ADD_TO_PLUGIN_ALL_STEPS)
+    foreach (FULL_CLASS_NAME ${known_steps})
+      ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_ALL_KERNELS)
+    foreach (FULL_CLASS_NAME ${known_kernels})
+      ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_ALL_DATA_STRUCTURES)
+    foreach (FULL_CLASS_NAME ${known_data_structures})
+      ADD_DATA_STRUCTURES_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_ALL_PLOTS)
+    foreach (FULL_CLASS_NAME ${known_plots})
+      ADD_PLOT_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_STEP)
+    ADD_STEP_TO_BUILD(${ADD_TO_PLUGIN_STEP})
+  endif()
+  
+  if (ADD_TO_PLUGIN_STEPS)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_STEPS})
+      ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_KERNEL)
+    ADD_KERNEL_TO_BUILD(${ADD_TO_PLUGIN_KERNEL})
+  endif()
+  
+  if (ADD_TO_PLUGIN_KERNELS)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_KERNELS})
+      ADD_KERNEL_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_DATA_STRUCTURE)
+    ADD_DATA_STRUCTURES_TO_BUILD(${ADD_TO_PLUGIN_DATA_STRUCTURE})
+  endif()
+  
+  if (ADD_TO_PLUGIN_DATA_STRUCTURES)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_DATA_STRUCTURES})
+      ADD_DATA_STRUCTURES_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_PLOT)
+    ADD_PLOT_TO_BUILD(${ADD_TO_PLUGIN_PLOT})
+  endif()
+  
+  if (ADD_TO_PLUGIN_PLOTS)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_PLOTS})
+      ADD_PLOT_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+  
+  if (ADD_TO_PLUGIN_CATEGORY)
+    ADD_STEP_CATEGORY_TO_PLUGIN(${ADD_TO_PLUGIN_CATEGORY})
+  endif()
 endmacro(ADD_TO_PLUGIN)
