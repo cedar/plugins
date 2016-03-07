@@ -61,6 +61,8 @@ if (CMAKE_BUILD_TYPE MATCHES "debug")
   add_definitions(-DDEBUG)
 endif()
 
+set(CEDAR_CONF_CMAKE_FILE "")
+set(CEDAR_CONF_CMAKE_FILE_USED_PATH "")
 # include cedar variables/directories when CEDAR_HOME is specified
 if(CEDAR_HOME)
   print_message("Using local cedar version in ${CEDAR_HOME}")
@@ -70,8 +72,9 @@ if(CEDAR_HOME)
   # Add link directories
   link_directories("${CEDAR_HOME}/${CEDAR_LIB_DIR}")
   
-  # includes and libraries of external dependencies
-  include("${CEDAR_HOME}/${CEDAR_BUILD_DIR}/cedar_configuration.cmake")
+  # tell the build system where to find the cedar configuration file
+  set(CEDAR_CONF_CMAKE_FILE "${CEDAR_HOME}/${CEDAR_BUILD_DIR}/cedar_configuration.cmake")
+  set(CEDAR_CONF_CMAKE_FILE_USED_PATH "CEDAR_HOME: ${CEDAR_HOME}")
   
 # include cedar variables/directories when CEDAR_HOME_INSTALLED is specified
 elseif(CEDAR_HOME_INSTALLED)
@@ -83,8 +86,17 @@ elseif(CEDAR_HOME_INSTALLED)
   link_directories("${CEDAR_HOME_INSTALLED}/lib")
 
   # includes and libraries of external dependencies
-  include("${CEDAR_HOME_INSTALLED}/share/cedar/cedar_configuration.cmake")
+  set(CEDAR_CONF_CMAKE_FILE "${CEDAR_HOME_INSTALLED}/share/cedar/cedar_configuration.cmake")
+  set(CEDAR_CONF_CMAKE_FILE_USED_PATH "CEDAR_HOME_INSTALLED: ${CEDAR_HOME_INSTALLED}")
 endif(CEDAR_HOME)
+
+# check if the cedar configuration file exists; print an error if not
+if (NOT EXISTS ${CEDAR_CONF_CMAKE_FILE})
+  message(FATAL_ERROR "Could not find or read cedar_configuration.cmake file. This is necessary to build the plugin; please specify an appropriate path in the project.conf file, either via CEDAR_HOME for local cedar versions or CEDAR_HOME_INSTALLED for installed versions. The current path for the cmake is: ${CEDAR_CONF_CMAKE_FILE}. The entry in the project.conf is ${CEDAR_CONF_CMAKE_FILE_USED_PATH}")
+endif()
+
+# includes and libraries of external dependencies
+include("${CEDAR_CONF_CMAKE_FILE}")
 
 # find OpenCV -- this is necessary because the opencv script sets some internal things (on windows)
 set (OpenCV_DIR ${CEDAR_OPENCV_CMAKE_DIR})
