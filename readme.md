@@ -53,6 +53,8 @@ Finally, you can add all classes of a kind using these commands:
 |------------------------------|--------------------------------------------------------------------------------|
 | **Dynamics**                                                                                                  |
 | *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
+| **Image Processing**                                                                                          |
+| *GeometricImageTransform*    | Rescales and rotates and image around its center and then offsets it using geometric transformations. |
 | **Keypoints**                                                                                                 |
 | *DoubleStoppedCellResponses* | Extracts the double-stopped cell responses from keypoint data.                 |
 | *KeypointExtractor*          | A step that extracts keypoint information.                                     |
