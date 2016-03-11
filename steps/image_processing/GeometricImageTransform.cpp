@@ -107,6 +107,38 @@ mOutput(new cedar::aux::MatData(cv::Mat()))
 // methods
 //----------------------------------------------------------------------------------------------------------------------
 
+void cedar::proc::steps::GeometricImageTransform::setRotationAmount(double angleInDegrees)
+{
+  this->_mRotation->setValue(angleInDegrees);
+}
+
+double cedar::proc::steps::GeometricImageTransform::getRotationAmount() const
+{
+  return this->_mRotation->getValue();
+}
+
+void cedar::proc::steps::GeometricImageTransform::setScaleFactor(double scaleFactor)
+{
+  this->_mScaling->setValue(scaleFactor);
+}
+
+double cedar::proc::steps::GeometricImageTransform::getScaleFactor() const
+{
+  return this->_mScaling->getValue();
+}
+
+void cedar::proc::steps::GeometricImageTransform::setTranslation(int offsetX, int offsetY)
+{
+  this->_mTranslation->setValue(0, offsetY);
+  this->_mTranslation->setValue(1, offsetX);
+}
+
+void cedar::proc::steps::GeometricImageTransform::getTranslation(int& offsetX, int& offsetY) const
+{
+  offsetY = this->_mTranslation->at(0);
+  offsetX = this->_mTranslation->at(1);
+}
+
 void cedar::proc::steps::GeometricImageTransform::transformationParameterChanged()
 {
   this->updateTransformationMatrix();

@@ -127,7 +127,17 @@ public:
   // public methods
   //--------------------------------------------------------------------------------------------------------------------
 public:
-  // none yet
+  void setRotationAmount(double angleInDegrees);
+
+  double getRotationAmount() const;
+
+  void setScaleFactor(double scaleFactor);
+
+  double getScaleFactor() const;
+
+  void setTranslation(int offsetX, int offsetY);
+
+  void getTranslation(int& offsetX, int& offsetY) const;
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
