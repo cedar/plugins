@@ -58,6 +58,7 @@ Finally, you can add all classes of a kind using these commands:
 | **Keypoints**                                                                                                 |
 | *DoubleStoppedCellResponses* | Extracts the double-stopped cell responses from keypoint data.                 |
 | *KeypointExtractor*          | A step that extracts keypoint information.                                     |
+| *KeypointLambdaMapping*      | A step that maps keypoint lambdas to other coordinate systems and vice versa.  |
 | *KeypointLinesAndEdges*      | Extracts line- and edge information from a KeypointData object.                |
 | *KeypointPatchRescaler*      | Rescales a local image patch according to a chosen keypoint size.              |
 | *KeypointVisualization*      | Draws visualizations for a list of opencv keypoints onto an image.             |
