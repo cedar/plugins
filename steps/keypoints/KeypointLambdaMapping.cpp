@@ -283,7 +283,7 @@ void cedar::proc::steps::KeypointLambdaMapping::compute(const cedar::proc::Argum
     float v = this->mInput.getData().at<float>(static_cast<int>(s), 0);
     int t = this->mCoordinateMapping[s];
     output.at<float>(t, 0) += acuity * v;
-    if (static_cast<size_t>(t) < target_size)
+    if (static_cast<size_t>(t) < target_size - 1)
     {
       output.at<float>(t + 1, 0) += (1.0f - acuity) * v;
     }
