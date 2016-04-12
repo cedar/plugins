@@ -140,7 +140,17 @@ void cedar::proc::steps::KeypointLambdaMapping::allocateOutput()
     default:
       break;
   }
+  unsigned int size_pre = 0;
+  if (!this->mOutput->getData().empty())
+  {
+    size_pre = cedar::aux::math::get1DMatrixSize(this->mOutput->getData());
+  }
   this->mOutput->setData(cv::Mat::zeros(static_cast<int>(size), 1, CV_32F));
+
+  if (size_pre != size)
+  {
+    this->emitOutputPropertiesChangedSignal("output");
+  }
 }
 
 void cedar::proc::steps::KeypointLambdaMapping::updateMapping()
