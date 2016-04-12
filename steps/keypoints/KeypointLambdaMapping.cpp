@@ -148,7 +148,7 @@ void cedar::proc::steps::KeypointLambdaMapping::updateMapping()
   this->mCoordinateMapping.clear();
   this->mMappingAcuity.clear();
 
-  if (!this->mInput.isSet())
+  if (!this->mInput.isSet() || this->mInput.getData().empty())
     return;
 
   this->allocateOutput();
