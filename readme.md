@@ -70,6 +70,7 @@ Finally, you can add all classes of a kind using these commands:
 | **Object Recognition**                                                                                        |
 | *FeatureStacks*              | This step builds localized histograms around keypoints. See Lomp et al. (2014) for details. |
 | *KeypointEdgeHistogramExtractor* | This step builds localized histograms around keypoints using shape features.   |
+| *ReceptiveFieldHistogram*    | Extracts histograms using localized receptive fields.                          |
 | *TopDownReconstruction*      | Reconstructs a shape based object representation.                              |
 | **Sources**                                                                                                   |
 | *ImageProvider*              | A step that outputs an image from a directory based on an index specified via a parameter. |
