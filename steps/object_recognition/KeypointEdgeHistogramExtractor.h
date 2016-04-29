@@ -87,6 +87,11 @@ public:
     return this->_mSubsampling->getValue();
   }
 
+  inline void setSubsamplingFactor(unsigned int factor)
+  {
+    this->_mSubsampling->setValue(factor);
+  }
+
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
   //--------------------------------------------------------------------------------------------------------------------
