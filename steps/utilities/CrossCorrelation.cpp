@@ -198,15 +198,35 @@ const
         }
         else // pattern is ND
         {
-          switch (cedar::aux::math::getDimensionalityOf(input))
+          auto input_dim = cedar::aux::math::getDimensionalityOf(input);
+          auto pattern_dim = cedar::aux::math::getDimensionalityOf(pattern);
+          switch (input_dim)
           {
             case 4:
             case 3:
-              //!@todo Proper checks for these cases
-              return cedar::proc::DataSlot::VALIDITY_VALID;
+              if (input_dim == pattern_dim)
+              {
+                if (cedar::aux::math::matrixSizesEqual(input, pattern) && input.type() == pattern.type())
+                {
+                  return cedar::proc::DataSlot::VALIDITY_VALID;
+                }
+                else
+                {
+                  return cedar::proc::DataSlot::VALIDITY_ERROR;
+                }
+              }
+              else if (input_dim - 1 == pattern_dim)
+              {
+                //!@todo Check that sizes in the correlated dimensions are equal
+                return cedar::proc::DataSlot::VALIDITY_VALID;
+              }
+              else
+              {
+                return cedar::proc::DataSlot::VALIDITY_ERROR;
+              }
             case 2:
             {
-              switch (cedar::aux::math::getDimensionalityOf(pattern))
+              switch (pattern_dim)
               {
                 case 1:
                   if (input.rows >= pattern.cols)
