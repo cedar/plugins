@@ -62,6 +62,10 @@ Finally, you can add all classes of a kind using these commands:
 | *KeypointLinesAndEdges*      | Extracts line- and edge information from a KeypointData object.                |
 | *KeypointPatchRescaler*      | Rescales a local image patch according to a chosen keypoint size.              |
 | *KeypointVisualization*      | Draws visualizations for a list of opencv keypoints onto an image.             |
+| **Kinect Utilities**                                                                                          |
+| *ConvertDepthToXyz*          | A step that converts depth data into 3D object data with scale and matrix center |
+| *KinectReader*               | A source that reads out images and depth images, as well as a RGBA point cloud from a Kinect camera. |
+| *TransformPointCloud*        | A step that performs geometric operations on a point cloud, yielding the transformed point cloud and camera position. |
 | **Motion detection**                                                                                          |
 | *CounterChangeCombination*   | The inputs have to be 3D toward and away matrices from a single edge filtered video or camera input. The first dimension of the input matrices is considered as the edge orientation dimension. The input matrices are shifted orthogonal the edge orientation by the size of the configurable shift parameter. Output matrices are two 3D matrices that reflect the combination of toward and away signals according to the counter-change rule. The first dimension is assigned to the motion direction. The two matrices represent the polarity if a dark pattern moves on bright ground (BtW: Black to White motion) or the other way around (WtB: White to Black motion) |
 | *MotionGradient*             | This class provides a cedar processing step implementing the OpenCV function calcMotionGradient. |
@@ -108,7 +112,9 @@ Finally, you can add all classes of a kind using these commands:
 |------------------------------|--------------------------------------------------------------------------------|
 | *KeypointData*               | A data structure that holds a vislab::keypoints::KPData object.                |
 | *KeypointListData*           | A std::vector of (open)cv::Keypoints.                                          |
+| *RGBAPointCloudData*         | A data structure that holds Kinect point cloud data.                           |
 | *StringData*                 | A data structure that holds a string.                                          |
+| *AsyncGrabber*               | A data structure that holds refreshed Kinect image data.                       |
 
 
 
