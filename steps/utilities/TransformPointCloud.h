@@ -14,7 +14,7 @@
 #include <cedar/auxiliaries/DoubleParameter.h>
 #include <cedar/auxiliaries/MatData.h>
 
-#include "steps/KinectUtilities/TransformPointCloud.fwd.h"
+#include "steps/utilities/TransformPointCloud.fwd.h"
 
 /*!@brief Abstract description of the class.
  *

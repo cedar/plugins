@@ -99,10 +99,10 @@ cedar::proc::steps::KinectReader::KinectReader()
   if (driver.getNumberDevices () > 0)
   {
     std::stringstream ss;
-    for (unsigned deviceIdx = 0; deviceIdx < driver.getNumberDevices (); ++deviceIdx)
+    for (unsigned device_idx = 0; device_idx < driver.getNumberDevices (); ++device_idx)
     {
-      ss << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
-         << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << std::endl;
+      ss << "Device: " << device_idx + 1 << ", vendor: " << driver.getVendorName (device_idx) << ", product: " << driver.getProductName (device_idx)
+         << ", connected: " << driver.getBus (device_idx) << " @ " << driver.getAddress (device_idx) << ", serial number: \'" << driver.getSerialNumber (device_idx) << "\'" << std::endl;
       //   cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << endl
       //    << "         bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << endl
       //    << "         <serial-number> (only in Linux and for devices which provide serial numbers)"  << endl;
@@ -133,17 +133,17 @@ void cedar::proc::steps::KinectReader::compute(const cedar::proc::Arguments&)
 {
   if(_mGrabPC->getValue())
   {
-    cedar::aux::ConstRGBAPointCloudPtr grabbedCloud(pImpl->grabber->getLatestCloud());
-    if (grabbedCloud) //if null, there is no new data since last grab
+    cedar::aux::ConstRGBAPointCloudPtr grabbed_cloud(pImpl->grabber->getLatestCloud());
+    if (grabbed_cloud) //if null, there is no new data since last grab
     {
-      cedar::aux::RGBAPointCloudPtr tempCloud(new cedar::aux::RGBAPointCloud);
+      cedar::aux::RGBAPointCloudPtr temp_cloud(new cedar::aux::RGBAPointCloud);
       bool returnTemp = false;
 
       //if downsampling active
       if (_mDownsample->getValue())
       {
-        pImpl->downsampling_grid.setInputCloud (grabbedCloud);
-        pImpl->downsampling_grid.filter(*tempCloud);
+        pImpl->downsampling_grid.setInputCloud (grabbed_cloud);
+        pImpl->downsampling_grid.filter(*temp_cloud);
         returnTemp = true;
       }
 
@@ -153,22 +153,22 @@ void cedar::proc::steps::KinectReader::compute(const cedar::proc::Arguments&)
 
         if(returnTemp)
         {
-          removeNaNFromPointCloud(*tempCloud, *tempCloud, mapping);
+          removeNaNFromPointCloud(*temp_cloud, *temp_cloud, mapping);
         }
         else
         {
-          removeNaNFromPointCloud(*grabbedCloud, *tempCloud, mapping);
+          removeNaNFromPointCloud(*grabbed_cloud, *temp_cloud, mapping);
           returnTemp = true;
         }
       }
 
       if(returnTemp)
       {
-        this->mPointCloud->setData(*tempCloud);
+        this->mPointCloud->setData(*temp_cloud);
       }
       else
       {
-        this->mPointCloud->setData(*grabbedCloud);
+        this->mPointCloud->setData(*grabbed_cloud);
       }
     }//grabbedCloud
   }//GrabPC
@@ -178,10 +178,10 @@ void cedar::proc::steps::KinectReader::compute(const cedar::proc::Arguments&)
     boost::shared_ptr<openni_wrapper::Image> new_image(pImpl->grabber->getLatestImage());
     if(new_image)
     {
-      cv::Mat &mimage = this->mImage->getData();
-      mimage.create(new_image->getHeight(),new_image->getWidth(),CV_8UC3);
-      new_image->fillRGB(mimage.cols, mimage.rows, mimage.ptr<unsigned char>(0));
-      cv::cvtColor(mimage,mimage,CV_RGB2BGR);
+      cv::Mat &m_image = this->mImage->getData();
+      m_image.create(new_image->getHeight(),new_image->getWidth(),CV_8UC3);
+      new_image->fillRGB(m_image.cols, m_image.rows, m_image.ptr<unsigned char>(0));
+      cv::cvtColor(m_image,m_image,CV_RGB2BGR);
     }
   }
 
@@ -191,9 +191,9 @@ void cedar::proc::steps::KinectReader::compute(const cedar::proc::Arguments&)
 
     if(new_depthImage)
     {
-      cv::Mat &mdepthimage = this->mDepthImage->getData();
-      mdepthimage.create(new_depthImage->getHeight(), new_depthImage->getWidth(), CV_32FC1);
-      new_depthImage->fillDepthImage( mdepthimage.cols, mdepthimage.rows, mdepthimage.ptr<float>(0));
+      cv::Mat &m_depthimage = this->mDepthImage->getData();
+      m_depthimage.create(new_depthImage->getHeight(), new_depthImage->getWidth(), CV_32FC1);
+      new_depthImage->fillDepthImage( m_depthimage.cols, m_depthimage.rows, m_depthimage.ptr<float>(0));
     }
 
     if( _mRemoveNaNDepth->getValue())
@@ -239,10 +239,10 @@ void cedar::proc::steps::KinectReader::removeNanPointFromDepthImage()
       //	This test is true only if the value of temp_image.at<float_t>(j,i) is NaN
       if(temp_image.at<float_t>(j,i) != temp_image.at<float_t>(j,i))
       {
-        temp_image.at<float_t>(j,i) = 8. ;
+        temp_image.at<float_t>(j,i) = 8.0f;
       }
     }
   }
 
-  this->mDepthImage->setData(temp_image) ;
+  this->mDepthImage->setData(temp_image);
 }

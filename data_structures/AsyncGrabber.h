@@ -20,6 +20,9 @@
 #ifndef PCL_ASYNC_GRABBER_H
 #define PCL_ASYNC_GRABBER_H
 
+// FORWARD DECLARATIONS
+#include "data_structures/AsyncGrabber.fwd.h"
+
 #include <boost/scoped_ptr.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -31,7 +34,7 @@ namespace pcl
 class AsyncGrabber
 {
 protected:
-  typedef pcl::PointCloud<pcl::PointXYZRGBA> 	PointCloud;
+  typedef pcl::PointCloud<pcl::PointXYZRGBA> PointCloud;
   typedef typename PointCloud::Ptr PointCloudPtr;
   typedef typename PointCloud::ConstPtr PointCloudConstPtr;
 
@@ -56,11 +59,15 @@ private:
   void depth_image_cb_(const boost::shared_ptr<openni_wrapper::DepthImage>& depthImage);
   // add from 2015 : depth image grabb
 
-  std::string	device_id_;
+  std::string device_id_;
   float cloud_fps_;
   float image_fps_;
   struct PImpl;
   boost::scoped_ptr<PImpl> mImpl;
+
+  boost::signals2::scoped_connection mc1;
+  boost::signals2::scoped_connection mc2;
+  boost::signals2::scoped_connection mc3;
 };
 }//namespace pcl
 

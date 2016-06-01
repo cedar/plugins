@@ -1,6 +1,6 @@
 /*======================================================================================================================
 
-    Copyright 2011, 2012, 2013, 2014 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
+    Copyright 2011, 2012, 2013, 2014, 2015, 2016 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
  
     This file is part of cedar.
 
@@ -22,20 +22,20 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        MatrixThreadDecoupler.fwd.h
+    File:        KinectReader.fwd.h
 
     Maintainer:  Oliver Lomp
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
-    Date:        2014 09 30
+    Date:        2016 02 09
 
-    Description: Forward declaration file for the class utilities::MatrixThreadDecoupler.
+    Description:
 
     Credits:
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_MULTIPLEXER_FWD_H
-#define CEDAR_PROC_STEPS_MULTIPLEXER_FWD_H
+#ifndef CEDAR_PROC_STEPS_KINECT_READER_FWD_H
+#define CEDAR_PROC_STEPS_KINECT_READER_FWD_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
@@ -55,13 +55,12 @@ namespace cedar
     namespace steps
     {
       //!@cond SKIPPED_DOCUMENTATION
-      class Multiplexer;
+      class KinectReader;
       //!@endcond
     }
   }
 }
 
 
-#endif // CEDAR_PROC_STEPS_MULTIPLEXER_FWD_H
-
+#endif // CEDAR_PROC_STEPS_KINECT_READER_FWD_H
 

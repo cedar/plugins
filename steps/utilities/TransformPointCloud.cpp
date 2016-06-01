@@ -45,18 +45,18 @@ void cedar::proc::steps::TransformPointCloud::compute(const cedar::proc::Argumen
   Eigen::Affine3f transform;
   pcl::getTransformation (x, y, z, roll, pitch, yaw, transform);
   Eigen::Vector3f origin(0,0,0);
-  Eigen::Vector3f cameraPos = transform * origin;
+  Eigen::Vector3f camera_pos = transform * origin;
 
-  mpCameraPosition->getData().at<double>(0,0) = cameraPos(0);
-  mpCameraPosition->getData().at<double>(1,0) = cameraPos(1);
-  mpCameraPosition->getData().at<double>(2,0) = cameraPos(2);
+  mpCameraPosition->getData().at<double>(0,0) = camera_pos(0);
+  mpCameraPosition->getData().at<double>(1,0) = camera_pos(1);
+  mpCameraPosition->getData().at<double>(2,0) = camera_pos(2);
 
   if(mpInputPointCloud)
   {
     cedar::aux::RGBAPointCloudPtr pc_copy(this->mpInputPointCloud->getData().makeShared());
-    cedar::aux::RGBAPointCloudPtr outputCloud(new cedar::aux::RGBAPointCloud);
-    pcl::transformPointCloud(*pc_copy,*outputCloud,transform);
-    mpOutputPointCloud->setData(*outputCloud);
+    cedar::aux::RGBAPointCloudPtr output_cloud(new cedar::aux::RGBAPointCloud);
+    pcl::transformPointCloud(*pc_copy,*output_cloud,transform);
+    mpOutputPointCloud->setData(*output_cloud);
   }
 }
 

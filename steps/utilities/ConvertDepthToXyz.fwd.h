@@ -22,11 +22,11 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        CounterChangeCombination.fwd.h
+    File:        ConvertDepthToXyz.fwd.h
 
     Maintainer:  Oliver Lomp
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
-    Date:        2016 02 09
+    Date:        2016 01 06
 
     Description:
 
@@ -34,8 +34,8 @@
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_KINECT_READER_FWD_H
-#define CEDAR_PROC_STEPS_KINECT_READER_FWD_H
+#ifndef CEDAR_PROC_STEPS_CONVERT_DEPTH_TO_XZY_FWD_H
+#define CEDAR_PROC_STEPS_CONVERT_DEPTH_TO_XZY_FWD_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
@@ -55,12 +55,12 @@ namespace cedar
     namespace steps
     {
       //!@cond SKIPPED_DOCUMENTATION
-      class KinectReader;
+      class ConvertDepthToXyz;
       //!@endcond
     }
   }
 }
 
 
-#endif // CEDAR_PROC_STEPS_KINECT_READER_FWD_H
+#endif // CEDAR_PROC_STEPS_CONVERT_DEPTH_TO_XZY_FWD_H
 

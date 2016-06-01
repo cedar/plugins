@@ -22,7 +22,7 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        CounterChangeCombination.fwd.h
+    File:        TransformPointCloud.fwd.h
 
     Maintainer:  Oliver Lomp
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
@@ -34,8 +34,8 @@
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_CONVERT_DEPTH_TO_XZY_FWD_H
-#define CEDAR_PROC_STEPS_CONVERT_DEPTH_TO_XZY_FWD_H
+#ifndef CEDAR_PROC_STEPS_TRANSFORM_POINT_CLOUD_FWD_H
+#define CEDAR_PROC_STEPS_TRANSFORM_POINT_CLOUD_FWD_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
@@ -55,12 +55,12 @@ namespace cedar
     namespace steps
     {
       //!@cond SKIPPED_DOCUMENTATION
-      class ConvertDepthToXyz;
+      class TransformPointCloud;
       //!@endcond
     }
   }
 }
 
 
-#endif // CEDAR_PROC_STEPS_CONVERT_DEPTH_TO_XZY_FWD_H
+#endif // CEDAR_PROC_STEPS_TRANSFORM_POINT_CLOUD_FWD_H
 

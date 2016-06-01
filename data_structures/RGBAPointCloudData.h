@@ -20,6 +20,9 @@
 #ifndef CEDAR_AUX_RGBAPOINTCLOUD_DATA_H
 #define CEDAR_AUX_RGBAPOINTCLOUD_DATA_H
 
+// FORWARD DECLARATIONS
+#include "data_structures/RGBAPointCloudData.fwd.h"
+
 // CEDAR INCLUDES
 #include <cedar/auxiliaries/DataTemplate.h>
 
