@@ -51,7 +51,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "steps/KinectUtilities/ConvertDepthToXyz.fwd.h"
+#include "steps/utilities/ConvertDepthToXyz.fwd.h"
 
 class cedar::proc::steps::ConvertDepthToXyz : public cedar::proc::Step
 {
@@ -71,15 +71,15 @@ public:
   //  Compute the delta of the input matrix
   void compute(const cedar::proc::Arguments& ) ;
 
-  void setSizePoint(unsigned int dimension, unsigned int newValue);
+  void setSizePoint(unsigned int dimension, unsigned int new_value);
   unsigned int getSizePoint(unsigned int dimension);
-  void setSizeMeter(unsigned int dimension, double newValue);
+  void setSizeMeter(unsigned int dimension, double new_value);
   double getSizeMeter(unsigned int dimension);
-  void setAlpha(double newValue);
+  void setAlpha(double new_value);
   double getAlpha();
-  void setMinDepth(double newValue);
+  void setMinDepth(double new_value);
   double getMinDepth();
-  void setMaxDepth(double newValue);
+  void setMaxDepth(double new_value);
   double getMaxDepth();
 
 public slots:

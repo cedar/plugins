@@ -63,16 +63,16 @@ cedar::proc::steps::ConvertDepthToXyz::ConvertDepthToXyz()
     _mMinDepth(new cedar::aux::DoubleParameter(this, "Minimum Depth in cm",20.,0.0,500.)),
     _mMaxDepth(new cedar::aux::DoubleParameter(this, "Maximum Depth in cm",300.,0.0,500.))
 {
-  cedar::proc::DataSlotPtr mInputDepthObject = this->declareInput("inputDepthObject") ;
-  mInputDepthObject->setCheck( cedar::proc::typecheck::DerivedFrom<cedar::aux::MatData>() ) ;
+  cedar::proc::DataSlotPtr mInputDepthObject = this->declareInput("inputDepthObject");
+  mInputDepthObject->setCheck( cedar::proc::typecheck::DerivedFrom<cedar::aux::MatData>());
 
-  this->declareOutput("3DObject", m3DObject) ;
-  this->declareOutput("Scale", mSpanVector) ;
-  this->declareOutput("Matrix Center", mCenterMatrix) ;
+  this->declareOutput("3DObject", m3DObject);
+  this->declareOutput("Scale", mSpanVector);
+  this->declareOutput("Matrix Center", mCenterMatrix);
 
-  QObject::connect(_mSizesPoint.get(), SIGNAL(valueChanged()), this, SLOT(updateMatrixSize())) ;
-  QObject::connect(_mSizesMeter.get(), SIGNAL(valueChanged()), this, SLOT(updateMatrixSize())) ;
-  QObject::connect(_mAlpha.get(), SIGNAL(valueChanged()), this, SLOT(updateKinectAngle())) ;
+  QObject::connect(_mSizesPoint.get(), SIGNAL(valueChanged()), this, SLOT(updateMatrixSize()));
+  QObject::connect(_mSizesMeter.get(), SIGNAL(valueChanged()), this, SLOT(updateMatrixSize()));
+  QObject::connect(_mAlpha.get(), SIGNAL(valueChanged()), this, SLOT(updateKinectAngle()));
 }
 
 
@@ -107,107 +107,110 @@ void cedar::proc::steps::ConvertDepthToXyz::compute(const cedar::proc::Arguments
   }
 
   cedar::aux::ConstDataPtr input = input_slot->getData();
-  cv::Mat inputData = input->getData<cv::Mat>();
-  cv::Mat& outputMatrix = this->m3DObject->getData();
-  cv::Mat& outputSpanVector = this->mSpanVector->getData();
-  cv::Mat& outputCenterMatrix = this->mCenterMatrix->getData();
 
-  float radAlpha = _mAlpha->getValue()*this->PI/180.;
+  cv::Mat input_data = input->getData<cv::Mat>();
 
-  int rowDepth = inputData.rows;
-  int colDepth = inputData.cols;
-  int cX = rowDepth/2;
-  int cY = colDepth/2;
+  cv::Mat& output_matrix = this->m3DObject->getData();
+  cv::Mat& output_span_vector = this->mSpanVector->getData();
+  cv::Mat& output_center_matrix = this->mCenterMatrix->getData();
+
+  float rad_alpha = _mAlpha->getValue()*this->PI/180.;
+
+  int row_depth = input_data.rows;
+  int col_depth = input_data.cols;
+  int cX = row_depth/2;
+  int cY = col_depth/2;
 
   int sizes[3] ;
 
-  std::vector<float> coefX;
-  std::vector<float> coefY;
+  std::vector<float> coef_x;
+  std::vector<float> coef_y;
 
-  float xSpan, ySpan, zSpan;
+  float x_span, y_span, z_span;
   float depth;
-  float xKinect, yKinect;
-  cv::Point3_<float> worldPoint;
-  cv::Point3_<int> matrixPoint;
+  float kinect_x, kinect_y;
+
+  cv::Point3_<float> world_point;
+  cv::Point3_<int> matrix_point;
 
   //Initialisation for easy variable
   sizes[0] = this->getSizePoint(0);
   sizes[1] = this->getSizePoint(1);
   sizes[2] = this->getSizePoint(2);
 
-  outputMatrix = cv::Mat(3, sizes, CV_32FC1, 0.0);
+  output_matrix = cv::Mat(3, sizes, CV_32FC1, 0.0);
 
   //initialisation of the coefficient for the transformation of x and y screen to x and y kinect world
 
-  for(int ind = 0; ind < rowDepth; ind++)
+  for(int ind = 0; ind < row_depth; ind++)
   {
-    coefX.push_back(static_cast<float>(cX - ind)/focalLength);
+    coef_x.push_back(static_cast<float>(cX - ind)/focalLength);
   }
 
 
-  for(int k = 0; k < colDepth; k++)
+  for(int k = 0; k < col_depth; k++)
   {
-    coefY.push_back( static_cast<float>(k - cY)/focalLength);
+    coef_y.push_back( static_cast<float>(k - cY)/focalLength);
   }
 
   //determine span
-  outputSpanVector.at<float>(0,0) = static_cast<float>(this->getSizeMeter(0))/static_cast<float>(sizes[0]);
-  outputSpanVector.at<float>(1,0) = static_cast<float>(this->getSizeMeter(1))/static_cast<float>(sizes[1]);
-  outputSpanVector.at<float>(2,0) = static_cast<float>(this->getSizeMeter(2))/static_cast<float>(sizes[2]);
+  output_span_vector.at<float>(0,0) = static_cast<float>(this->getSizeMeter(0))/static_cast<float>(sizes[0]);
+  output_span_vector.at<float>(1,0) = static_cast<float>(this->getSizeMeter(1))/static_cast<float>(sizes[1]);
+  output_span_vector.at<float>(2,0) = static_cast<float>(this->getSizeMeter(2))/static_cast<float>(sizes[2]);
 
-  xSpan = outputSpanVector.at<float>(0,0)*conversion;
-  ySpan = outputSpanVector.at<float>(1,0)*conversion;
-  zSpan = outputSpanVector.at<float>(2,0)*conversion;
+  x_span = output_span_vector.at<float>(0,0)*conversion;
+  y_span = output_span_vector.at<float>(1,0)*conversion;
+  z_span = output_span_vector.at<float>(2,0)*conversion;
 
-  outputCenterMatrix.at<float>(0,0) = static_cast<float>(sizes[0]/2);
-  outputCenterMatrix.at<float>(1,0) = 0;
-  outputCenterMatrix.at<float>(2,0) = 0;
+  output_center_matrix.at<float>(0,0) = static_cast<float>(sizes[0]/2);
+  output_center_matrix.at<float>(1,0) = 0;
+  output_center_matrix.at<float>(2,0) = 0;
 
   //go to fill the array of 3D points, and determine the min and max !
-  for(int i = 0 ; i < rowDepth ; i++)
+  for(int i = 0 ; i < row_depth ; i++)
   {
-    for(int j = 0 ; j < colDepth ; j++)
+    for(int j = 0 ; j < col_depth ; j++)
     {
-      depth = inputData.at<float>(i,j)*conversion;
+      depth = input_data.at<float>(i,j)*conversion;
 
       if(_mMinDepth->getValue() < depth && depth < _mMaxDepth->getValue())
       {
         // change the screen to kinect coordinate
-        yKinect = depth*coefX[i];
-        xKinect = depth*coefY[j];
+        kinect_y = depth*coef_x[i];
+        kinect_x = depth*coef_y[j];
         // change the kinect coordinate to the world coordinate
 
-        worldPoint.x = xKinect ;  //koordinates swap to match world
-        worldPoint.z = depth*cos(radAlpha) + yKinect*sin(radAlpha);
-        worldPoint.y = -depth*sin(radAlpha) + yKinect*cos(radAlpha) + cameraHeight;
+        world_point.x = kinect_x ;  //koordinates swap to match world
+        world_point.z = depth*cos(rad_alpha) + kinect_y*sin(rad_alpha);
+        world_point.y = -depth*sin(rad_alpha) + kinect_y*cos(rad_alpha) + cameraHeight;
 
-        matrixPoint.x = static_cast<int>((worldPoint.x/xSpan) + outputCenterMatrix.at<float>(0,0));
-        matrixPoint.y = static_cast<int>((worldPoint.y/ySpan) + outputCenterMatrix.at<float>(1,0));
-        matrixPoint.z = static_cast<int>((worldPoint.z/zSpan) + outputCenterMatrix.at<float>(2,0));
+        matrix_point.x = static_cast<int>((world_point.x/x_span) + output_center_matrix.at<float>(0,0));
+        matrix_point.y = static_cast<int>((world_point.y/y_span) + output_center_matrix.at<float>(1,0));
+        matrix_point.z = static_cast<int>((world_point.z/z_span) + output_center_matrix.at<float>(2,0));
 
         if
         (
-          0 <= matrixPoint.x && matrixPoint.x < sizes[0]
-          && 0 <= matrixPoint.y && matrixPoint.y < sizes[1]
-          && 0 <= matrixPoint.z && matrixPoint.z < sizes[2]
+          0 <= matrix_point.x && matrix_point.x < sizes[0]
+          && 0 <= matrix_point.y && matrix_point.y < sizes[1]
+          && 0 <= matrix_point.z && matrix_point.z < sizes[2]
         )
         {
-          outputMatrix.at<float>(sizes[0]-matrixPoint.y,matrixPoint.x,matrixPoint.z) = 1.0 ;
+          output_matrix.at<float>(sizes[0]-matrix_point.y,matrix_point.x,matrix_point.z) = 1.0 ;
         }
       }
     }
   }
 
-  this->mCenterMatrix->setData(outputCenterMatrix);
-  this->mSpanVector->setData(outputSpanVector);
-  this->m3DObject->setData(outputMatrix);
+  this->mCenterMatrix->setData(output_center_matrix);
+  this->mSpanVector->setData(output_span_vector);
+  this->m3DObject->setData(output_matrix);
 
   input->unlock() ;
 }
 
-void cedar::proc::steps::ConvertDepthToXyz::setSizePoint(unsigned int dimension, unsigned int newValue)
+void cedar::proc::steps::ConvertDepthToXyz::setSizePoint(unsigned int dimension, unsigned int new_value)
 {
-  this->_mSizesPoint->setValue(dimension, newValue);
+  this->_mSizesPoint->setValue(dimension, new_value);
 }
 
 unsigned int cedar::proc::steps::ConvertDepthToXyz::getSizePoint(unsigned int dimension)
@@ -215,9 +218,9 @@ unsigned int cedar::proc::steps::ConvertDepthToXyz::getSizePoint(unsigned int di
   return this->_mSizesPoint->at(dimension);
 }
 
-void cedar::proc::steps::ConvertDepthToXyz::setSizeMeter(unsigned int dimension, double newValue)
+void cedar::proc::steps::ConvertDepthToXyz::setSizeMeter(unsigned int dimension, double new_value)
 {
-  this->_mSizesMeter->setValue(dimension, newValue);
+  this->_mSizesMeter->setValue(dimension, new_value);
 }
 
 double cedar::proc::steps::ConvertDepthToXyz::getSizeMeter(unsigned int dimension)
@@ -225,9 +228,9 @@ double cedar::proc::steps::ConvertDepthToXyz::getSizeMeter(unsigned int dimensio
   return this->_mSizesMeter->at(dimension);
 }
 
-void cedar::proc::steps::ConvertDepthToXyz::setAlpha(double newValue)
+void cedar::proc::steps::ConvertDepthToXyz::setAlpha(double new_value)
 {
-  this->_mAlpha->setValue(newValue);
+  this->_mAlpha->setValue(new_value);
 }
 
 double cedar::proc::steps::ConvertDepthToXyz::getAlpha()
@@ -235,9 +238,9 @@ double cedar::proc::steps::ConvertDepthToXyz::getAlpha()
   return this->_mAlpha->getValue();
 }
 
-void cedar::proc::steps::ConvertDepthToXyz::setMinDepth(double newValue)
+void cedar::proc::steps::ConvertDepthToXyz::setMinDepth(double new_value)
 {
-  this->_mMinDepth->setValue(newValue);
+  this->_mMinDepth->setValue(new_value);
 }
 
 double cedar::proc::steps::ConvertDepthToXyz::getMinDepth()
@@ -245,9 +248,9 @@ double cedar::proc::steps::ConvertDepthToXyz::getMinDepth()
   return this->_mMinDepth->getValue();
 }
 
-void cedar::proc::steps::ConvertDepthToXyz::setMaxDepth(double newValue )
+void cedar::proc::steps::ConvertDepthToXyz::setMaxDepth(double new_value)
 {
-  this->_mMaxDepth->setValue(newValue);
+  this->_mMaxDepth->setValue(new_value);
 }
 
 double cedar::proc::steps::ConvertDepthToXyz::getMaxDepth()

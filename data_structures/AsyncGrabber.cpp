@@ -57,9 +57,9 @@ void AsyncGrabber::start()
   boost::function<void (const boost::shared_ptr<openni_wrapper::Image>&)> f2 = boost::bind (&AsyncGrabber::image_cb_, this, _1);
   boost::function<void (const boost::shared_ptr<openni_wrapper::DepthImage>&)> f3 = boost::bind (&AsyncGrabber::depth_image_cb_, this, _1);
 
-  boost::signals2::connection c1 = mImpl->grabber_->registerCallback (f1);
-  boost::signals2::connection c2 = mImpl->grabber_->registerCallback (f2);
-  boost::signals2::connection c3 = mImpl->grabber_->registerCallback (f3);
+  mc1 = mImpl->grabber_->registerCallback (f1);
+  mc2 = mImpl->grabber_->registerCallback (f2);
+  mc3 = mImpl->grabber_->registerCallback (f3);
 
   mImpl->grabber_->start();  
 }

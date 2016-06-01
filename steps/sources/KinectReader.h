@@ -25,7 +25,7 @@
 
 // LOCAL INCLUDES
 //#include "utilities_namespace.h"
-#include "steps/KinectUtilities/KinectReader.fwd.h"
+#include "steps/sources/KinectReader.fwd.h"
 #include "data_structures/RGBAPointCloudData.h"
 // PROJECT INCLUDES
 #include <iostream>

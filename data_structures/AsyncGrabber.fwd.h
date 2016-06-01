@@ -22,20 +22,20 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        CounterChangeCombination.fwd.h
+    File:        AsyncGrabber.fwd.h
 
     Maintainer:  Oliver Lomp
     Email:       oliver.lomp@ini.ruhr-uni-bochum.de
-    Date:        2016 02 09
+    Date:        2016 01 06
 
-    Description:
+    Description: Forward declaration file for the class AsyncGrabber.
 
     Credits:
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_TRANSFORM_POINT_CLOUD_FWD_H
-#define CEDAR_PROC_STEPS_TRANSFORM_POINT_CLOUD_FWD_H
+#ifndef CEDAR_AUX_ASNYC_GRABBER_FWD_H
+#define CEDAR_AUX_ASNYC_GRABBER_FWD_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
@@ -48,19 +48,12 @@
 #endif // Q_MOC_RUN
 
 
-namespace cedar
+namespace pcl
 {
-  namespace proc
-  {
-    namespace steps
-    {
-      //!@cond SKIPPED_DOCUMENTATION
-      class TransformPointCloud;
-      //!@endcond
-    }
-  }
+  //!@cond SKIPPED_DOCUMENTATION
+  class AsyncGrabber;
+  //!@endcond
 }
 
-
-#endif // CEDAR_PROC_STEPS_TRANSFORM_POINT_CLOUD_FWD_H
+#endif // CEDAR_AUX_ASNYC_GRABBER_FWD_H
 
