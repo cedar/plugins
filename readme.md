@@ -87,6 +87,8 @@ Finally, you can add all classes of a kind using these commands:
 | *Integrator*                 | A looped step that integrates nx1 inputs across time.                          |
 | *LabelString*                | Outputs a label and ordered list of labels for activation from a label field.  |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
+| *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
+| *PointWiseNormalization*     | Normalizes the entries along one dimension of a matrix.                        |
 | *ShiftedAddition*            | no description.                                                                |
 | *TransformPointCloud*        | A step that performs geometric operations on a point cloud, yielding the transformed point cloud and camera position. |
 | *WeightedSum*                | A looped step that multiplies each input value with a given weight and sums them up across each input dimension. The given weight function encodes the distance from the center of the input matrix. This step is used to calculate a velocity signal dependent on the distance between a peak position and the center of the input matrix. |
