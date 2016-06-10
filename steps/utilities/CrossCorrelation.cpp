@@ -122,6 +122,7 @@ void cedar::proc::steps::CrossCorrelation::alternateKernelCenterChanged()
     auto bool_parameter = boost::dynamic_pointer_cast<cedar::aux::BoolParameter>(parameter);
     bool_parameter->setValue(this->_mAlternateKernelCenter->getValue());
   }
+  this->recompute();
 }
 
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::CrossCorrelation::determineInputValidity
@@ -579,6 +580,10 @@ void cedar::proc::steps::CrossCorrelation::compute3D()
     case 3:
     {
       int start = (result.size[dim_sliced] - 1) / 2;
+      if (this->_mAlternateKernelCenter->getValue())
+      {
+        start += 1;
+      }
       ranges.at(dim_sliced) = cv::Range(start, start + 1);
       result_low_d = result(&ranges.front());
       break;
