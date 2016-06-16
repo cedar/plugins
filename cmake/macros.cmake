@@ -85,6 +85,13 @@ macro(SET_DEPRECATED_NAME_DEFAULT_ARGUMENTS PREFIX)
   list(APPEND "${PREFIX}_MULTI_VALUE_OPTIONS" "DEPRECATED_NAMES")
 endmacro()
 
+#
+# Adds defaults to several lists to be used with cmake_parse_arguments.
+#
+macro(SET_DEPRECATION_DEFAULT_ARGUMENTS PREFIX)
+  list(APPEND "${PREFIX}_ONE_VALUE_OPTIONS" "DEPRECATED")
+endmacro()
+
 
 #
 #
@@ -116,6 +123,15 @@ macro(PROCESS_DEPRECATED_NAME_DEFAULT_ARGUMENTS PREFIX FULL_CLASS_NAME)
     foreach (deprecated_name ${${PREFIX}_DEPRECATED_NAMES})
       DECLARE_DEPRECATED_NAME(${FULL_CLASS_NAME} ${deprecated_name})
     endforeach()
+  endif()
+endmacro()
+
+#
+# Processes parsed default calss arguments parsed with SET_DEFAULT_CLASS_DECLARATION_ARGUMENTS and PARSE_DEFAULT_ARGUMENTS PREFIX.
+#
+macro(PROCESS_DEPRECATION_DEFAULT_ARGUMENTS PREFIX FULL_CLASS_NAME)
+  if (STEP_DEPRECATED)
+    DECLARE_DEPRECATION(${FULL_CLASS_NAME} ${STEP_DEPRECATED})
   endif()
 endmacro()
 
@@ -293,7 +309,7 @@ macro(ADD_STEP_TO_BUILD FULL_CLASS_NAME)
     set(decl "${decl}    (\n")
     set(decl "${decl}      new cedar::proc::ElementDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")\n")
     set(decl "${decl}    );\n")
-    
+   
     # add description, if set
     set(description ${DESCRIPTION_${NORMALIZED_CLASS_NAME}})
     if (description)
@@ -314,6 +330,12 @@ macro(ADD_STEP_TO_BUILD FULL_CLASS_NAME)
         string(REPLACE "::" "." deprecated_name ${deprecated_names})
         set(decl "${decl}    declaration->deprecatedName(\"${deprecated_name}\");\n")
       endforeach()
+    endif()
+    
+    # add deprecation, if set ${NORMALIZED_CLASS_NAME}_DEPRECATION
+    set (deprecation "${${NORMALIZED_CLASS_NAME}_DEPRECATION}")
+    if (deprecation)
+      set(decl "${decl}    declaration->deprecate(\"${deprecation}\");\n")
     endif()
     
     set(decl "${decl}    plugin->add(declaration);\n")
@@ -513,6 +535,13 @@ macro(DECLARE_DEPRECATED_NAME FULL_CLASS_NAME DEPRECATED_NAME)
   
   list(APPEND "DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}" ${DEPRECATED_NAME})
 endmacro(DECLARE_DEPRECATED_NAME)
+
+macro(DECLARE_DEPRECATION FULL_CLASS_NAME DEPRECATION)
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  set("${NORMALIZED_CLASS_NAME}_DEPRECATION" ${DEPRECATION})
+endmacro(DECLARE_DEPRECATION)
 
 macro(DECLARE_REQUIRED_LIBRARY FULL_CLASS_NAME REQUIRED_LIBRARY)
   # normalize the class name so it can be used to declare variables
