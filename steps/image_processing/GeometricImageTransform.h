@@ -139,6 +139,9 @@ public:
 
   void getTranslation(int& offsetX, int& offsetY) const;
 
+  //! Resets the transformation parameters to identity transformations.
+  void resetTransformation();
+
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
   //--------------------------------------------------------------------------------------------------------------------

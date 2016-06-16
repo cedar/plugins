@@ -101,11 +101,24 @@ mOutput(new cedar::aux::MatData(cv::Mat()))
   this->mImage.addOutputRelation(cedar::proc::CopyMatrixPropertiesPtr(new cedar::proc::CopyMatrixProperties(output_slot)));
 
   this->updateTransformationMatrix();
+
+  this->registerFunction
+  (
+    "reset to identity transformation",
+    boost::bind(&cedar::proc::steps::GeometricImageTransform::resetTransformation, this)
+  );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 // methods
 //----------------------------------------------------------------------------------------------------------------------
+
+void cedar::proc::steps::GeometricImageTransform::resetTransformation()
+{
+  this->setRotationAmount(0.0);
+  this->setTranslation(0.0, 0.0);
+  this->setScaleFactor(1.0);
+}
 
 void cedar::proc::steps::GeometricImageTransform::setRotationAmount(double angleInDegrees)
 {
