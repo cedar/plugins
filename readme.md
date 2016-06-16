@@ -88,6 +88,7 @@ Finally, you can add all classes of a kind using these commands:
 | *LabelString*                | Outputs a label and ordered list of labels for activation from a label field.  |
 | *LabelWMAnnotator*           | Takes a yarp-friendly label WM representation and puts labels into an image.   |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
+| *MaxPooling*                 | Subsamples a matrix by taking the maximum over rectangular regions.            |
 | *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
 | *PointWiseNormalization*     | Normalizes the entries along one dimension of a matrix.                        |
 | *ShiftedAddition*            | no description.                                                                |
