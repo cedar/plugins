@@ -55,6 +55,10 @@ Finally, you can add all classes of a kind using these commands:
 | *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
 | **Image Processing**                                                                                          |
 | *GeometricImageTransform*    | Rescales and rotates and image around its center and then offsets it using geometric transformations. |
+| *SteerC2C3*                  | Calculates the C2 and C3 component from steering filter responses.             |
+| *SteerableFilter*            | Applies a steerable filter to an input.                                        |
+| *SteeringAngle*              | Calculates the steering angle from C2/C3 responses.                            |
+| *SteeringEnergy*             | Calculates the steering energy from C2/C3 responses.                           |
 | **Keypoints**                                                                                                 |
 | *DoubleStoppedCellResponses* | Extracts the double-stopped cell responses from keypoint data.                 |
 | *KeypointExtractor*          | A step that extracts keypoint information.                                     |
