@@ -86,6 +86,7 @@ Finally, you can add all classes of a kind using these commands:
 | *HyperAcuteRescaling*        | Rescales an input matrix so that as little information as possible is lost. Note that this step's output is not properly normalized. |
 | *Integrator*                 | A looped step that integrates nx1 inputs across time.                          |
 | *LabelString*                | Outputs a label and ordered list of labels for activation from a label field.  |
+| *LabelWMAnnotator*           | Takes a yarp-friendly label WM representation and puts labels into an image.   |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
 | *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
 | *PointWiseNormalization*     | Normalizes the entries along one dimension of a matrix.                        |
