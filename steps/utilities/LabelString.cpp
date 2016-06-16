@@ -84,6 +84,18 @@ void cedar::proc::steps::LabelString::setString(unsigned int stringNumber, const
   this->_mStrings->setValue(stringNumber, string);
 }
 
+std::string cedar::proc::steps::LabelString::getLabelForIndex(unsigned int index) const
+{
+  if (index < this->_mStrings->size())
+  {
+    return this->_mStrings->at(index);
+  }
+  else
+  {
+    return "[unlabeled index " + cedar::aux::toString(index) + "]";
+  }
+}
+
 void cedar::proc::steps::LabelString::compute(const cedar::proc::Arguments&)
 {
   cv::Point max_loc;
@@ -106,7 +118,8 @@ void cedar::proc::steps::LabelString::compute(const cedar::proc::Arguments&)
     {
       ranking += "\n";
     }
-    ranking += cedar::aux::toString(count) + ": " + this->_mStrings->at(iter->second) + "(" + cedar::aux::toString(iter->first) + ")";
+
+    ranking += cedar::aux::toString(count) + ": " + this->getLabelForIndex(iter->second) + "(" + cedar::aux::toString(iter->first) + ")";
   }
 
   this->mRankedList->setData(ranking);
@@ -121,13 +134,12 @@ void cedar::proc::steps::LabelString::compute(const cedar::proc::Arguments&)
       index = static_cast<unsigned int>(max_loc.y);
     }
 
-    if (index < this->_mStrings->size())
-    {
-      this->mOutput->setData(this->_mStrings->at(index));
-      return;
-    }
+    this->mOutput->setData(this->getLabelForIndex(index));
   }
-  this->mOutput->setData("(none)");
+  else
+  {
+    this->mOutput->setData("(none)");
+  }
 }
 
 void cedar::proc::steps::LabelString::numberOfStringsChanged()

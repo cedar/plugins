@@ -92,6 +92,8 @@ protected:
 private:
   void compute(const cedar::proc::Arguments&);
 
+  std::string getLabelForIndex(unsigned int index) const;
+
 private slots:
   void numberOfStringsChanged();
 
