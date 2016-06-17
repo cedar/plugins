@@ -240,39 +240,25 @@ void cedar::proc::steps::AttentionSlice::updateOutput()
   cv::Mat old_wta = this->mWTAActivation->getData().clone();
   wta_l.unlock();
 
-  if (this->allInputsValid())
-  {
-    cedar::proc::Step::ReadLocker locker(this);
-    this->compute(cedar::proc::Arguments());
-    locker.unlock();
-  }
+  this->callComputeWithoutTriggering();
 
   l.relock();
   const cv::Mat& out = this->mOutput->getData();
   bool changed = old_out.type() != out.type() || out.size != old_out.size;
   l.unlock();
 
-  if (changed)
-  {
-    this->emitOutputPropertiesChangedSignal("cutout_region");
-  }
-
   wta_l.relock();
   const cv::Mat& wta = this->mWTAActivation->getData();
   bool wta_changed = old_wta.type() != wta.type() || wta.size != old_wta.size;
   wta_l.unlock();
 
-  if (wta_changed)
+  if (changed)
   {
     this->emitOutputPropertiesChangedSignal("cutout_region");
   }
 
-  if (this->allInputsValid())
+  if (wta_changed)
   {
-    cedar::proc::Step::ReadLocker locker(this);
-    this->compute(cedar::proc::Arguments());
-    locker.unlock();
-
     this->emitOutputPropertiesChangedSignal("WTA activation");
   }
 }
