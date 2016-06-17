@@ -107,12 +107,7 @@ void cedar::proc::steps::SteerableFilter::inputConnectionChanged(const std::stri
 
       CEDAR_ASSERT(input_channels == 1);
 
-      cedar::proc::Step::ReadLocker locker(this);
-      if (this->allInputsValid())
-      {
-        this->compute(cedar::proc::Arguments());
-      }
-      locker.unlock();
+      this->callComputeWithoutTriggering();
     }
 
     if (changed)

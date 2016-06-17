@@ -105,12 +105,7 @@ void cedar::proc::steps::SteeringEnergy::inputConnectionChanged(const std::strin
     this->mEnergy->getData() = cv::Mat::zeros(mat.rows, mat.cols, CV_32F);
   }
 
-  cedar::proc::Step::ReadLocker locker(this);
-  if (this->allInputsValid())
-  {
-    this->compute(cedar::proc::Arguments());
-  }
-  locker.unlock();
+  this->callComputeWithoutTriggering();
 
   if (changed)
   {

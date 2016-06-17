@@ -134,6 +134,9 @@ void cedar::proc::steps::MaxPooling::inputConnectionChanged(const std::string& i
   cv::Mat mat;
   if (inputName == "input")
   {
+    // need to block the signals so onTrigger doesn't get called (which should not happen in the inputConnectionChanged function)
+    bool blocked = this->_mPooledDimensions->blockSignals(true);
+
     this->mInput = boost::dynamic_pointer_cast<const cedar::aux::MatData>(this->getInput(inputName));
     if (this->mInput)
     {
@@ -141,6 +144,8 @@ void cedar::proc::steps::MaxPooling::inputConnectionChanged(const std::string& i
       this->_mPooledDimensions->resize(this->mInput->getDimensionality());
     }
     this->_mPooledDimensions->setConstant(!this->mInput || this->mInput->getDimensionality() <= 2);
+
+    this->_mPooledDimensions->blockSignals(blocked);
   }
 
   CEDAR_ASSERT(mat.channels() == 1);

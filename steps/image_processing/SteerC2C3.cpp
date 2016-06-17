@@ -143,12 +143,7 @@ void cedar::proc::steps::SteerC2C3::inputConnectionChanged(const std::string& in
       this->mC3->getData() = cv::Mat(mat.rows, mat.cols, CV_32F);
     }
 
-    if (this->allInputsValid())
-    {
-      cedar::proc::Step::ReadLocker locker(this);
-      this->compute(cedar::proc::Arguments());
-      locker.unlock();
-    }
+    this->callComputeWithoutTriggering();
   }
 
   if (changed)
