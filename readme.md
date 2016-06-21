@@ -52,6 +52,7 @@ Finally, you can add all classes of a kind using these commands:
 | step                         | description                                                                    |
 |------------------------------|--------------------------------------------------------------------------------|
 | **Dynamics**                                                                                                  |
+| *InhibitoryNeuron*           | A single neuron with the dynamics tau * dv/dt = -sigmoid(s) * tanh(beta * (v - s)) - (1 - sigmoid(s)) * v, where v is the state of the system, beta defines the slope of change and s is the input, projected to zero dimensions by summing. |
 | *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
 | **Image Processing**                                                                                          |
 | *GeometricImageTransform*    | Rescales and rotates and image around its center and then offsets it using geometric transformations. |
@@ -76,6 +77,7 @@ Finally, you can add all classes of a kind using these commands:
 | *KeypointEdgeHistogramExtractor* | This step builds localized histograms around keypoints using shape features.   |
 | *ReceptiveFieldHistogram*    | Extracts histograms using localized receptive fields.                          |
 | *TopDownReconstruction*      | Reconstructs a shape based object representation.                              |
+| *ViewCombination*            | Subsamples discrete activation fields by summing up neighboring sampling points (1D only). This is intended for object recognition, where multiple nodes representing multiple object views may be summed to form a representation of a single object. |
 | **Sources**                                                                                                   |
 | *ImageProvider*              | A step that outputs an image from a directory based on an index specified via a parameter. |
 | *KinectReader*               | A source that reads a Kinect camera, yielding images and depth images, as well as a RGBA point cloud. |
