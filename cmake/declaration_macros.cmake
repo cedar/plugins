@@ -76,6 +76,44 @@ macro(DECLARE_STEP FULL_CLASS_NAME)
   PROCESS_CATEGORY_DEFAULT_ARGUMENTS(STEP ${FULL_CLASS_NAME})
 endmacro(DECLARE_STEP)
 
+# This is a macro called by group template description files.
+#
+# It automatically generates build information required for the template.Here is an example call with a list of 
+# all possible parameters:
+# DECLARE_GROUP_TEMPLATE(TEMPLATE_FILE # json file (relative to declaration cmake) from which the template group is taken
+#              GROUP "group name" # name of a group in the json file that is to be exported
+#              DISPLAY_NAME "name displayed in the GUI" # optional
+#              CATEGORY "YourCategory"
+#              DESCRIPTION "Describe what the step does."
+#              MAINTAINER "Your Name" # to let people know who to contact about this step
+#             )
+macro(DECLARE_GROUP_TEMPLATE)
+  # append macros for reading template specific information
+  list(APPEND "GROUP_TEMPLATE_ONE_VALUE_OPTIONS" "TEMPLATE_FILE")
+  list(APPEND "GROUP_TEMPLATE_ONE_VALUE_OPTIONS" "GROUP" "DISPLAY_NAME")
+  
+  # parse optional arguments
+  SET_CATEGORY_DEFAULT_ARGUMENTS(GROUP_TEMPLATE)
+  SET_DEFAULT_CLASS_DECLARATION_ARGUMENTS(GROUP_TEMPLATE)
+  
+  PARSE_DEFAULT_ARGUMENTS(GROUP_TEMPLATE ${ARGN})
+  
+  # register the step with the list of steps
+  set(GROUP ${GROUP_TEMPLATE_GROUP})
+  NORMALIZE_CLASS_NAME(${GROUP})
+  list(APPEND known_group_templates ${GROUP})
+  
+  if (GROUP_TEMPLATE_DISPLAY_NAME)
+    set("DISPLAY_NAME_${NORMALIZED_CLASS_NAME}" "${GROUP_TEMPLATE_DISPLAY_NAME}")
+  else()
+    set("DISPLAY_NAME_${NORMALIZED_CLASS_NAME}" "${GROUP}")
+  endif()
+  set("GROUP_TEMPLATE_JSON_FILE_${NORMALIZED_CLASS_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${GROUP_TEMPLATE_TEMPLATE_FILE}")
+  
+  PROCESS_CATEGORY_DEFAULT_ARGUMENTS(GROUP_TEMPLATE ${GROUP})
+  PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(GROUP_TEMPLATE ${GROUP})
+endmacro(DECLARE_GROUP_TEMPLATE)
+
 macro(DECLARE_STEP_BASE_CLASS FULL_CLASS_NAME)
   # extract the class name, without the namespace
   EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
@@ -186,12 +224,13 @@ endmacro(DECLARE_PLUGIN)
 
 # TODO describe syntax
 macro(ADD_TO_PLUGIN)
-  set(OPTIONS ALL_STEPS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS)
-  set(ONE_VALUE_OPTIONS STEP CATEGORY KERNEL DATA_STRUCTURE PLOT)
-  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES KERNELS DATA_STRUCTURES PLOTS)
+  set(OPTIONS ALL_STEPS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS ALL_GROUP_TEMPLATES)
+  set(ONE_VALUE_OPTIONS STEP CATEGORY KERNEL DATA_STRUCTURE PLOT GROUP_TEMPLATE)
+  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES KERNELS DATA_STRUCTURES PLOTS GROUP_TEMPLATES)
   
   cmake_parse_arguments(ADD_TO_PLUGIN "${OPTIONS}" "${ONE_VALUE_OPTIONS}" "${MULTI_VALUE_OPTIONS}" ${ARGN})
   
+  # wildcards
   if (ADD_TO_PLUGIN_ALL_STEPS)
     foreach (FULL_CLASS_NAME ${known_steps})
       ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
@@ -216,6 +255,13 @@ macro(ADD_TO_PLUGIN)
     endforeach()
   endif()
   
+  if (ADD_TO_PLUGIN_ALL_GROUP_TEMPLATES)
+    foreach (GROUP ${known_group_templates})
+      ADD_GROUP_TEMPLATE_TO_BUILD(${GROUP})
+    endforeach()
+  endif()
+  
+  # steps
   if (ADD_TO_PLUGIN_STEP)
     ADD_STEP_TO_BUILD(${ADD_TO_PLUGIN_STEP})
   endif()
@@ -226,6 +272,18 @@ macro(ADD_TO_PLUGIN)
     endforeach()
   endif()
   
+  # group templates
+  if (ADD_TO_PLUGIN_GROUP_TEMPLATE)
+    ADD_GROUP_TEMPLATE_TO_BUILD(${ADD_TO_PLUGIN_GROUP_TEMPLATE})
+  endif()
+  
+  if (ADD_TO_PLUGIN_GROUP_TEMPLATES)
+    foreach (GROUP_NAME ${ADD_TO_PLUGIN_GROUP_TEMPLATES})
+      ADD_GROUP_TEMPLATE_TO_BUILD(${GROUP_NAME})
+    endforeach()
+  endif()
+  
+  # kernels
   if (ADD_TO_PLUGIN_KERNEL)
     ADD_KERNEL_SOURCES_TO_BUILD(${ADD_TO_PLUGIN_KERNEL})
   endif()
@@ -236,6 +294,7 @@ macro(ADD_TO_PLUGIN)
     endforeach()
   endif()
   
+  # data structures
   if (ADD_TO_PLUGIN_DATA_STRUCTURE)
     ADD_DATA_STRUCTURES_TO_BUILD(${ADD_TO_PLUGIN_DATA_STRUCTURE})
   endif()
@@ -246,6 +305,7 @@ macro(ADD_TO_PLUGIN)
     endforeach()
   endif()
   
+  # plots
   if (ADD_TO_PLUGIN_PLOT)
     ADD_PLOT_TO_BUILD(${ADD_TO_PLUGIN_PLOT})
   endif()
@@ -256,6 +316,7 @@ macro(ADD_TO_PLUGIN)
     endforeach()
   endif()
   
+  # categories
   if (ADD_TO_PLUGIN_CATEGORY)
     ADD_STEP_CATEGORY_TO_PLUGIN(${ADD_TO_PLUGIN_CATEGORY})
   endif()

@@ -233,7 +233,9 @@ endmacro(print_fatal_error)
 # Normalizes a class name so it can be used as part of the name of a cmake variable.
 # Throughout the project, this is used to emulate (hash)map-like functionality.
 macro(NORMALIZE_CLASS_NAME FULL_CLASS_NAME)
-  string(REGEX REPLACE "::" "__" NORMALIZED_CLASS_NAME ${FULL_CLASS_NAME})
+  string(STRIP ${FULL_CLASS_NAME} NORMALIZED_CLASS_NAME)
+  string(REGEX REPLACE "::" "__" NORMALIZED_CLASS_NAME ${NORMALIZED_CLASS_NAME})
+  string(REGEX REPLACE " " "_" NORMALIZED_CLASS_NAME ${NORMALIZED_CLASS_NAME})
 endmacro(NORMALIZE_CLASS_NAME)
 
 macro(EXTRACT_CLASS_NAME FULL_CLASS_NAME)
@@ -294,6 +296,39 @@ macro(ADD_CLASS_TO_BUILD_COMMON FULL_CLASS_NAME)
     endforeach()
   endif()
 endmacro(ADD_CLASS_TO_BUILD_COMMON)
+
+#
+# macro ADD_GROUP_TEMPLATE_TO_BUILD
+#
+macro(ADD_GROUP_TEMPLATE_TO_BUILD GROUP_NAME)
+  NORMALIZE_CLASS_NAME(${GROUP_NAME})
+  list(FIND known_group_templates ${GROUP_NAME} IDX)
+  if (IDX LESS 0)
+    print_error("Unknown group template \"${GROUP_NAME}\".")
+  endif()
+
+  IS_CLASS_IN_BUILD(${GROUP_NAME} GROUP_TEMPLATE)
+  if (NOT STEP_IN_BUILD)
+    ADD_CLASS_TO_BUILD_COMMON(${GROUP_NAME})
+    
+    set(decl " {\n")
+    
+    set(decl "${decl}    cedar::proc::GroupDeclarationPtr group_declaration\n")
+    set(decl "${decl}    (\n")
+    set(decl "${decl}      new cedar::proc::GroupDeclaration\n")
+    set(decl "${decl}      (\n")
+    set(decl "${decl}        \"${GROUP_NAME}\",\n")
+    set(decl "${decl}        \"${GROUP_TEMPLATE_JSON_FILE_${NORMALIZED_CLASS_NAME}}\",\n")
+    set(decl "${decl}        \"${DISPLAY_NAME_${NORMALIZED_CLASS_NAME}}\",\n")
+    set(decl "${decl}        \"${CATEGORY_${NORMALIZED_CLASS_NAME}}\"\n")
+    set(decl "${decl}      )\n")
+    set(decl "${decl}    );\n")
+    set(decl "${decl}    plugin->add(group_declaration);\n")
+    set(decl "${decl}  }\n")
+    
+    set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
+  endif()
+endmacro(ADD_GROUP_TEMPLATE_TO_BUILD)
 
 #
 # macro ADD_STEP_SOURCES_TO_BUILD

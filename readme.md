@@ -105,6 +105,18 @@ Finally, you can add all classes of a kind using these commands:
 
 
 
+# Group templates included in the plugin #
+
+| group template               | description                                                                    |
+|------------------------------|--------------------------------------------------------------------------------|
+| *edge histogram rotation*    | Template forward rotating localized edge histograms within the CF thesis architecture. |
+| *localized histogram extraction* | Template for extracting localized histograms within the CF thesis architecture. |
+| *localized histogram forward shift* | Template forward shifting localized histograms within the CF thesis architecture. |
+| *steering filter bank*       | Applies a bank of steering filters and calculates energy and angle for each pixel. |
+
+
+
+
 # Kernels included in the plugin #
 
 | kernel                       | description                                                                    |
