@@ -110,6 +110,9 @@ Finally, you can add all classes of a kind using these commands:
 | group template               | description                                                                    |
 |------------------------------|--------------------------------------------------------------------------------|
 | *edge histogram rotation*    | Template forward rotating localized edge histograms within the CF thesis architecture. |
+| *edge rotation estimation*   | Mathing of rotation based on localized edge histograms.                        |
+| *histogram label matching*   | Mathing for labels based on localized histograms.                              |
+| *histogram shift estimation* | Mathing of shift based on localized histograms.                                |
 | *localized histogram extraction* | Template for extracting localized histograms within the CF thesis architecture. |
 | *localized histogram forward shift* | Template forward shifting localized histograms within the CF thesis architecture. |
 | *steering filter bank*       | Applies a bank of steering filters and calculates energy and angle for each pixel. |
