@@ -62,9 +62,10 @@ _mSpacing(new cedar::aux::DoubleParameter(this, "spacing", 1.0, 0.0, 100.0))
 {
   this->updateKernel();
 
-  QObject::connect(_mType.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()));
-  QObject::connect(_mTaps.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()));
-  QObject::connect(_mSpacing.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()));
+  QObject::connect(_mType.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()), Qt::DirectConnection);
+  QObject::connect(_mTaps.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()), Qt::DirectConnection);
+  QObject::connect(_mSpacing.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()), Qt::DirectConnection);
+  QObject::connect(this->_mDimensionality.get(), SIGNAL(valueChanged()), this, SLOT(recalculate()), Qt::DirectConnection);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -79,7 +80,7 @@ void cedar::aux::kernel::SteerableKernel::recalculate()
 
 void cedar::aux::kernel::SteerableKernel::calculateParts()
 {
-  cv::Mat new_kernel;
+//  cv::Mat new_kernel;
   cv::Mat x, y;
   switch (this->_mType->getValue())
   {
@@ -125,9 +126,11 @@ void cedar::aux::kernel::SteerableKernel::calculateParts()
 //  new_kernel = dim2 * x.t();
 //  mKernel->lockForWrite();
   //0 dim are rows ->y dimension
-  this->setKernelPart(0, y);
+  if (this->kernelPartCount() > 0)
+    this->setKernelPart(0, y);
   //1 dim are columns ->x dimension
-  this->setKernelPart(1, x);
+  if (this->kernelPartCount() > 1)
+    this->setKernelPart(1, x);
 //  mKernel->getData() = new_kernel;
 //  mKernel->unlock();
 }
