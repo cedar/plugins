@@ -146,12 +146,6 @@ void cedar::proc::steps::SteerC2C3::inputConnectionChanged(const std::string& in
     this->callComputeWithoutTriggering();
   }
 
-  if (changed)
-  {
-    this->emitOutputPropertiesChangedSignal("C2");
-    this->emitOutputPropertiesChangedSignal("C3");
-  }
-
   std::vector<std::string> input_slots;
   input_slots.push_back("G2a");
   input_slots.push_back("G2b");
@@ -167,6 +161,12 @@ void cedar::proc::steps::SteerC2C3::inputConnectionChanged(const std::string& in
     {
       this->redetermineInputValidity(slot);
     }
+  }
+
+  if (changed)
+  {
+    this->emitOutputPropertiesChangedSignal("C2");
+    this->emitOutputPropertiesChangedSignal("C3");
   }
 }
 
