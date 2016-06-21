@@ -178,7 +178,7 @@ void cedar::dyn::steps::PatternMemory::inputConnectionChanged(const std::string&
   {
     this->mPattern = boost::dynamic_pointer_cast<cedar::aux::ConstMatData>(this->getInput(inputName));
 
-    if (this->mPattern)
+    if (this->mPattern && this->getDimensionality() >= 1 && this->getDimensionality() <= 3)
     {
       this->updateWeightMatrixSize();
     }
