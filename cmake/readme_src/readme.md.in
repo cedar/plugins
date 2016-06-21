@@ -6,6 +6,10 @@
 
 @STEP_LIST_TEXT@
 
+# Group templates included in the plugin #
+
+@GROUP_TEMPLATE_LIST_TEXT@
+
 # Kernels included in the plugin #
 
 @KERNEL_LIST_TEXT@

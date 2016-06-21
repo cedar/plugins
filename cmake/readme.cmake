@@ -22,6 +22,9 @@ foreach (category ${CATEGORIES})
 endforeach()
 set(STEP_LIST_TEXT "${STEP_LIST_TEXT}\n\n")
 
+# generate the group template list #
+GENERATE_DESCRIPTION_LIST("group template" known_group_templates GROUP_TEMPLATE_LIST_TEXT)
+
 # generate the kernel list #
 GENERATE_DESCRIPTION_LIST("kernel" known_kernels KERNEL_LIST_TEXT)
 
