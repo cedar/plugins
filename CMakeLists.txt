@@ -36,7 +36,11 @@
 
 cmake_minimum_required(VERSION 2.8.3)
 
-set(SELECTED_BUILDSET "buildset.cmake")
+if (BUILDSET)
+  set(SELECTED_BUILDSET "${BUILDSET}")
+else()
+  set(SELECTED_BUILDSET "buildset.cmake")
+endif()
 include_directories(${CMAKE_SOURCE_DIR})
 
 include(${CMAKE_SOURCE_DIR}/cmake/macros.cmake)
