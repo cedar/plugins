@@ -36,6 +36,7 @@ ADD_TO_PLUGIN(STEPS cedar::proc::steps::CrossCorrelation
                     cedar::dyn::steps::PatternMemory
                     )
 
+ADD_TO_PLUGIN(PLOTS cedar::aux::gui::StringPlot)
 
 ADD_TO_PLUGIN(GROUP_TEMPLATES "steering filter bank"
                               "histogram label matching"
