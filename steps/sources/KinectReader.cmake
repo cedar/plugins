@@ -5,5 +5,5 @@ DECLARE_STEP(cedar::proc::steps::KinectReader
              MAINTAINER       "Nico Kuerschner"
              DEPRECATED_NAME  KinectUtilities::KinectReader
              REQUIRES_DATA_STRUCTURES cedar::aux::RGBAPointCloudData pcl::AsyncGrabber
-             REQUIRES_LIBRARY "pcl"
+             REQUIRES_LIBRARIES "pcl"
             )
