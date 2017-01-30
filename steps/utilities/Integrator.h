@@ -14,6 +14,7 @@
 #include "cedar/dynamics/Dynamics.h"
 #include <cedar/processing/ExternalData.h> // getInputSlot() returns ExternalData
 #include <cedar/processing/typecheck/DerivedFrom.h>
+#include "cedar/auxiliaries/BoolParameter.h"
 #include "cedar/auxiliaries/UIntParameter.h"
 #include "cedar/auxiliaries/UIntVectorParameter.h"
 #include "cedar/auxiliaries/DoubleParameter.h"
@@ -54,8 +55,13 @@ private:
   cedar::aux::MatDataPtr mOutput;
   cedar::aux::UIntParameterPtr _mSize;
   cedar::aux::DoubleVectorParameterPtr _initValue;
+  cedar::aux::BoolParameterPtr _useRestrictions;
+  cedar::aux::DoubleVectorParameterPtr _lowerRestrictions;
+  cedar::aux::DoubleVectorParameterPtr _upperRestrictions;
+  cedar::aux::BoolParameterPtr _cyclicRestrictions;
 
   cv::Mat _mSum;
+  std::vector<cedar::aux::DoubleVectorParameterPtr> mRestrictions;
 
 };
 
