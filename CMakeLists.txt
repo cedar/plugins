@@ -52,7 +52,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/setup.cmake)
 
 ## Find and read all step declarations ##
 
-list(APPEND code_directories steps kernels data_structures plots group_templates)
+list(APPEND code_directories steps kernels data_structures plots group_templates scripts)
 
 # go through all directories that contain code
 foreach (directory ${code_directories})

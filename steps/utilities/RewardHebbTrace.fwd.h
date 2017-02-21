@@ -1,7 +1,7 @@
 /*======================================================================================================================
 
-    Copyright 2011, 2012, 2013, 2014 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
-
+    Copyright 2011, 2012, 2013, 2014, 2015 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
+ 
     This file is part of cedar.
 
     cedar is free software: you can redistribute it and/or modify it under
@@ -22,53 +22,48 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        Plugin.cpp
+    File:        DummyBehavior.fwd.h
 
-    Maintainer:  Oliver Lomp
+    Maintainer:  Jan Tekülve
+    Email:       jan.tekuelve@ini.rub.de
+    Date:        2015 10 30
 
-    Email:       oliver.lomp@ini.ruhr-uni-bochum.de
-
-    Date:        2016 02 05
-
-    Description:
+    Description: Forward declaration file for the class promoplugin::DummyBehavior.
 
     Credits:
 
 ======================================================================================================================*/
 
-// PROJECT INCLUDES
-@PLUGIN_INCLUDE_FILES@
-@NONPLUGIN_INCLUDE_FILES@
+#ifndef PROMOPLUGIN_REWARD_HEBB_TRACE_FWD_H
+#define PROMOPLUGIN_REWARD_HEBB_TRACE_FWD_H
+
+// CEDAR CONFIGURATION
+#include "cedar/configuration.h"
 
 // CEDAR INCLUDES
-#include <cedar/processing/ElementDeclaration.h>
-#include <cedar/processing/CppScriptDeclaration.h>
-#include <cedar/processing/GroupDeclaration.h>
-#include <cedar/auxiliaries/kernel/Kernel.h>
-#include <cedar/auxiliaries/gui/PlotDeclaration.h>
-#include <cedar/auxiliaries/PluginDeclarationList.h>
-#include <cedar/auxiliaries/FactoryManager.h>
 
 // SYSTEM INCLUDES
+#ifndef Q_MOC_RUN
+
+#include <boost/smart_ptr.hpp>
+
+#endif // Q_MOC_RUN
 
 
-CEDAR_DECLARE_PROC_PLUGIN_FUNCTION(void pluginDeclaration(cedar::aux::PluginDeclarationListPtr plugin));
-
-namespace
+namespace cedar
 {
-  bool declare()
+  namespace proc
   {
-    // these classes cannot (yet) be declared as a plugin; instead, they are added whenever the shared object/dll/dylib
-    // is loaded
-@NONPLUGIN_DECLARATIONS@
-    return true;
+    namespace steps
+    {
+      //!@cond SKIPPED_DOCUMENTATION
+      class RewardHebbTrace;
+      CEDAR_GENERATE_POINTER_TYPES(RewardHebbTrace);
+      //!@endcond
+    }
   }
-  
-  bool declared = declare();
 }
 
-void pluginDeclaration(cedar::aux::PluginDeclarationListPtr plugin)
-{
-@PLUGIN_DECLARATIONS@
-}
+
+#endif // PROMOPLUGIN_REWARD_HEBB_TRACE_FWD_H
 
