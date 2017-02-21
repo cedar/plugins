@@ -110,6 +110,7 @@ Finally, you can add all classes of a kind using these commands:
 | *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
 | *PadAndTranslate*            | A step that converts a 1D representation into a larger frame and translates the center of the 1D representation to the position given by the skalar-translation input. Borders are cyclic. |
 | *PointWiseNormalization*     | Normalizes the entries along one dimension of a matrix.                        |
+| *RewardHebbTrace*            | A step that learns an associated input in presence of a reward signal          |
 | *ShiftedAddition*            | no description.                                                                |
 | *TransformPointCloud*        | A step that performs geometric operations on a point cloud, yielding the transformed point cloud and camera position. |
 | *WeightedSum*                | A looped step that multiplies each input value with a given weight and sums them up across each input dimension. The given weight function encodes the distance from the center of the input matrix. This step is used to calculate a velocity signal dependent on the distance between a peak position and the center of the input matrix. |

@@ -2,6 +2,7 @@ syntax:glob
 build/*
 project.conf
 buildset.cmake
+.idea/*
 
 syntax: glob
 .project

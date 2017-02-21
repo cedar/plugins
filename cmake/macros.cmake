@@ -401,15 +401,48 @@ macro(ADD_KERNEL_SOURCES_TO_BUILD FULL_CLASS_NAME)
         set(decl "${decl}      cedar::aux::kernel::FactoryManagerSingleton::getInstance()->addDeprecatedName<${FULL_CLASS_NAME}Ptr>(\"${deprecated_name}\");\n")
       endforeach()
     endif()
-    
+
     set(decl "${decl}    }\n")
     set(NONPLUGIN_DECLARATIONS "${NONPLUGIN_DECLARATIONS} ${decl}")
-      
+
     foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
       set(NONPLUGIN_INCLUDE_FILES "${NONPLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
     endforeach()
   endif (NOT KERNEL_IN_BUILD)
 endmacro(ADD_KERNEL_SOURCES_TO_BUILD)
+
+#
+# macro ADD_KERNEL_SOURCES_TO_BUILD
+#
+macro(ADD_SCRIPT_SOURCES_TO_BUILD FULL_CLASS_NAME)
+  print_message("Add ScriptSourcesToBuild: ${FULL_CLASS_NAME}")
+  IS_CLASS_IN_BUILD(${FULL_CLASS_NAME} SCRIPT)
+  if (NOT SCRIPT_IN_BUILD)
+    ADD_CLASS_TO_BUILD_COMMON(${FULL_CLASS_NAME})
+    NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+
+    set(decl " {\n")
+    set(decl "${decl}    cedar::proc::CppScriptDeclarationPtr declaration\n")
+    set(decl "${decl}    (\n")
+    set(decl "${decl}      new cedar::proc::CppScriptDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")\n")
+    set(decl "${decl}    );\n")
+
+    # add description, if set
+    #set(description ${DESCRIPTION_${NORMALIZED_CLASS_NAME}})
+    #if (description)
+      #string(REPLACE "\"" "\\\"" description ${description})
+     # set(decl "${decl}    declaration->setDescription(\"${description}\");\n")
+    #endif()
+
+    set(decl "${decl}    plugin->add(declaration);\n")
+    set(decl "${decl}  }\n")
+    set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
+
+    foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
+      set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
+    endforeach()
+  endif (NOT SCRIPT_IN_BUILD)
+endmacro(ADD_SCRIPT_SOURCES_TO_BUILD)
 
 macro(ADD_DATA_STRUCTURES_TO_BUILD FULL_CLASS_NAME)
   IS_CLASS_IN_BUILD(${FULL_CLASS_NAME} DATA_STRUCTURE)

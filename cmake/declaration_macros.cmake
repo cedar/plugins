@@ -154,6 +154,29 @@ macro(DECLARE_KERNEL FULL_CLASS_NAME)
   PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(KERNEL ${FULL_CLASS_NAME})
 endmacro(DECLARE_KERNEL)
 
+# This is a macro called by script description files.
+#
+# It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional.
+# TODO this macro is highly redundant with DECLARE_STEP
+macro(DECLARE_SCRIPT FULL_CLASS_NAME)
+  #print_message("DECLARE_SCRIPT: ${FULL_CLASS_NAME}")
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+
+  # register the step with the list of steps
+  list(APPEND known_scripts ${FULL_CLASS_NAME})
+
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
+
+  SET_DEFAULT_CLASS_DECLARATION_ARGUMENTS(SCRIPT)
+  PARSE_DEFAULT_ARGUMENTS(SCRIPT ${ARGN})
+  PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(SCRIPT ${FULL_CLASS_NAME})
+endmacro(DECLARE_SCRIPT)
+
 # This is a macro called by kernel description files.
 #
 # It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
@@ -224,12 +247,13 @@ endmacro(DECLARE_PLUGIN)
 
 # TODO describe syntax
 macro(ADD_TO_PLUGIN)
-  set(OPTIONS ALL_STEPS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS ALL_GROUP_TEMPLATES)
-  set(ONE_VALUE_OPTIONS STEP CATEGORY KERNEL DATA_STRUCTURE PLOT GROUP_TEMPLATE)
-  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES KERNELS DATA_STRUCTURES PLOTS GROUP_TEMPLATES)
+  set(OPTIONS ALL_STEPS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS ALL_GROUP_TEMPLATES ALL_SCRIPTS)
+  set(ONE_VALUE_OPTIONS STEP CATEGORY KERNEL DATA_STRUCTURE PLOT GROUP_TEMPLATE SCRIPT)
+  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES KERNELS DATA_STRUCTURES PLOTS GROUP_TEMPLATES SCRIPTS)
   
   cmake_parse_arguments(ADD_TO_PLUGIN "${OPTIONS}" "${ONE_VALUE_OPTIONS}" "${MULTI_VALUE_OPTIONS}" ${ARGN})
-  
+
+  #print_message("ADD_TO_PLUGIN: ${ARGN}")
   # wildcards
   if (ADD_TO_PLUGIN_ALL_STEPS)
     foreach (FULL_CLASS_NAME ${known_steps})
@@ -240,6 +264,13 @@ macro(ADD_TO_PLUGIN)
   if (ADD_TO_PLUGIN_ALL_KERNELS)
     foreach (FULL_CLASS_NAME ${known_kernels})
       ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+
+  if (ADD_TO_PLUGIN_ALL_SCRIPTS)
+    #print_message("AllScripts: ${known_scripts}")
+    foreach (FULL_CLASS_NAME ${known_scripts})
+      ADD_SCRIPT_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
     endforeach()
   endif()
   
@@ -291,6 +322,17 @@ macro(ADD_TO_PLUGIN)
   if (ADD_TO_PLUGIN_KERNELS)
     foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_KERNELS})
       ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+
+  # scripts
+  if (ADD_TO_PLUGIN_SCRIPT)
+    ADD_SCRIPT_SOURCES_TO_BUILD(${ADD_TO_PLUGIN_SCRIPT})
+  endif()
+
+  if (ADD_TO_PLUGIN_SCRIPTS)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_SCRIPTS})
+      ADD_SCRIPT_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
     endforeach()
   endif()
   
