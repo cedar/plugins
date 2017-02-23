@@ -49,7 +49,8 @@
 #include "cedar/processing/Group.h"
 #include "cedar/processing/steps/StaticGain.h"
 #include "cedar/dynamics/fields/NeuralField.h"
-#include "steps/utilities/RewardHebbTrace.fwd.h"
+#include "steps/dynamics/SerialOrderRecruiting.fwd.h"
+#include <cedar/auxiliaries/StringParameter.h>
 
 // SYSTEM INCLUDES
 
@@ -82,7 +83,7 @@ public:
   //--------------------------------------------------------------------------------------------------------------------
 public:
 public slots:
-  void addCorrespondingField(cedar::proc::steps::RewardHebbTracePtr hebbStep);
+  void recruitGroup(cedar::dyn::SerialOrderRecruitingPtr serialOrderStep);
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -97,6 +98,8 @@ protected:
 private:
   void run();
   std::string cutImprintName(std::string fullName);
+  cedar::proc::ElementPtr AddAGroupFromFile(const std::string& groupName, const cedar::aux::Path& fileName, cedar::proc::GroupPtr containerGroup);
+  void connectGroup(cedar::proc::GroupPtr containerGroup, cedar::proc::GroupPtr toBeIncludedGroup);
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -105,6 +108,8 @@ private:
 protected:
   // none yet
 private:
+  int mCreatedGroupCounter;
+  bool ran = false;
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -114,6 +119,9 @@ protected:
   // none yet
 
 private:
+  cedar::aux::StringParameterPtr _mGroupFile;
+  cedar::aux::StringParameterPtr _mGroupName;
+  cedar::aux::StringParameterPtr _mGroupContainerName;
   // none yet
 
 };
