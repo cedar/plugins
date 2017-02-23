@@ -63,6 +63,7 @@ Finally, you can add all classes of a kind using these commands:
 |------------------------------|--------------------------------------------------------------------------------|
 | **Dynamics**                                                                                                  |
 | *InhibitoryNeuron*           | A single neuron with the dynamics tau * dv/dt = -sigmoid(s) * tanh(beta * (v - s)) - (1 - sigmoid(s)) * v, where v is the state of the system, beta defines the slope of change and s is the input, projected to zero dimensions by summing. |
+| *SerialOrderRecruiting*      | An Extension of the Serial Order Step, that allows a dynamic growth of serial order nodes and optionally a recruition of additional Groups toghether with the RecruitGroupsScript. |
 | *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
 | **Image Processing**                                                                                          |
 | *GeometricImageTransform*    | Rescales and rotates and image around its center and then offsets it using geometric transformations. |

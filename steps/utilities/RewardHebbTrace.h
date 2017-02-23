@@ -86,8 +86,8 @@ public slots:
  void toggleUseReward();
  void toggleUseManualWeights();
 
- signals:
-   void evokeFieldRecruitment(cedar::proc::steps::RewardHebbTracePtr);
+// signals:
+//   void evokeFieldRecruitment(cedar::proc::steps::RewardHebbTracePtr);
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
   //--------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ private:
 
   void reset();
 
-  void createFieldRecruit();
+//  void createFieldRecruit();
 
   //--------------------------------------------------------------------------------------------------------------------
   // parameters

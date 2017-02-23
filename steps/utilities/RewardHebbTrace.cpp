@@ -99,7 +99,7 @@ cedar::proc::steps::RewardHebbTrace::RewardHebbTrace()
   mWeightCenters->setConstant(!mSetWeights->getValue());
 
   this->registerFunction("reset Weights", boost::bind(&RewardHebbTrace::resetWeights, this), false);
-  this->registerFunction("create OutputField", boost::bind(&RewardHebbTrace::createFieldRecruit, this), false);
+//  this->registerFunction("create OutputField", boost::bind(&RewardHebbTrace::createFieldRecruit, this), false);
 
   QObject::connect(mAssociationDimension.get(), SIGNAL(valueChanged()), this, SLOT(updateAssociationDimension()));
   QObject::connect(mAssociationSizes.get(), SIGNAL(valueChanged()), this, SLOT(resetWeights()));
@@ -277,11 +277,11 @@ void cedar::proc::steps::RewardHebbTrace::toggleUseManualWeights()
   mWeightCenters->setConstant(!mSetWeights->getValue());
 }
 
-void cedar::proc::steps::RewardHebbTrace::createFieldRecruit()
-{
-  std::cout << "Emit the Recruitment Signal: " << this->getName() << std::endl;
-  emit evokeFieldRecruitment(boost::dynamic_pointer_cast<cedar::proc::steps::RewardHebbTrace>(shared_from_this()));
-}
+//void cedar::proc::steps::RewardHebbTrace::createFieldRecruit()
+//{
+//  std::cout << "Emit the Recruitment Signal: " << this->getName() << std::endl;
+//  emit evokeFieldRecruitment(boost::dynamic_pointer_cast<cedar::proc::steps::RewardHebbTrace>(shared_from_this()));
+//}
 
 unsigned int cedar::proc::steps::RewardHebbTrace::getDimensionality()
 {
