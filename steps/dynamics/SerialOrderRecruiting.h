@@ -82,6 +82,8 @@ public:
   //!@brief The standard constructor.
   SerialOrderRecruiting();
 
+  virtual ~SerialOrderRecruiting();
+
   //--------------------------------------------------------------------------------------------------------------------
   // public methods
   //--------------------------------------------------------------------------------------------------------------------
@@ -90,7 +92,7 @@ public slots:
   void numberOfOrdinalPositionsChanged();
 
   signals:
-  void evokeFieldRecruitment(cedar::dyn::SerialOrderRecruitingPtr);
+  void evokeFieldRecruitment(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting>);
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
   //--------------------------------------------------------------------------------------------------------------------
@@ -126,6 +128,8 @@ private:
   // position. The next ordinal position is then activated once the input is reset to 0.
   cedar::aux::ConstMatDataPtr mCosSignalInput;
 
+  cedar::aux::ConstMatDataPtr mResetSignalInput;
+
   //!@brief activation of the ordinal nodes of the architecture
   std::vector<cedar::aux::MatDataPtr> mOrdinalNodes;
   //!@brief the output of this step is determined by the sigmoided activation of all ordinal nodes.
@@ -147,6 +151,8 @@ private:
   cedar::aux::MatDataPtr mMemoryNodeOutputBuffer;
 
   bool _mRecruited;
+
+  bool _mReset;
 
   //--------------------------------------------------------------------------------------------------------------------
   // parameters

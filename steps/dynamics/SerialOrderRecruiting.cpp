@@ -70,6 +70,7 @@ cedar::dyn::SerialOrderRecruiting::SerialOrderRecruiting()
         mMemoryNodeActivationBuffer(new cedar::aux::MatData(cv::Mat::zeros(1, 1, CV_32F))),
         mMemoryNodeOutputBuffer(new cedar::aux::MatData(cv::Mat::zeros(1, 1, CV_32F))),
         _mRecruited(false),
+        _mReset(false),
 // parameters
         _mNumberOfOrdinalPositions(new cedar::aux::UIntParameter(this, "number of ordinal positions", 3, 1, 10)),
         _mOrdinalNodeRestingLevel
@@ -181,18 +182,11 @@ cedar::dyn::SerialOrderRecruiting::SerialOrderRecruiting()
                                         cedar::aux::math::SigmoidPtr(new cedar::aux::math::AbsSigmoid(0.0, 100.0))
                                 )
                 ),
-        _mUseDynamicExtension
-                (
-                        new cedar::aux::BoolParameter
-                                (
-                                        this,
-                                        "use dynamic extension",
-                                        false
-                                )
-                )
+        _mUseDynamicExtension(new cedar::aux::BoolParameter(this,"use dynamic extension",false))
 {
   // declare the inputs
   this->declareInput("CoS signal input", false);
+  this->declareInput("Reset signal input", false);
   // declare the buffers
   this->declareBuffer("ordinal node activation", this->mOrdinalNodeActivationBuffer);
   this->declareBuffer("memory node activation", this->mMemoryNodeActivationBuffer);
@@ -211,6 +205,12 @@ cedar::dyn::SerialOrderRecruiting::SerialOrderRecruiting()
   // connect the parameter's change signal
   QObject::connect(_mNumberOfOrdinalPositions.get(), SIGNAL(valueChanged()), this,
                    SLOT(numberOfOrdinalPositionsChanged()));
+}
+
+cedar::dyn::SerialOrderRecruiting::~SerialOrderRecruiting()
+{
+  std::cout << "Destroyed: " << this->getName()<<std::endl;
+  this->disconnect();
 }
 
 void cedar::dyn::SerialOrderRecruiting::numberOfOrdinalPositionsChanged()
@@ -361,6 +361,22 @@ void cedar::dyn::SerialOrderRecruiting::eulerStep(const cedar::unit::Time &time)
 
       }
 
+      if(this->mResetSignalInput)
+      {
+        if(this->mResetSignalInput->getData().at<float>(0,0) > 0.5)
+        {
+          if(!_mReset)
+          {
+            _mReset = true;
+            this->reset();
+          }
+        }
+        else
+        {
+          _mReset = false;
+        }
+      }
+
     }
 
     d += time / cedar::unit::Time(tau * cedar::unit::milli * cedar::unit::seconds) * d_dot;
@@ -413,7 +429,7 @@ cedar::proc::DataSlot::VALIDITY cedar::dyn::SerialOrderRecruiting::determineInpu
         ) const
 {
   // First, let's make sure that this is really the input in case anyone ever changes our interface.
-  CEDAR_DEBUG_ASSERT(slot->getName() == "CoS signal input")
+//  CEDAR_DEBUG_ASSERT(slot->getName() == "CoS signal input")
 
   if (cedar::aux::ConstMatDataPtr mat_data = boost::dynamic_pointer_cast<const cedar::aux::MatData>(data))
   {
@@ -431,18 +447,24 @@ cedar::proc::DataSlot::VALIDITY cedar::dyn::SerialOrderRecruiting::determineInpu
 void cedar::dyn::SerialOrderRecruiting::inputConnectionChanged(const std::string &inputName)
 {
   // Again, let's first make sure that this is really the input in case anyone ever changes our interface.
-  CEDAR_DEBUG_ASSERT(inputName == "CoS signal input");
+  //  CEDAR_DEBUG_ASSERT(inputName == "CoS signal input");
 
   // Assign the input to the member. This saves us from casting in every computation step.
   if (inputName == "CoS signal input")
   {
     this->mCosSignalInput = boost::dynamic_pointer_cast<const cedar::aux::MatData>(this->getInput(inputName));
   }
+
+  if (inputName == "Reset signal input")
+  {
+    this->mResetSignalInput = boost::dynamic_pointer_cast<const cedar::aux::MatData>(this->getInput(inputName));
+  }
 }
 
 void cedar::dyn::SerialOrderRecruiting::createRecruit()
 {
   std::cout << "Emit the Recruitment Signal: " << this->getName() << std::endl;
-  emit evokeFieldRecruitment(boost::dynamic_pointer_cast<cedar::dyn::SerialOrderRecruiting>(shared_from_this()));
+  boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> weak_ptr(boost::dynamic_pointer_cast<cedar::dyn::SerialOrderRecruiting>(shared_from_this()));
+  emit evokeFieldRecruitment(weak_ptr);
 }
 
