@@ -51,22 +51,62 @@
 #include "cedar/dynamics/fields/NeuralField.h"
 #include "steps/dynamics/SerialOrderRecruiting.fwd.h"
 #include <cedar/auxiliaries/StringParameter.h>
-
+#include <cedar/auxiliaries/IntParameter.h>
+#include "cedar/auxiliaries/EnumType.h"
+#include "cedar/auxiliaries/EnumParameter.h"
 // SYSTEM INCLUDES
 
-/*!@todo describe.
+/*!This Script should be run once to connect Steps in the Architecture with a recruit function of this script.
+ * Then during runtime, whenever the connected steps emit the specified signal, a new group, specified in the appropiate Scriptparameters, should be created.
+ * For each recruit Routine you need to add a new Enum, and a new slot function that connects the newly created group in your desired way.
  *
- * @todo describe more.
  */
 class cedar::proc::scripts::RecruitGroup : public cedar::proc::CppScript
 {
   //--------------------------------------------------------------------------------------------------------------------
   // macros
   //--------------------------------------------------------------------------------------------------------------------
-  Q_OBJECT
+Q_OBJECT
+
   //--------------------------------------------------------------------------------------------------------------------
   // nested types
   //--------------------------------------------------------------------------------------------------------------------
+//!@brief Enum class for FunctionTypes
+  class AddRoutine
+  {
+  public:
+    //! the id of an enum entry
+    typedef cedar::aux::EnumId Id;
+
+    //! constructs the enum for all ids
+    static void construct()
+    {
+      mType.type()->def(cedar::aux::Enum(Episode, "EpisodeMemory"));
+      mType.type()->def(cedar::aux::Enum(Ordinal, "OrdinalSlot"));
+    }
+
+    //! @returns A const reference to the base enum object.
+    static const cedar::aux::EnumBase &type()
+    {
+      return *(mType.type());
+    }
+
+    //! @returns A pointer to the base enum object.
+    static const cedar::proc::DataRole::TypePtr &typePtr()
+    {
+      return mType.type();
+    }
+
+  public:
+    //! flag for using linear weight relations with zero at the center
+    static const Id Episode = 0;
+    //! flag for linear weights with a noise term at the outskirts
+    static const Id Ordinal = 1;
+
+  private:
+    static cedar::aux::EnumType<AddRoutine> mType;
+  };
+
 
   //--------------------------------------------------------------------------------------------------------------------
   // constructors and destructor
@@ -83,8 +123,9 @@ public:
   //--------------------------------------------------------------------------------------------------------------------
 public:
 public slots:
-  void recruitGroup(cedar::dyn::SerialOrderRecruitingPtr serialOrderStep);
-  // none yet
+
+  void recruitGroupForEpisode(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderStep);
+  void recruitGroupForOrdinal(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderStep);
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -97,9 +138,18 @@ protected:
   //--------------------------------------------------------------------------------------------------------------------
 private:
   void run();
+
+  cedar::proc::GroupPtr recruitGroup();
+
+  cedar::proc::GroupPtr getGroupContainer();
+
   std::string cutImprintName(std::string fullName);
-  cedar::proc::ElementPtr AddAGroupFromFile(const std::string& groupName, const cedar::aux::Path& fileName, cedar::proc::GroupPtr containerGroup);
-  void connectGroup(cedar::proc::GroupPtr containerGroup, cedar::proc::GroupPtr toBeIncludedGroup);
+
+  cedar::proc::ElementPtr AddAGroupFromFile(const std::string &groupName, const cedar::aux::Path &fileName, cedar::proc::GroupPtr containerGroup);
+
+  void registerForEpisode();
+
+  void registerForOrdinal();
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -122,6 +172,9 @@ private:
   cedar::aux::StringParameterPtr _mGroupFile;
   cedar::aux::StringParameterPtr _mGroupName;
   cedar::aux::StringParameterPtr _mGroupContainerName;
+  cedar::aux::EnumParameterPtr _mAddRoutine;
+  cedar::aux::IntParameterPtr _mXOffSet;
+  cedar::aux::IntParameterPtr _mYOffSet;
   // none yet
 
 };
