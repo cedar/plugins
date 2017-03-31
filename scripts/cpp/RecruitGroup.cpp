@@ -50,18 +50,30 @@
 // constructors and destructor
 //----------------------------------------------------------------------------------------------------------------------
 
+cedar::aux::EnumType<cedar::proc::scripts::RecruitGroup::AddRoutine> cedar::proc::scripts::RecruitGroup::AddRoutine::mType(
+        "AddRoutine::"
+                                                                                                                          );
+
 cedar::proc::scripts::RecruitGroup::RecruitGroup()
         :
         mCreatedGroupCounter(0),
         ran(false),
         _mGroupFile(new cedar::aux::StringParameter(this, "path to groupfile", "/dir/architecture.json")),
         _mGroupName(new cedar::aux::StringParameter(this, "group name", "myLoadGroup")),
-        _mGroupContainerName(new cedar::aux::StringParameter(this, "container group", "root"))
+        _mGroupContainerName(new cedar::aux::StringParameter(this, "container group", "root")),
+        _mAddRoutine(
+                new cedar::aux::EnumParameter(this, "AddRoutine",
+                                              cedar::proc::scripts::RecruitGroup::AddRoutine::typePtr(),
+                                              AddRoutine::Episode
+                                             )),
+        _mXOffSet(new cedar::aux::IntParameter(this, "x pos", 90)),
+        _mYOffSet(new cedar::aux::IntParameter(this, "y pos", 250))
 {
 }
 
 cedar::proc::scripts::RecruitGroup::~RecruitGroup()
 {
+  std::cout << "Destroy the RecruitGroup Script" << std::endl;
   this->requestStop();
 }
 
@@ -73,33 +85,73 @@ void cedar::proc::scripts::RecruitGroup::run()
 {
   if (!ran)
   {
-    std::cout << "Hello RecruitGroup! Lets start the Thread!" << std::endl;
-    std::set <cedar::dyn::SerialOrderRecruitingPtr> imprintHebbElements = this->getGroup()->findAll<cedar::dyn::SerialOrderRecruiting>(
-            true);
+    std::cout << "Hello RecruitGroupScript! Lets start the Thread!" << std::endl;
 
-    for (auto it = imprintHebbElements.begin(); it != imprintHebbElements.end(); it++)
+    switch (_mAddRoutine->getValue())
     {
-      auto hebb = *it;
-      bool isConnected = QObject::connect(hebb.get(),
-                                          SIGNAL(evokeFieldRecruitment(cedar::dyn::SerialOrderRecruitingPtr)), this,
-                                          SLOT(recruitGroup(cedar::dyn::SerialOrderRecruitingPtr)),
-                                          Qt::ConnectionType::DirectConnection);
-      std::cout << "Connected: " << hebb->getName() << " Connect Return: " << isConnected << std::endl;
+      case AddRoutine::Episode:
+        registerForEpisode();
+        break;
+      case AddRoutine::Ordinal:
+        registerForOrdinal();
+        break;
+      default:
+        std::cout << "Started the Script with an unknown Connection Routine. Please check the implementation of run()"
+                  << std::endl;
     }
+
     ran = true;
-  }
-  else
+  } else
   {
-    //TODO: Only add unmanaged SerialOrderSteps
-    std::cout << "Started the Script for the Second Time. This has no effect! If you added steps in between, this should be fixed!" << std::endl;
+    //TODO: Only add unregistered Steps
+    std::cout
+            << "Started the Script for the Second Time. This has no effect! If you added steps in between, this should be fixed!"
+            << std::endl;
   }
 
 }
 
-void cedar::proc::scripts::RecruitGroup::recruitGroup(cedar::dyn::SerialOrderRecruitingPtr serialOrderStep)
+void cedar::proc::scripts::RecruitGroup::registerForEpisode()
 {
-  std::cout << "Recruit a Group!" << std::endl;
-  mCreatedGroupCounter = mCreatedGroupCounter + 1;
+  std::set<cedar::dyn::SerialOrderRecruitingPtr> serialOrderSteps = this->getGroup()->findAll<cedar::dyn::SerialOrderRecruiting>(
+          true);
+
+  for (auto it = serialOrderSteps.begin(); it != serialOrderSteps.end(); it++)
+  {
+    auto serialOrderStep = *it;
+    auto match = serialOrderStep->getName().find("Episode");
+    if (match != std::string::npos)
+    {
+      bool isConnected = QObject::connect(serialOrderStep.get(), SIGNAL(evokeFieldRecruitment(
+              boost::weak_ptr<cedar::dyn::SerialOrderRecruiting>)), this, SLOT(recruitGroupForEpisode(
+              boost::weak_ptr<cedar::dyn::SerialOrderRecruiting>)), Qt::ConnectionType::DirectConnection);
+      std::cout << "Connected: " << serialOrderStep->getName() << " Connect Return: " << isConnected << std::endl;
+    }
+  }
+}
+
+void cedar::proc::scripts::RecruitGroup::registerForOrdinal()
+{
+  std::set<cedar::dyn::SerialOrderRecruitingPtr> serialOrderSteps = this->getGroup()->findAll<cedar::dyn::SerialOrderRecruiting>(
+          true);
+
+  for (auto it = serialOrderSteps.begin(); it != serialOrderSteps.end(); it++)
+  {
+    auto serialOrderStep = *it;
+    auto match = serialOrderStep->getName().find("Ordinal");
+    if (match != std::string::npos)
+    {
+      bool isConnected = QObject::connect(serialOrderStep.get(), SIGNAL(evokeFieldRecruitment(
+              boost::weak_ptr<cedar::dyn::SerialOrderRecruiting>)), this, SLOT(recruitGroupForOrdinal(
+              boost::weak_ptr<cedar::dyn::SerialOrderRecruiting>)), Qt::ConnectionType::DirectConnection);
+      std::cout << "Connected: " << serialOrderStep->getName() << " Connect Return: " << isConnected << std::endl;
+    }
+  }
+}
+
+
+cedar::proc::GroupPtr cedar::proc::scripts::RecruitGroup::getGroupContainer()
+{
   cedar::proc::GroupPtr groupContainer = this->getGroup();
 
   if (_mGroupContainerName->getValue() != "root")
@@ -112,48 +164,101 @@ void cedar::proc::scripts::RecruitGroup::recruitGroup(cedar::dyn::SerialOrderRec
       std::cout << "The Found Container is: " << groupContainer->getName() << std::endl;
     } else
     {
-      std::cout << "The specified Groupcontainer was not found! Abort Adding a Group!" << std::endl;
-      return;
+      std::cout << "The specified Group container was not found! Abort Adding a Group!" << std::endl;
+      return cedar::proc::GroupPtr(new cedar::proc::Group);
     }
   }
+  return groupContainer;
+}
 
+cedar::proc::GroupPtr cedar::proc::scripts::RecruitGroup::recruitGroup()
+{
+  std::cout << "Recruit a Group!" << std::endl;
+  mCreatedGroupCounter = mCreatedGroupCounter + 1;
+  cedar::proc::GroupPtr groupContainer = this->getGroupContainer();
   auto loadedGroupElement = AddAGroupFromFile(_mGroupName->getValue(), _mGroupFile->getValue(), groupContainer);
 
   loadedGroupElement->setName(loadedGroupElement->getName() + boost::lexical_cast<std::string>(mCreatedGroupCounter));
 
   if (auto newGroup = boost::dynamic_pointer_cast<cedar::proc::Group>(loadedGroupElement))
   {
+    return newGroup;
+  } else
+  {
+    std::cout << "Somehow loading the group: " << _mGroupName->getValue() << " from file: " << _mGroupFile->getValue()
+              << " did not return a GroupPointer! Returning empty Group!" << std::endl;
+    return cedar::proc::GroupPtr(new cedar::proc::Group);
+  }
+}
+
+
+void cedar::proc::scripts::RecruitGroup::recruitGroupForEpisode(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderStep)
+{
+  cedar::proc::GroupPtr newGroup = this->recruitGroup();
+  cedar::proc::GroupPtr groupContainer = this->getGroupContainer();
+
+  if (boost::shared_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderShared = serialOrderStep.lock())
+  {
     if (_mGroupContainerName->getValue() != "root")
     {
       std::string containerInputName = "M_" + cedar::aux::toString<unsigned int>(mCreatedGroupCounter);
       groupContainer->addConnector(containerInputName, true);
-      this->getGroup()->connectSlots(serialOrderStep->getName() + '.' + "ordinal node " + cedar::aux::toString<unsigned int>(mCreatedGroupCounter) + " output", groupContainer->getName() + "." + containerInputName);
+      this->getGroup()->connectSlots(serialOrderShared->getName() + '.' + "ordinal node " +
+                                     cedar::aux::toString<unsigned int>(mCreatedGroupCounter) + " output",
+                                     groupContainer->getName() + "." + containerInputName
+                                    );
       //Connect SerialOrderStep to the ContainerGroup
-      connectGroup(groupContainer, newGroup);
+      auto inputMap = newGroup->getDataSlots(cedar::proc::DataRole::INPUT);
+      for (auto it = inputMap.begin(); it != inputMap.end(); it++)
+      {
+        std::string slotName = it->first;
+        auto dataSlot = it->second;
+        if (slotName != "SequenceActive")
+          groupContainer->connectSlots(slotName + "." + "output", newGroup->getName() + "." + slotName);
+        else
+          groupContainer->connectSlots("M_" + cedar::aux::toString<unsigned int>(mCreatedGroupCounter) + ".output",
+                                       newGroup->getName() + "." + slotName
+                                      );
+      }
+    }
+  }
+}
+
+void cedar::proc::scripts::RecruitGroup::recruitGroupForOrdinal(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderStep)
+{
+  cedar::proc::GroupPtr newGroup = this->recruitGroup();
+  cedar::proc::GroupPtr groupContainer = this->getGroupContainer();
+
+  if (boost::shared_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderShared = serialOrderStep.lock())
+  {
+    if (_mGroupContainerName->getValue() != "root")
+    {
+      std::string containerInputName = "M_" + cedar::aux::toString<unsigned int>(mCreatedGroupCounter);
+      groupContainer->addConnector(containerInputName, true);
+      this->getGroup()->connectSlots(serialOrderShared->getName() + '.' + "ordinal node " +
+                                     cedar::aux::toString<unsigned int>(mCreatedGroupCounter) + " output",
+                                     groupContainer->getName() + "." + containerInputName
+                                    );
+      //Connect SerialOrderStep to the ContainerGroup
+      auto inputMap = newGroup->getDataSlots(cedar::proc::DataRole::INPUT);
+      for (auto it = inputMap.begin(); it != inputMap.end(); it++)
+      {
+        std::string slotName = it->first;
+        auto dataSlot = it->second;
+        if (slotName != "SequenceActive")
+          groupContainer->connectSlots(slotName + "." + "output", newGroup->getName() + "." + slotName);
+        else
+          groupContainer->connectSlots("M_" + cedar::aux::toString<unsigned int>(mCreatedGroupCounter) + ".output",
+                                       newGroup->getName() + "." + slotName
+                                      );
+      }
     }
   }
 }
 
 
-void cedar::proc::scripts::RecruitGroup::connectGroup(cedar::proc::GroupPtr containerGroup,
-                                                      cedar::proc::GroupPtr toBeIncludedGroup)
-{
-  auto inputMap = toBeIncludedGroup->getDataSlots(cedar::proc::DataRole::INPUT);
-  for (auto it = inputMap.begin(); it != inputMap.end(); it++)
-  {
-    std::string slotName = it->first;
-    auto dataSlot = it->second;
-    if (slotName != "SequenceActive")
-      containerGroup->connectSlots(slotName + "." + "output", toBeIncludedGroup->getName() + "." + slotName);
-    else
-      containerGroup->connectSlots("M_" + cedar::aux::toString<unsigned int>(mCreatedGroupCounter)+".output",toBeIncludedGroup->getName() + "." + slotName);
-  }
-}
-
-
 cedar::proc::ElementPtr
-cedar::proc::scripts::RecruitGroup::AddAGroupFromFile(const std::string &groupName, const cedar::aux::Path &fileName,
-                                                      cedar::proc::GroupPtr containerGroup)
+cedar::proc::scripts::RecruitGroup::AddAGroupFromFile(const std::string &groupName, const cedar::aux::Path &fileName, cedar::proc::GroupPtr containerGroup)
 {
   // first, read in the configuration tree
   cedar::aux::ConfigurationNode configuration;
@@ -167,8 +272,9 @@ cedar::proc::scripts::RecruitGroup::AddAGroupFromFile(const std::string &groupNa
     {
       // try to access the group node with name "groupName"
       cedar::aux::ConfigurationNode &group_node = groups_node.get_child(groupName);
+      group_node.put("ui generic.positionX", _mXOffSet->getValue());
       group_node.put("ui generic.positionY", 100 + mCreatedGroupCounter *
-                                                   275); // Todo: These values are totally arbitrary and should be parameters
+                                                   _mYOffSet->getValue());
       // create, add, and configure
       cedar::proc::GroupPtr imported_group(new cedar::proc::Group());
       containerGroup->add(imported_group, containerGroup->getUniqueIdentifier("imported group"));
@@ -180,10 +286,10 @@ cedar::proc::scripts::RecruitGroup::AddAGroupFromFile(const std::string &groupNa
     {
       // could not find given group, abort
       CEDAR_THROW
-              (
-                      cedar::aux::NotFoundException,
-                      "Could not find group with name " + groupName + " in file " + fileName
-              );
+      (
+              cedar::aux::NotFoundException,
+              "Could not find group with name " + groupName + " in file " + fileName
+      );
     }
   }
   catch (const boost::property_tree::ptree_bad_path &)
