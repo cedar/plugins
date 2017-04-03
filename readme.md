@@ -90,6 +90,7 @@ Finally, you can add all classes of a kind using these commands:
 | *TopDownReconstruction*      | Reconstructs a shape based object representation.                              |
 | *ViewCombination*            | Subsamples discrete activation fields by summing up neighboring sampling points (1D only). This is intended for object recognition, where multiple nodes representing multiple object views may be summed to form a representation of a single object. |
 | **Sources**                                                                                                   |
+| *OpenGLTargetVisualisation*  | A step that visualizes a colored blob in the 3D Caren simulation               |
 | *ImageProvider*              | A step that outputs an image from a directory based on an index specified via a parameter. |
 | *KinectReader*               | A source that reads a Kinect camera, yielding images and depth images, as well as a RGBA point cloud. |
 | *SpatialPattern*             | Outputs a matrix of synaptic weights that correspond to a spatial relational template (e.g., "to the left of"). |
@@ -103,6 +104,7 @@ Finally, you can add all classes of a kind using these commands:
 | *Demultiplexer*              | Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).    |
 | *EgoToBirdView*              | A step that converts camera input and distance information to a top-down representation. |
 | *ElementwiseDivide*          | To input matrices Nom and Denom will be divided elementwisely. The output is Nom/(Denom + scalar). "scalar" is a scalar and configurable parameter. This value is added to all elements in the Denom matrix to prevent dividing by zero or very small values. |
+| *FourDimHebbMap*             | A step that learns an associated 2D input for each activation in a 2D field in presence of a reward signal |
 | *HarmonicOscillator*         | A looped step that employs the harmonic Oscillator Formula pdotdot = -K(p-x)-B*pdot. K and B are automatically set to the critically damped solution. |
 | *HyperAcuteRescaling*        | Rescales an input matrix so that as little information as possible is lost. Note that this step's output is not properly normalized. |
 | *Integrator*                 | A looped step that integrates nx1 inputs across time.                          |

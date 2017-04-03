@@ -72,51 +72,52 @@ _mH( new cedar::aux::DoubleParameter ( this, "h (negative)", -5.0, -100000.0, 0.
 
 void cedar::proc::steps::ApproximateInput::compute(const cedar::proc::Arguments&)
 {
+  float h = _mH->getValue();
+  float tau = _mTau->getValue() / 1000.0;
+
+  auto couplingDataPtr = getInput("coupling");
+  auto durationDataPtr = getInput("duration");
+  auto distanceDataPtr = getInput("distance");
+
+  if (!couplingDataPtr
+      || !durationDataPtr
+      || !distanceDataPtr)
+    return;
+
+  auto couplingData = couplingDataPtr->getData<cv::Mat>();
+  auto durationData = durationDataPtr->getData<cv::Mat>();
+  auto distanceData = distanceDataPtr->getData<cv::Mat>();
+
+  if (couplingData.empty()
+      || durationData.empty()
+      || distanceData.empty())
+    return;
+
+  float c = couplingData.at<float>(0,0);
+  float tf = durationData.at<float>(0,0);
+  float D = distanceData.at<float>(0,0);
+
+  float C3 = ( c - 1 ) / ( c + 1 );
+
+  float nenner = tau*tau*(c+1)/pow(c*c+1, 2.0)
+                 *(c + C3 - C3*tf
+                   + exp( -tf/tau )
+                     * ( - sin(c*tf/tau) - c*cos(c*tf/tau) + c*C3*sin(c*tf/tau) - C3*cos(c*tf/tau) ));
+  float newS = D / nenner + h; // h is negative!
+//  std::cout << "   h: " << h << std::endl;
+//  std::cout << "   D: " << D << std::endl;
+//  std::cout << "   c: " << c << std::endl;
+//  std::cout << "   tf: " << tf << std::endl;
+//  std::cout << " new S: " << newS << std::endl;
+
+  mOutput->getData().create(1, 1, CV_32F);
+  mOutput->getData().at<float>(0,0) = newS;
 }
 
 
   void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::string&)
   {
-    float h = _mH->getValue();
-    float tau = _mTau->getValue() / 1000.0;
 
-    auto couplingDataPtr = getInput("coupling");
-    auto durationDataPtr = getInput("duration");
-    auto distanceDataPtr = getInput("distance");
-
-    if (!couplingDataPtr
-        || !durationDataPtr
-        || !distanceDataPtr)
-      return;
-
-    auto couplingData = couplingDataPtr->getData<cv::Mat>();
-    auto durationData = durationDataPtr->getData<cv::Mat>();
-    auto distanceData = distanceDataPtr->getData<cv::Mat>();
-
-    if (couplingData.empty()
-        || durationData.empty()
-        || distanceData.empty())
-      return;
-
-    float c = couplingData.at<float>(0,0);
-    float tf = durationData.at<float>(0,0);
-    float D = distanceData.at<float>(0,0);
-
-    float C3 = ( c - 1 ) / ( c + 1 );
-
-    float nenner = tau*tau*(c+1)/pow(c*c+1, 2.0)
-                   *(c + C3 - C3*tf
-                     + exp( -tf/tau )
-                       * ( - sin(c*tf/tau) - c*cos(c*tf/tau) + c*C3*sin(c*tf/tau) - C3*cos(c*tf/tau) ));
-    float newS = D / nenner + h; // h is negative!
-    std::cout << "   h: " << h << std::endl;
-    std::cout << "   D: " << D << std::endl;
-    std::cout << "   c: " << c << std::endl;
-    std::cout << "   tf: " << tf << std::endl;
-  std::cout << " new S: " << newS << std::endl;
-
-    mOutput->getData().create(1, 1, CV_32F);
-    mOutput->getData().at<float>(0,0) = newS;
   }
 
   cedar::proc::DataSlot::VALIDITY cedar::proc::steps::ApproximateInput::determineInputValidity
