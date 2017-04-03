@@ -497,20 +497,21 @@ std::cout << "ApproximateCoupling: ausserhalb Wertebereich!" << std::endl;
 
 void cedar::proc::steps::ApproximateCoupling::compute(const cedar::proc::Arguments&)
 {
+  float newC;
+
+  newC= calculateCouplingFromTF( getInput( "duration" )->getData<cv::Mat>().at<float>(0,0)  );
+
+  mOutput->getData().create(1, 1, CV_32F);
+  mOutput->getData().at<float>(0,0) = newC;
 }
 
 void cedar::proc::steps::ApproximateCoupling::vectorDimensionChanged()
 {
 }
 
-void cedar::proc::steps::ApproximateCoupling::inputConnectionChanged(const std::string& inputName)
+void cedar::proc::steps::ApproximateCoupling::inputConnectionChanged(const std::string& )
 {
-  float newC;
 
-  newC= calculateCouplingFromTF( getInput( inputName )->getData<cv::Mat>().at<float>(0,0)  );
-
-  mOutput->getData().create(1, 1, CV_32F);
-  mOutput->getData().at<float>(0,0) = newC;
 }
 
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::ApproximateCoupling::determineInputValidity
