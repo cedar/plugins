@@ -490,9 +490,9 @@ float cedar::proc::steps::ApproximateCoupling::calculateCouplingFromTF(float tf)
      }
   }
 
-  assert(1); // hier sollte man nicht landen. TODO
-  return 0.0; // FEHLER
- }
+std::cout << "ApproximateCoupling: ausserhalb Wertebereich!" << std::endl;
+  return *(cs.end());
+}
 
 
 void cedar::proc::steps::ApproximateCoupling::compute(const cedar::proc::Arguments&)
@@ -516,7 +516,7 @@ void cedar::proc::steps::ApproximateCoupling::inputConnectionChanged(const std::
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::ApproximateCoupling::determineInputValidity
 (
   cedar::proc::ConstDataSlotPtr,
-  cedar::aux::ConstDataPtr data
+  cedar::aux::ConstDataPtr
 )
 const
 {
