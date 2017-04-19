@@ -1,0 +1,723 @@
+{
+    "meta":
+    {
+        "format": "1",
+        "required plugins":
+        [
+            "StandardPlugin"
+        ]
+    },
+    "steps":
+    {
+        "cedar.processing.steps.ChannelSplit":
+        {
+            "name": "new ChannelSplit"
+        },
+        "cedar.processing.MatrixSlice":
+        {
+            "name": "new MatrixSlice",
+            "anchor type": "Absolute",
+            "range lower":
+            [
+                "130",
+                "195"
+            ],
+            "range upper":
+            [
+                "380",
+                "445"
+            ]
+        },
+        "cedar.processing.sources.Picture":
+        {
+            "name": "new Picture",
+            "record": "false",
+            "PictureGrabber":
+            {
+                "name": "PictureGrabber",
+                "step size": "0.001 s",
+                "idle time": "1e-05 s",
+                "simulated time": "0.001 s",
+                "loop mode": "Fixed",
+                "channels":
+                {
+                    "cedar.dev.sensors.visual.PictureChannel":
+                    {
+                        "snapshot file": ".\/snapshot.jpg",
+                        "record file": ".\/record.avi",
+                        "filename": "\/home\/lompolbx\/Pictures\/edge_filter_test.png"
+                    }
+                }
+            }
+        }
+    },
+    "groups":
+    {
+        "steering filter bank":
+        {
+            "meta":
+            {
+                "format": "1",
+                "required plugins":
+                [
+                    "StandardPlugin"
+                ]
+            },
+            "steps":
+            {
+                "cedar.proc.steps.SteeringAngle":
+                {
+                    "name": "Y steering angle"
+                },
+                "cedar.proc.steps.SteeringEnergy":
+                {
+                    "name": "Y steering energy"
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "g2a",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "G2a",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "g2b",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "G2b",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "g2c",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "G2c",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "h2a",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "H2a",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "h2b",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "H2b",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "h2c",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "H2c",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.Convolution":
+                {
+                    "name": "h2d",
+                    "kernels":
+                    {
+                        "cedar.aux.kernel.SteerableKernel":
+                        {
+                            "dimensionality": "2",
+                            "anchor":
+                            [
+                                "0",
+                                "0"
+                            ],
+                            "type": "H2d",
+                            "taps": "3",
+                            "spacing": "1"
+                        }
+                    },
+                    "convolution":
+                    {
+                        "borderType": "Replicate",
+                        "mode": "Same",
+                        "engine":
+                        {
+                            "type": "cedar.aux.conv.OpenCV"
+                        },
+                        "alternate even kernel center": "false"
+                    }
+                },
+                "cedar.processing.steps.MatrixTypeConverter":
+                {
+                    "name": "new MatrixTypeConverter",
+                    "target type": "Float"
+                },
+                "cedar.proc.steps.SteerC2C3":
+                {
+                    "name": "new SteerC2C3"
+                },
+                "cedar.processing.steps.Threshold":
+                {
+                    "name": "new Threshold",
+                    "apply lower threshold": "true",
+                    "apply upper threshold": "false",
+                    "lower threshold": "250",
+                    "upper threshold": "255"
+                }
+            },
+            "connections":
+            [
+                {
+                    "source": "new SteerC2C3.C2",
+                    "target": "Y steering angle.C2"
+                },
+                {
+                    "source": "new SteerC2C3.C2",
+                    "target": "Y steering energy.C2"
+                },
+                {
+                    "source": "new SteerC2C3.C3",
+                    "target": "Y steering angle.C3"
+                },
+                {
+                    "source": "new SteerC2C3.C3",
+                    "target": "Y steering energy.C3"
+                },
+                {
+                    "source": "input image.output",
+                    "target": "new MatrixTypeConverter.matrix"
+                },
+                {
+                    "source": "Y steering angle.dominantAngle",
+                    "target": "dominant angle.input"
+                },
+                {
+                    "source": "Y steering energy.energy",
+                    "target": "steering energy.input"
+                },
+                {
+                    "source": "Y steering energy.energy",
+                    "target": "new Threshold.input"
+                },
+                {
+                    "source": "new Threshold.thresholded input",
+                    "target": "shape base.input"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "g2a.matrix"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "g2b.matrix"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "g2c.matrix"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "h2a.matrix"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "h2b.matrix"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "h2c.matrix"
+                },
+                {
+                    "source": "new MatrixTypeConverter.converted matrix",
+                    "target": "h2d.matrix"
+                },
+                {
+                    "source": "g2a.result",
+                    "target": "new SteerC2C3.G2a"
+                },
+                {
+                    "source": "g2b.result",
+                    "target": "new SteerC2C3.G2b"
+                },
+                {
+                    "source": "g2c.result",
+                    "target": "new SteerC2C3.G2c"
+                },
+                {
+                    "source": "h2a.result",
+                    "target": "new SteerC2C3.H2a"
+                },
+                {
+                    "source": "h2b.result",
+                    "target": "new SteerC2C3.H2b"
+                },
+                {
+                    "source": "h2c.result",
+                    "target": "new SteerC2C3.H2c"
+                },
+                {
+                    "source": "h2d.result",
+                    "target": "new SteerC2C3.H2d"
+                }
+            ],
+            "parameter links":
+            [
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "g2b",
+                    "source parameter": "kernels[0].taps",
+                    "target parameter": "kernels[0].taps"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "g2b",
+                    "source parameter": "convolution.borderType",
+                    "target parameter": "convolution.borderType"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "g2b",
+                    "source parameter": "kernels[0].spacing",
+                    "target parameter": "kernels[0].spacing"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "g2c",
+                    "source parameter": "kernels[0].taps",
+                    "target parameter": "kernels[0].taps"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "g2c",
+                    "source parameter": "convolution.borderType",
+                    "target parameter": "convolution.borderType"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "g2c",
+                    "source parameter": "kernels[0].spacing",
+                    "target parameter": "kernels[0].spacing"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2a",
+                    "source parameter": "kernels[0].taps",
+                    "target parameter": "kernels[0].taps"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2a",
+                    "source parameter": "convolution.borderType",
+                    "target parameter": "convolution.borderType"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2a",
+                    "source parameter": "kernels[0].spacing",
+                    "target parameter": "kernels[0].spacing"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2b",
+                    "source parameter": "kernels[0].taps",
+                    "target parameter": "kernels[0].taps"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2b",
+                    "source parameter": "convolution.borderType",
+                    "target parameter": "convolution.borderType"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2b",
+                    "source parameter": "kernels[0].spacing",
+                    "target parameter": "kernels[0].spacing"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2c",
+                    "source parameter": "kernels[0].taps",
+                    "target parameter": "kernels[0].taps"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2c",
+                    "source parameter": "convolution.borderType",
+                    "target parameter": "convolution.borderType"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2c",
+                    "source parameter": "kernels[0].spacing",
+                    "target parameter": "kernels[0].spacing"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2d",
+                    "source parameter": "kernels[0].taps",
+                    "target parameter": "kernels[0].taps"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2d",
+                    "source parameter": "convolution.borderType",
+                    "target parameter": "convolution.borderType"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "source element": "g2a",
+                    "target element": "h2d",
+                    "source parameter": "kernels[0].spacing",
+                    "target parameter": "kernels[0].spacing"
+                }
+            ],
+            "name": "steering filter bank",
+            "connectors":
+            {
+                "dominant angle": "false",
+                "input image": "true",
+                "shape base": "false",
+                "steering energy": "false"
+            },
+            "is looped": "false",
+            "time factor": "1",
+            "ui":
+            [
+                {
+                    "type": "step",
+                    "step": "Y steering angle",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "312",
+                    "positionY": "144"
+                },
+                {
+                    "type": "step",
+                    "step": "Y steering energy",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "312",
+                    "positionY": "192"
+                },
+                {
+                    "type": "step",
+                    "step": "g2a",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "24"
+                },
+                {
+                    "type": "step",
+                    "step": "g2b",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "72"
+                },
+                {
+                    "type": "step",
+                    "step": "g2c",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "120"
+                },
+                {
+                    "type": "step",
+                    "step": "h2a",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "168"
+                },
+                {
+                    "type": "step",
+                    "step": "h2b",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "216"
+                },
+                {
+                    "type": "step",
+                    "step": "h2c",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "264"
+                },
+                {
+                    "type": "step",
+                    "step": "h2d",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "312"
+                },
+                {
+                    "type": "step",
+                    "step": "new MatrixTypeConverter",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "24",
+                    "positionY": "168"
+                },
+                {
+                    "type": "step",
+                    "step": "new SteerC2C3",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "224",
+                    "positionY": "168"
+                },
+                {
+                    "type": "step",
+                    "step": "new Threshold",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "312",
+                    "positionY": "304"
+                }
+            ],
+            "ui generic":
+            {
+                "group": "steering filter bank",
+                "architecture widgets": "",
+                "width": "385.6190476190477",
+                "height": "362.7619047619046",
+                "smart mode": "false",
+                "collapsed": "false",
+                "lock geometry": "false",
+                "uncollapsed width": "385.6190476190477",
+                "uncollapsed height": "362.7619047619046",
+                "positionX": "-696",
+                "positionY": "128"
+            }
+        }
+    },
+    "connections":
+    [
+        {
+            "source": "new ChannelSplit.channel 1",
+            "target": "steering filter bank.input image"
+        },
+        {
+            "source": "new Picture.Picture",
+            "target": "new MatrixSlice.matrix"
+        },
+        {
+            "source": "new MatrixSlice.slice",
+            "target": "new ChannelSplit.three channel input"
+        }
+    ],
+    "name": "root",
+    "connectors": "",
+    "is looped": "false",
+    "time factor": "1",
+    "ui":
+    [
+        {
+            "type": "step",
+            "step": "new ChannelSplit",
+            "display style": "ICON_ONLY",
+            "width": "40",
+            "height": "40",
+            "positionX": "-871",
+            "positionY": "155"
+        },
+        {
+            "type": "step",
+            "step": "new MatrixSlice",
+            "display style": "ICON_ONLY",
+            "width": "40",
+            "height": "40",
+            "positionX": "-952",
+            "positionY": "160"
+        },
+        {
+            "type": "step",
+            "step": "new Picture",
+            "display style": "ICON_AND_TEXT",
+            "width": "160",
+            "height": "50",
+            "positionX": "-1152",
+            "positionY": "160"
+        }
+    ],
+    "ui generic":
+    {
+        "group": "root",
+        "open plots": "",
+        "plot groups": "",
+        "architecture widgets": "",
+        "width": "250",
+        "height": "250",
+        "smart mode": "false",
+        "collapsed": "false",
+        "lock geometry": "false",
+        "uncollapsed width": "250",
+        "uncollapsed height": "250",
+        "positionX": "0",
+        "positionY": "0"
+    }
+}

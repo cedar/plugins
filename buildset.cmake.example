@@ -1,0 +1,8 @@
+# Declare your buildset's name:
+DECLARE_PLUGIN(Plugin)
+
+# Then add steps using one or more of the following commands:
+# ADD_TO_PLUGIN(STEPS cedar::proc::steps::Multiplexer)
+# ADD_TO_PLUGIN(CATEGORIES Utilities Sources)
+# ADD_TO_PLUGIN(NAMESPACES cedar::proc::steps)
+# ADD_TO_PLUGIN(ALL_STEPS)
