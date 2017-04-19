@@ -75,7 +75,7 @@ void cedar::proc::steps::ApproximateInput::compute(const cedar::proc::Arguments&
 }
 
 
-void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::string& inputName)
+void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::string&)
 {
   float h = _mH->getValue();
   float tau = _mTau->getValue() / 1000.0;
@@ -109,11 +109,6 @@ void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::str
                    + exp( -tf/tau )
                      * ( - sin(c*tf/tau) - c*cos(c*tf/tau) + c*C3*sin(c*tf/tau) - C3*cos(c*tf/tau) ));
   float newS = D / nenner + h; // h is negative!
-  std::cout << "   h: " << h << std::endl;
-  std::cout << "   D: " << D << std::endl;
-  std::cout << "   c: " << c << std::endl;
-  std::cout << "   tf: " << tf << std::endl;
-std::cout << " new S: " << newS << std::endl;
 
   mOutput->getData().create(1, 1, CV_32F);
   mOutput->getData().at<float>(0,0) = newS;
@@ -122,7 +117,7 @@ std::cout << " new S: " << newS << std::endl;
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::ApproximateInput::determineInputValidity
 (
   cedar::proc::ConstDataSlotPtr,
-  cedar::aux::ConstDataPtr data
+  cedar::aux::ConstDataPtr 
 )
 const
 {

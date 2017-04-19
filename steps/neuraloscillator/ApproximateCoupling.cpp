@@ -507,7 +507,14 @@ void cedar::proc::steps::ApproximateCoupling::inputConnectionChanged(const std::
 {
   float newC;
 
-  newC= calculateCouplingFromTF( getInput( inputName )->getData<cv::Mat>().at<float>(0,0)  );
+  auto data = getInput(inputName);
+  if (!data)
+    return;
+  auto mat = data->getData<cv::Mat>();
+  if (mat.empty())
+    return;
+
+  newC= calculateCouplingFromTF( mat.at<float>(0,0)  );
 
   mOutput->getData().create(1, 1, CV_32F);
   mOutput->getData().at<float>(0,0) = newC;
