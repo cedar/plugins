@@ -22,20 +22,20 @@
  Institute:   Ruhr-Universitaet Bochum
  Institut fuer Neuroinformatik
 
- File:        RecruitGroup.h
+ File:        ExecuteFunctionOnSteps.h
 
  Maintainer:  Jan Tekülve
  Email:       jan.tekuelve@ini.rub.de
  Date:        2016 11 03
 
- Description: Header file for the class promoplugin::RecruitGroup.
+ Description: Header file for the class promoplugin::ExecuteFunctionOnSteps.
 
  Credits:
 
  ======================================================================================================================*/
 
-#ifndef RECRUIT_GROUP_H
-#define RECRUIT_GROUP_H
+#ifndef EXECUTE_FUNCTION_ON_STEPS_H
+#define EXECUTE_FUNCTION_ON_STEPS_H
 
 // CEDAR CONFIGURATION
 #include "cedar/configuration.h"
@@ -43,7 +43,7 @@
 // CEDAR INCLUDES
 
 // FORWARD DECLARATIONS
-#include "scripts/cpp/RecruitGroup.fwd.h"
+#include "scripts/cpp/ExecuteFunctionOnSteps.fwd.h"
 #include "cedar/processing/CppScript.h"
 #include "cedar/processing/Element.h"
 #include "cedar/processing/Group.h"
@@ -61,7 +61,7 @@
  * For each recruit Routine you need to add a new Enum, and a new slot function that connects the newly created group in your desired way.
  *
  */
-class cedar::proc::scripts::RecruitGroup : public cedar::proc::CppScript
+class cedar::proc::scripts::ExecuteFunctionOnSteps : public cedar::proc::CppScript
 {
   //--------------------------------------------------------------------------------------------------------------------
   // macros
@@ -72,7 +72,7 @@ Q_OBJECT
   // nested types
   //--------------------------------------------------------------------------------------------------------------------
 //!@brief Enum class for FunctionTypes
-  class AddRoutine
+  class FunctionName
   {
   public:
     //! the id of an enum entry
@@ -81,8 +81,7 @@ Q_OBJECT
     //! constructs the enum for all ids
     static void construct()
     {
-      mType.type()->def(cedar::aux::Enum(Episode, "EpisodeMemory"));
-      mType.type()->def(cedar::aux::Enum(Ordinal, "OrdinalSlot"));
+      mType.type()->def(cedar::aux::Enum(ResetWeights, "RewardHebbTrace->resetWeights()"));
     }
 
     //! @returns A const reference to the base enum object.
@@ -98,11 +97,11 @@ Q_OBJECT
     }
 
   public:
-    static const Id Episode = 0;
-    static const Id Ordinal = 1;
+    //! flag for linear weights with a noise term at the outskirts
+    static const Id ResetWeights = 0;
 
   private:
-    static cedar::aux::EnumType<AddRoutine> mType;
+    static cedar::aux::EnumType<FunctionName> mType;
   };
 
 
@@ -111,10 +110,10 @@ Q_OBJECT
   //--------------------------------------------------------------------------------------------------------------------
 public:
   //!@brief The standard constructor.
-  RecruitGroup();
+  ExecuteFunctionOnSteps();
 
   //!@brief Destructor
-  virtual ~RecruitGroup();
+  virtual ~ExecuteFunctionOnSteps();
 
   //--------------------------------------------------------------------------------------------------------------------
   // public methods
@@ -122,8 +121,6 @@ public:
 public:
 public slots:
 
-  void recruitGroupForEpisode(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderStep);
-  void recruitGroupForOrdinal(boost::weak_ptr<cedar::dyn::SerialOrderRecruiting> serialOrderStep);
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -136,18 +133,7 @@ protected:
   //--------------------------------------------------------------------------------------------------------------------
 private:
   void run();
-
-  cedar::proc::GroupPtr recruitGroup(std::string containerName);
-
-  cedar::proc::GroupPtr getGroupContainer(std::string name);
-
-  std::string cutImprintName(std::string fullName);
-
-  cedar::proc::ElementPtr AddAGroupFromFile(const std::string &groupName, const cedar::aux::Path &fileName, cedar::proc::GroupPtr containerGroup);
-
-  void registerForEpisode();
-
-  void registerForOrdinal();
+  void rewardHebbianTraceResetWeights();
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -156,8 +142,6 @@ private:
 protected:
   // none yet
 private:
-  int mCreatedGroupCounter;
-  bool ran = false;
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -167,17 +151,11 @@ protected:
   // none yet
 
 private:
-  cedar::aux::StringParameterPtr _mGroupFile;
-  cedar::aux::StringParameterPtr _mGroupName;
-  cedar::aux::StringParameterPtr _mGroupContainerName;
-  cedar::aux::StringParameterPtr _mInnerContainerName;
-  cedar::aux::EnumParameterPtr _mAddRoutine;
-  cedar::aux::IntParameterPtr _mXOffSet;
-  cedar::aux::IntParameterPtr _mYOffSet;
+  cedar::aux::EnumParameterPtr _mFunctionName;
   // none yet
 
 };
-// class cedar::proc::scripts::RecruitGroup
+// class cedar::proc::scripts::ExecuteFunctionOnSteps
 
-#endif // RECRUIT_GROUP_H
+#endif // EXECUTE_FUNCTION_ON_STEPS_H
 

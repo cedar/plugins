@@ -72,11 +72,6 @@ _mH( new cedar::aux::DoubleParameter ( this, "h (negative)", -5.0, -100000.0, 0.
 
 void cedar::proc::steps::ApproximateInput::compute(const cedar::proc::Arguments&)
 {
-}
-
-
-void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::string&)
-{
   float h = _mH->getValue();
   float tau = _mTau->getValue() / 1000.0;
 
@@ -114,10 +109,16 @@ void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::str
   mOutput->getData().at<float>(0,0) = newS;
 }
 
+
+void cedar::proc::steps::ApproximateInput::inputConnectionChanged(const std::string&)
+{
+
+}
+
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::ApproximateInput::determineInputValidity
 (
   cedar::proc::ConstDataSlotPtr,
-  cedar::aux::ConstDataPtr 
+  cedar::aux::ConstDataPtr
 )
 const
 {
