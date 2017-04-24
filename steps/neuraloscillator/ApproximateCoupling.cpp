@@ -490,40 +490,38 @@ float cedar::proc::steps::ApproximateCoupling::calculateCouplingFromTF(float tf)
      }
   }
 
-  assert(1); // hier sollte man nicht landen. TODO
-  return 0.0; // FEHLER
- }
+std::cout << "ApproximateCoupling: ausserhalb Wertebereich!" << std::endl;
+  return *(cs.end());
+}
 
 
 void cedar::proc::steps::ApproximateCoupling::compute(const cedar::proc::Arguments&)
 {
-}
-
-void cedar::proc::steps::ApproximateCoupling::vectorDimensionChanged()
-{
-}
-
-void cedar::proc::steps::ApproximateCoupling::inputConnectionChanged(const std::string& inputName)
-{
-  float newC;
-
-  auto data = getInput(inputName);
+  auto data = getInput("duration");
   if (!data)
     return;
   auto mat = data->getData<cv::Mat>();
   if (mat.empty())
     return;
 
-  newC= calculateCouplingFromTF( mat.at<float>(0,0)  );
+  float newC= calculateCouplingFromTF( mat.at<float>(0,0)  );
 
   mOutput->getData().create(1, 1, CV_32F);
   mOutput->getData().at<float>(0,0) = newC;
 }
 
+void cedar::proc::steps::ApproximateCoupling::vectorDimensionChanged()
+{
+}
+
+void cedar::proc::steps::ApproximateCoupling::inputConnectionChanged(const std::string& )
+{
+}
+
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::ApproximateCoupling::determineInputValidity
 (
   cedar::proc::ConstDataSlotPtr,
-  cedar::aux::ConstDataPtr data
+  cedar::aux::ConstDataPtr
 )
 const
 {
