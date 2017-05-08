@@ -77,7 +77,9 @@ cedar::proc::steps::RewardHebbTrace::RewardHebbTrace()
         // outputs
         mConnectionWeights(new cedar::aux::MatData(cv::Mat::zeros(100, 100, CV_32F))),
         mWeightOutput((new cedar::aux::MatData(cv::Mat::zeros(100, 100, CV_32F)))),
+        mRecipocralOutput((new cedar::aux::MatData(cv::Mat::zeros(1, 1, CV_32F)))),
         mReadOutTrigger(new cedar::aux::MatData(cv::Mat::zeros(1, 1, CV_32F))),
+//        mReciprocalInput(new cedar::aux::MatData(cv::mat::zeros(100,100,CV_32F))),
         mInputSum(new cedar::aux::MatData(cv::Mat::zeros(1, 1, CV_32F))),
         mWeightSizeX(mAssociationDimension->getValue() > 0 ? mAssociationSizes->getValue().at(0) : 1),
         mWeightSizeY(mAssociationDimension->getValue() > 1 ? mAssociationSizes->getValue().at(1) : 1)
@@ -90,6 +92,9 @@ cedar::proc::steps::RewardHebbTrace::RewardHebbTrace()
   auto weightOutput = this->declareOutput(mOutputName, mConnectionWeights);
   weightOutput->setSerializable(true);
   auto weightTriggerOutput = this->declareOutput(mTriggerOutputName, mWeightOutput);
+
+//  cedar::proc::DataSlotPtr reciprocInput = this->declareInput(mReciprocalInputName, true);
+  auto reciprocOutput = this->declareOutput(mReciprocalOutputName,mRecipocralOutput);
 
   this->mConnectionWeights->getData() = initializeWeightMatrix();
   mWeightOutput->setData(mConnectionWeights->getData());
@@ -133,7 +138,7 @@ cv::Mat cedar::proc::steps::RewardHebbTrace::initializeWeightMatrix()
   {
 //    std::cout<<"InitWeights: RANDOM!"<<std::endl;
     srand(static_cast<unsigned>(time(0)));
-    float HIGH = 0.1;
+    float HIGH = 0.01;
     float LOW = 0;
     for (unsigned int x = 0; x < mWeightSizeX; x++)
     {
@@ -196,10 +201,25 @@ void cedar::proc::steps::RewardHebbTrace::eulerStep(const cedar::unit::Time &tim
       mIsRewarded = false;
     }
   }
+
+  if(mAssoInput)
+  {
+    //Somehow match the current Input with the learned Weights
+    cv::Mat currentAssoMat = mAssoInput->getData();
+    cv::Mat currentWeights = mConnectionWeights->getData();
+
+    cv::Mat compMultiplication = currentAssoMat.mul(currentWeights);
+    float summedMatrix = cv::sum(compMultiplication)[0];
+    cv::Mat recOutput = cv::Mat::zeros(1,1,CV_32F);
+    recOutput.at<float>(0,0) = summedMatrix;
+
+    mRecipocralOutput->setData(recOutput);
+  }
+
   if (mReadOutTrigger)
   {
     const cv::Mat& trigger = mReadOutTrigger->getData();
-    if (trigger.at<float>(0, 0) > 0.5) // It is assumed that a change greater than 0.5 is intentional
+    if (trigger.at<float>(0, 0) > 0.5) //TODO: This should actually just be calculated using a multiplication wit a sigmoid
     {
       mWeightOutput->setData(mConnectionWeights->getData());
     }
@@ -223,6 +243,10 @@ void cedar::proc::steps::RewardHebbTrace::inputConnectionChanged(const std::stri
   {
     this->mReadOutTrigger = boost::dynamic_pointer_cast<const cedar::aux::MatData>(this->getInput(inputName));
   }
+//  if (inputName == mReciprocalInputName)
+//  {
+//    this->mReciprocalInput = boost::dynamic_pointer_cast<const cedar::aux::MatData>(this->getInput(inputName));
+//  }
 }
 
 cedar::proc::DataSlot::VALIDITY
