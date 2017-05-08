@@ -139,17 +139,21 @@ protected:
   //!@brief The data containing the output.
   cedar::aux::MatDataPtr mConnectionWeights;
   cedar::aux::MatDataPtr mWeightOutput;
+  cedar::aux::MatDataPtr mRecipocralOutput;
 private:
   std::string mAssoInputName = "association input";
   std::string mOutputName = "weights";
   std::string mTriggerOutputName = "trigger output";
   std::string mRewardInputName = "reward signal";
   std::string mReadOutInputName= "read out trigger";
+//  std::string mReciprocalInputName = "reciprocal input";
+  std::string mReciprocalOutputName = "reciprocal output";
   bool mIsRewarded = false;
   int mElapsedTime = 0;
 
   cedar::aux::ConstMatDataPtr mAssoInput;
   cedar::aux::ConstMatDataPtr mReadOutTrigger;
+//  cedar::aux::ConstMatDataPtr mReciprocalInput;
   cedar::aux::MatDataPtr mInputSum;
   unsigned int mWeightSizeX;
   unsigned int mWeightSizeY;
