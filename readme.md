@@ -83,7 +83,6 @@ Finally, you can add all classes of a kind using these commands:
 | *MotionGradient*             | This class provides a cedar processing step implementing the OpenCV function calcMotionGradient. |
 | **Nao**                                                                                                       |
 | *NaoCamera*                  | Nao's camera.                                                                  |
-| **NeuralOscillator**                                                                                          |
 | **Object Recognition**                                                                                        |
 | *FeatureStacks*              | This step builds localized histograms around keypoints. See Lomp et al. (2014) for details. |
 | *KeypointEdgeHistogramExtractor* | This step builds localized histograms around keypoints using shape features.   |
@@ -96,7 +95,6 @@ Finally, you can add all classes of a kind using these commands:
 | *KinectReader*               | A source that reads a Kinect camera, yielding images and depth images, as well as a RGBA point cloud. |
 | *SpatialPattern*             | Outputs a matrix of synaptic weights that correspond to a spatial relational template (e.g., "to the left of"). |
 | **Utilities**                                                                                                 |
-| *ApproximateCoupling*        | bla                                                                            |
 | *ApproximateCoupling*        | bla                                                                            |
 | *ApproximateInput*           | bla                                                                            |
 | *AttentionSlice*             | A step that determines the location of the maximum in an activation matrix and cuts out a region around this location from an input image. |

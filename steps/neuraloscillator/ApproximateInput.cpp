@@ -97,13 +97,14 @@ void cedar::proc::steps::ApproximateInput::compute(const cedar::proc::Arguments&
   float tf = durationData.at<float>(0,0);
   float D = distanceData.at<float>(0,0);
 
-  float C3 = ( c - 1 ) / ( c + 1 );
+  float C3 = ( c*c -1 ) / ( (c+1)*(c+1) );
+  //( c - 1 ) / ( c + 1 );
 
-  float nenner = tau*tau*(c+1)/pow(c*c+1, 2.0)
-                 *(c + C3 - C3*tf
+  float nenner = tau*tau*(c+1.0)/pow(c*c+1, 2.0)
+                 *(c + C3 - C3*tf/tau*(c*c+1.0)
                    + exp( -tf/tau )
                      * ( - sin(c*tf/tau) - c*cos(c*tf/tau) + c*C3*sin(c*tf/tau) - C3*cos(c*tf/tau) ));
-  float newS = D / nenner + h; // h is negative!
+  float newS = D / nenner - h; // h is negative!
 
   mOutput->getData().create(1, 1, CV_32F);
   mOutput->getData().at<float>(0,0) = newS;
