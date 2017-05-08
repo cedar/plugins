@@ -1,0 +1,737 @@
+{
+    "meta":
+    {
+        "format": "1",
+        "required plugins":
+        [
+            "StandardPlugin"
+        ]
+    },
+    "steps":
+    {
+        "cedar.processing.sources.GaussInput":
+        {
+            "name": "bottom-up pseudo-edge-histogram",
+            "amplitude": "1",
+            "dimensionality": "1",
+            "sigma":
+            [
+                "0.01"
+            ],
+            "centers":
+            [
+                "3"
+            ],
+            "sizes":
+            [
+                "36"
+            ],
+            "cyclic": "false"
+        },
+        "cedar.processing.sources.GaussInput":
+        {
+            "name": "new GaussInput",
+            "amplitude": "1",
+            "dimensionality": "2",
+            "sigma":
+            [
+                "3",
+                "3"
+            ],
+            "centers":
+            [
+                "3",
+                "3"
+            ],
+            "sizes":
+            [
+                "36",
+                "30"
+            ],
+            "cyclic": "false"
+        },
+        "cedar.processing.sources.GaussInput":
+        {
+            "name": "pseudo-bottom-up-histogram",
+            "amplitude": "1",
+            "dimensionality": "3",
+            "sigma":
+            [
+                "3",
+                "3",
+                "3"
+            ],
+            "centers":
+            [
+                "3",
+                "3",
+                "3"
+            ],
+            "sizes":
+            [
+                "9",
+                "9",
+                "36"
+            ],
+            "cyclic": "false"
+        },
+        "cedar.processing.sources.GaussInput":
+        {
+            "name": "top-down pseudo-edge-histogram",
+            "amplitude": "1",
+            "dimensionality": "1",
+            "sigma":
+            [
+                "0.01"
+            ],
+            "centers":
+            [
+                "3"
+            ],
+            "sizes":
+            [
+                "36"
+            ],
+            "cyclic": "false"
+        }
+    },
+    "groups":
+    {
+        "edge rotation estimation":
+        {
+            "meta":
+            {
+                "format": "1",
+                "required plugins":
+                [
+                    "StandardPlugin"
+                ]
+            },
+            "steps":
+            {
+                "cedar.proc.steps.CrossCorrelation":
+                {
+                    "name": "cross correlation",
+                    "pad input": "true",
+                    "unpad output": "false",
+                    "normalize": "false",
+                    "correlated dimensions":
+                    [
+                        "true"
+                    ],
+                    "border type": "Cyclic",
+                    "alternate kernel center": "false",
+                    "apply spatial filtering": "false",
+                    "spatial filtering threshold": "0.01"
+                },
+                "cedar.processing.RemoveMean":
+                {
+                    "name": "mean-freeing"
+                },
+                "cedar.processing.Normalization":
+                {
+                    "name": "normalization",
+                    "normalization type": "L2Norm",
+                    "normalized dimensions":
+                    [
+                        "true"
+                    ]
+                },
+                "cedar.processing.Resize":
+                {
+                    "name": "resizing",
+                    "output size":
+                    [
+                        "180"
+                    ],
+                    "interpolation": "LINEAR"
+                },
+                "cedar.processing.StaticGain":
+                {
+                    "name": "weighting",
+                    "gain factor": "0"
+                }
+            },
+            "connections":
+            [
+                {
+                    "source": "top-down pattern.output",
+                    "target": "cross correlation.input"
+                },
+                {
+                    "source": "bottom-up pattern.output",
+                    "target": "cross correlation.pattern"
+                },
+                {
+                    "source": "cross correlation.crossCorrelation",
+                    "target": "normalization.input"
+                },
+                {
+                    "source": "normalization.normalized input",
+                    "target": "mean-freeing.matrix"
+                },
+                {
+                    "source": "mean-freeing.mean-free matrix",
+                    "target": "weighting.input"
+                },
+                {
+                    "source": "resizing.output",
+                    "target": "rotation estimate.input"
+                },
+                {
+                    "source": "weighting.output",
+                    "target": "resizing.input"
+                }
+            ],
+            "parameter links":
+            [
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "target element": "weighting",
+                    "source parameter": "weight",
+                    "target parameter": "gain factor"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "target element": "resizing",
+                    "source parameter": "output size",
+                    "target parameter": "output size"
+                }
+            ],
+            "custom parameters":
+            [
+                {
+                    "name": "weight",
+                    "type": "cedar.aux.DoubleParameter"
+                },
+                {
+                    "name": "output size",
+                    "type": "cedar.aux.UIntVectorParameter"
+                }
+            ],
+            "name": "edge rotation estimation",
+            "connectors":
+            {
+                "bottom-up pattern": "true",
+                "rotation estimate": "false",
+                "top-down pattern": "true"
+            },
+            "is looped": "false",
+            "time factor": "1",
+            "weight": "0",
+            "output size":
+            [
+                "180"
+            ],
+            "ui":
+            [
+                {
+                    "type": "step",
+                    "step": "cross correlation",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "40",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "mean-freeing",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "184",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "normalization",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "112",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "resizing",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "328",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "weighting",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "256",
+                    "positionY": "32"
+                }
+            ],
+            "ui generic":
+            {
+                "group": "edge rotation estimation",
+                "architecture widgets": "",
+                "width": "408",
+                "height": "88",
+                "smart mode": "false",
+                "collapsed": "false",
+                "lock geometry": "false",
+                "uncollapsed width": "408",
+                "uncollapsed height": "88",
+                "positionX": "-400",
+                "positionY": "-144"
+            }
+        },
+        "histogram label matching":
+        {
+            "meta":
+            {
+                "format": "1",
+                "required plugins":
+                [
+                    "StandardPlugin"
+                ]
+            },
+            "steps":
+            {
+                "cedar.proc.steps.CrossCorrelation":
+                {
+                    "name": "correlation",
+                    "pad input": "false",
+                    "unpad output": "false",
+                    "normalize": "true",
+                    "correlated dimensions":
+                    [
+                        "false",
+                        "true"
+                    ],
+                    "border type": "Zero",
+                    "alternate kernel center": "false",
+                    "apply spatial filtering": "false",
+                    "spatial filtering threshold": "0.01"
+                },
+                "cedar.processing.RemoveMean":
+                {
+                    "name": "mean-freeing"
+                },
+                "cedar.processing.Normalization":
+                {
+                    "name": "normalization",
+                    "normalization type": "L2Norm",
+                    "normalized dimensions":
+                    [
+                        "true"
+                    ]
+                },
+                "cedar.processing.StaticGain":
+                {
+                    "name": "weighting",
+                    "gain factor": "0"
+                }
+            },
+            "connections":
+            [
+                {
+                    "source": "weights.output",
+                    "target": "correlation.input"
+                },
+                {
+                    "source": "pattern.output",
+                    "target": "correlation.pattern"
+                },
+                {
+                    "source": "correlation.crossCorrelation",
+                    "target": "normalization.input"
+                },
+                {
+                    "source": "normalization.normalized input",
+                    "target": "mean-freeing.matrix"
+                },
+                {
+                    "source": "mean-freeing.mean-free matrix",
+                    "target": "weighting.input"
+                },
+                {
+                    "source": "weighting.output",
+                    "target": "label match values.input"
+                }
+            ],
+            "parameter links":
+            [
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "target element": "weighting",
+                    "source parameter": "weight",
+                    "target parameter": "gain factor"
+                }
+            ],
+            "custom parameters":
+            [
+                {
+                    "name": "weight",
+                    "type": "cedar.aux.DoubleParameter"
+                }
+            ],
+            "name": "histogram label matching",
+            "connectors":
+            {
+                "label match values": "false",
+                "pattern": "true",
+                "weights": "true"
+            },
+            "is looped": "false",
+            "time factor": "1",
+            "weight": "0",
+            "ui":
+            [
+                {
+                    "type": "step",
+                    "step": "correlation",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "48",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "mean-freeing",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "200",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "normalization",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "120",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "weighting",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "280",
+                    "positionY": "32"
+                }
+            ],
+            "ui generic":
+            {
+                "group": "histogram label matching",
+                "architecture widgets": "",
+                "width": "360",
+                "height": "88",
+                "smart mode": "false",
+                "collapsed": "false",
+                "lock geometry": "false",
+                "uncollapsed width": "360",
+                "uncollapsed height": "88",
+                "positionX": "-400",
+                "positionY": "88"
+            }
+        },
+        "histogram shift estimation":
+        {
+            "meta":
+            {
+                "format": "1",
+                "required plugins":
+                [
+                    "StandardPlugin"
+                ]
+            },
+            "steps":
+            {
+                "cedar.proc.steps.CrossCorrelation":
+                {
+                    "name": "new CrossCorrelation",
+                    "pad input": "true",
+                    "unpad output": "true",
+                    "normalize": "false",
+                    "correlated dimensions":
+                    [
+                        "false",
+                        "false",
+                        "true"
+                    ],
+                    "border type": "Zero",
+                    "alternate kernel center": "false",
+                    "apply spatial filtering": "false",
+                    "spatial filtering threshold": "0.01"
+                },
+                "cedar.processing.Normalization":
+                {
+                    "name": "new Normalization",
+                    "normalization type": "L2Norm",
+                    "normalized dimensions":
+                    [
+                        "true",
+                        "true"
+                    ]
+                },
+                "cedar.processing.Projection":
+                {
+                    "name": "new Projection",
+                    "dimension mapping":
+                    {
+                        "0": "0",
+                        "1": "1",
+                        "2": "4294967295"
+                    },
+                    "output dimensionality": "2",
+                    "output dimension sizes":
+                    [
+                        "9",
+                        "9"
+                    ],
+                    "compression type": "SUM"
+                },
+                "cedar.processing.Resize":
+                {
+                    "name": "new Resize",
+                    "output size":
+                    [
+                        "129",
+                        "129"
+                    ],
+                    "interpolation": "LINEAR"
+                },
+                "cedar.processing.StaticGain":
+                {
+                    "name": "weighting",
+                    "gain factor": "0"
+                }
+            },
+            "connections":
+            [
+                {
+                    "source": "bottom-up pattern.output",
+                    "target": "new CrossCorrelation.input"
+                },
+                {
+                    "source": "top-down pattern.output",
+                    "target": "new CrossCorrelation.pattern"
+                },
+                {
+                    "source": "new CrossCorrelation.crossCorrelation",
+                    "target": "new Projection.input"
+                },
+                {
+                    "source": "new Projection.output",
+                    "target": "new Normalization.input"
+                },
+                {
+                    "source": "new Normalization.normalized input",
+                    "target": "weighting.input"
+                },
+                {
+                    "source": "new Resize.output",
+                    "target": "shift estimate.input"
+                },
+                {
+                    "source": "weighting.output",
+                    "target": "new Resize.input"
+                }
+            ],
+            "parameter links":
+            [
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "target element": "weighting",
+                    "source parameter": "weight",
+                    "target parameter": "gain factor"
+                },
+                {
+                    "type": "cedar.aux.DirectParameterLink",
+                    "target element": "new Resize",
+                    "source parameter": "shift field size",
+                    "target parameter": "output size"
+                }
+            ],
+            "custom parameters":
+            [
+                {
+                    "name": "weight",
+                    "type": "cedar.aux.DoubleParameter"
+                },
+                {
+                    "name": "shift field size",
+                    "type": "cedar.aux.UIntVectorParameter"
+                }
+            ],
+            "name": "histogram shift estimation",
+            "connectors":
+            {
+                "bottom-up pattern": "true",
+                "shift estimate": "false",
+                "top-down pattern": "true"
+            },
+            "is looped": "false",
+            "time factor": "1",
+            "weight": "0",
+            "shift field size":
+            [
+                "129",
+                "129"
+            ],
+            "ui":
+            [
+                {
+                    "type": "step",
+                    "step": "new CrossCorrelation",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "40",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "new Normalization",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "184",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "new Projection",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "112",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "new Resize",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "328",
+                    "positionY": "32"
+                },
+                {
+                    "type": "step",
+                    "step": "weighting",
+                    "display style": "ICON_ONLY",
+                    "width": "40",
+                    "height": "40",
+                    "positionX": "256",
+                    "positionY": "32"
+                }
+            ],
+            "ui generic":
+            {
+                "group": "histogram shift estimation",
+                "architecture widgets": "",
+                "width": "408",
+                "height": "88",
+                "smart mode": "false",
+                "collapsed": "false",
+                "lock geometry": "false",
+                "uncollapsed width": "408",
+                "uncollapsed height": "88",
+                "positionX": "-400",
+                "positionY": "-16"
+            }
+        }
+    },
+    "connections":
+    [
+        {
+            "source": "top-down pseudo-edge-histogram.Gauss input",
+            "target": "edge rotation estimation.top-down pattern"
+        },
+        {
+            "source": "bottom-up pseudo-edge-histogram.Gauss input",
+            "target": "edge rotation estimation.bottom-up pattern"
+        },
+        {
+            "source": "pseudo-bottom-up-histogram.Gauss input",
+            "target": "histogram shift estimation.bottom-up pattern"
+        },
+        {
+            "source": "top-down pseudo-edge-histogram.Gauss input",
+            "target": "histogram shift estimation.top-down pattern"
+        },
+        {
+            "source": "new GaussInput.Gauss input",
+            "target": "histogram label matching.weights"
+        },
+        {
+            "source": "bottom-up pseudo-edge-histogram.Gauss input",
+            "target": "histogram label matching.pattern"
+        }
+    ],
+    "name": "",
+    "connectors": "",
+    "is looped": "false",
+    "time factor": "1",
+    "ui":
+    [
+        {
+            "type": "step",
+            "step": "bottom-up pseudo-edge-histogram",
+            "display style": "ICON_ONLY",
+            "width": "40",
+            "height": "40",
+            "positionX": "-584",
+            "positionY": "-64"
+        },
+        {
+            "type": "step",
+            "step": "new GaussInput",
+            "display style": "ICON_ONLY",
+            "width": "40",
+            "height": "40",
+            "positionX": "-584",
+            "positionY": "112"
+        },
+        {
+            "type": "step",
+            "step": "pseudo-bottom-up-histogram",
+            "display style": "ICON_ONLY",
+            "width": "40",
+            "height": "40",
+            "positionX": "-584",
+            "positionY": "56"
+        },
+        {
+            "type": "step",
+            "step": "top-down pseudo-edge-histogram",
+            "display style": "ICON_ONLY",
+            "width": "40",
+            "height": "40",
+            "positionX": "-584",
+            "positionY": "-120"
+        }
+    ],
+    "ui generic":
+    {
+        "group": "",
+        "open plots": "",
+        "plot groups": "",
+        "architecture widgets": "",
+        "width": "250",
+        "height": "250",
+        "smart mode": "false",
+        "collapsed": "false",
+        "lock geometry": "false",
+        "uncollapsed width": "250",
+        "uncollapsed height": "250",
+        "positionX": "0",
+        "positionY": "0"
+    }
+}
