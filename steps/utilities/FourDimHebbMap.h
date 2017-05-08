@@ -161,8 +161,10 @@ private:
   cedar::aux::MatDataPtr mInputSum;
   unsigned int mWeightSizeX;
   unsigned int mWeightSizeY;
-  std::vector<std::vector<cv::Mat>> mWeights;
+//  std::vector<std::vector<cv::Mat>> mWeights;
+  std::map<std::pair<int,int>,cv::Mat> mWeightMap;
   cv::Mat mMatrixOfOnes;
+  cv::Mat mNonZeroElements;
 };// class cedar::proc::steps::FourDimHebbMap
 
 

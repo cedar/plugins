@@ -111,60 +111,35 @@ cedar::proc::steps::FourDimHebbMap::FourDimHebbMap()
 //  mWeightCenters->setConstant(!mSetWeights->getValue());
 
   this->registerFunction("reset Weights", boost::bind(&FourDimHebbMap::resetWeights, this), false);
-//  this->registerFunction("create OutputField", boost::bind(&FourDimHebbMap::createFieldRecruit, this), false);
 
-//  QObject::connect(mAssociationDimension.get(), SIGNAL(valueChanged()), this, SLOT(updateAssociationDimension()));
   QObject::connect(mAssociationSizes.get(), SIGNAL(valueChanged()), this, SLOT(resetWeights()));
   QObject::connect(mUseRewardDuration.get(), SIGNAL(valueChanged()), this, SLOT(toggleUseReward()));
-//  QObject::connect(mSetWeights.get(), SIGNAL(valueChanged()), this, SLOT(toggleUseManualWeights()));
-//  QObject::connect(mWeightCenters.get(), SIGNAL(valueChanged()), this, SLOT(resetWeights()));
-//  QObject::connect(mWeightSigmas.get(), SIGNAL(valueChanged()), this, SLOT(resetWeights()));
-//  QObject::connect(mWeightAmplitude.get(), SIGNAL(valueChanged()), this, SLOT(resetWeights()));
+
 }
 //----------------------------------------------------------------------------------------------------------------------
 // methods
 //----------------------------------------------------------------------------------------------------------------------
 
-//void cedar::proc::steps::FourDimHebbMap::updateAssociationDimension()
-//{
-//  int new_dim = static_cast<int>(mAssociationDimension->getValue());
-//  mAssociationSizes->resize(new_dim, mAssociationSizes->getDefaultValue());
-//  mWeightCenters->resize(new_dim, mWeightCenters->getDefaultValue());
-//  mWeightSigmas->resize(new_dim, mWeightCenters->getDefaultValue());
-//  mWeightSizeX = mAssociationDimension->getValue() > 0 ? mAssociationSizes->getValue().at(0) : 1;
-//  mWeightSizeY = mAssociationDimension->getValue() > 1 ? mAssociationSizes->getValue().at(1) : 1;
-//  this->resetWeights();
-//}
+
 
 void cedar::proc::steps::FourDimHebbMap::initializeWeightMatrix()
 {
   mWeightSizeX = mAssociationSizes->getValue().at(0);
   mWeightSizeY = mAssociationSizes->getValue().at(1);
   mMatrixOfOnes = cv::Mat(mWeightSizeX, mWeightSizeY, CV_32F, 1.0f);
-
+  mWeightMap.clear();
   //Add Weights only dynamically!
 //  mWeights.clear();
-  mWeights.resize(mWeightSizeX);
-  for (unsigned int i = 0; i < mWeightSizeX; i++)
-  {
-    mWeights.at(i).resize(mWeightSizeY);
-    for (unsigned int j = 0; j < mWeightSizeY; j++)
-    {
-      cv::Mat myWeightMat = cv::Mat::zeros(mWeightSizeX, mWeightSizeY, CV_32F);
-//      srand(static_cast<unsigned>(time(0)));
-//      float HIGH = 0.1;
-//      float LOW = 0;
-//      for (unsigned int x = 0; x < mWeightSizeX; x++)
-//      {
-//        for (unsigned int y = 0; y < mWeightSizeY; y++)
-//        {
-//          float random = LOW + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HIGH - LOW)));
-//          myWeightMat.at<float>(x, y) = random;
-//        }
-//      }
-      mWeights.at(i).at(j) = myWeightMat;
-    }
-  }
+//  mWeights.resize(mWeightSizeX);
+//  for (unsigned int i = 0; i < mWeightSizeX; i++)
+//  {
+//    mWeights.at(i).resize(mWeightSizeY);
+//    for (unsigned int j = 0; j < mWeightSizeY; j++)
+//    {
+//      cv::Mat myWeightMat = cv::Mat::zeros(mWeightSizeX, mWeightSizeY, CV_32F);
+//      mWeights.at(i).at(j) = myWeightMat;
+//    }
+//  }
 }
 
 cv::Mat cedar::proc::steps::FourDimHebbMap::retrieveWeightedOutput()
@@ -172,21 +147,24 @@ cv::Mat cedar::proc::steps::FourDimHebbMap::retrieveWeightedOutput()
   cv::Mat output = cv::Mat::zeros(mWeightSizeX, mWeightSizeY, CV_32F);
   if (mReadOutTrigger)
   {
-    const cv::Mat &inputMap = mReadOutTrigger->getData();
-    for (int x = 0; x < inputMap.rows; x++)
+    for (unsigned int i = 0; i < mNonZeroElements.total(); i++)
     {
-      for (int y = 0; y < inputMap.cols; y++)
+      int x = mNonZeroElements.at<cv::Point>(i).x;
+      int y = mNonZeroElements.at<cv::Point>(i).y;
+
+      std::pair<int,int> curPair = std::pair<int,int>(x,y);
+      auto iterator = mWeightMap.find(curPair);
+      if(iterator != mWeightMap.end())
       {
-        if (inputMap.at<float>(x, y) > 0.5)
-        {
-          output += mWeights.at(x).at(y);
-        }
+        output += iterator->second;
       }
+//      output += mWeights.at(y).at(x);
     }
   }
   //Todo:: Maybe Normalize here!
   return output;
 }
+
 
 cv::Mat cedar::proc::steps::FourDimHebbMap::retrieveCuedOutput()
 {
@@ -194,55 +172,27 @@ cv::Mat cedar::proc::steps::FourDimHebbMap::retrieveCuedOutput()
   if (mCueInput)
   {
     const cv::Mat &inputCue = mCueInput->getData();
-    if ((unsigned int)inputCue.rows ==  mWeightSizeX && (unsigned int)inputCue.cols ==  mWeightSizeY)
+    if ((unsigned int) inputCue.rows == mWeightSizeX && (unsigned int) inputCue.cols == mWeightSizeY)
     {
-      double maxCueVal;
-      cv::minMaxLoc(inputCue, nullptr, &maxCueVal);
-      //Brute Force Variant
-//    //Store Cue Indices in a LookUpTable, what about cv::for_each_operator?
-//    std::vector<QPoint> relevantIndices;
-//    for (int x = 0; x < inputCue.rows; x++)
-//    {
-//      for (int y = 0; y < inputCue.cols; y++)
-//      {
-//        if (inputCue.at<float>(x, y) > 0.5)
-//        {
-//          relevantIndices.push_back(QPoint(x,y));
-//        }
-//      }
-//    }
-//    std::cout << "InputCue: "<< inputCue.rows << "," << inputCue.cols <<std::endl;
-//    std::cout << "MatchMatrix0: "<< mWeights.at(0).at(0).rows << "," << mWeights.at(0).at(0).cols <<std::endl;
+//      double maxCueVal = std::numeric_limits<double>::min();
+//      cv::minMaxLoc(inputCue, nullptr, &maxCueVal);
 
-      for (unsigned int i = 0; i < mWeightSizeX; i++)
+      for (auto it=mWeightMap.begin(); it!=mWeightMap.end(); ++it)
       {
-        for (unsigned int j = 0; j < mWeightSizeY; j++)
-        {
-          cv::Mat matchMat = mWeights.at(i).at(j);
-//          cv::Mat multMat = inputCue.mul(matchMat);
-          cv::Mat addMat = inputCue+matchMat;
-          double maxValue = std::numeric_limits<double>::min();
-          double minVal;
-          cv::minMaxLoc(addMat, &minVal, &maxValue);
-//          std::cout<<"MaxValue = " << maxValue<<std::endl;
-          if (maxValue > maxCueVal + mCueThreshold->getValue())
-          {
-            output.at<float>(i, j) = maxValue;
-          }
-          //Does any part overlap with the cue? Then we can add the current i,j Position to our OutputMatrix
-//        for(unsigned int k = 0 ; k< relevantIndices.size();k++)
-//        {
-//
-//          QPoint curPoint = relevantIndices.at(k);
-//          std::cout<<"Indice k= " << k << " at " << curPoint.x() <<","<<curPoint.y()<<" Matrix Value: "<< MatchMat.at<float>(curPoint.x(),curPoint.y())<<std::endl;
-//
-//          if(MatchMat.at<float>(curPoint.x(),curPoint.y()) > mCueThreshold->getValue() )
-//          {
-//            output.at<float>(i,j) = 1;
-//            break;
-//          }
-//        }
-        }
+        cv::Mat matchMat = it->second;
+//        cv::Mat addMat = inputCue + matchMat;
+        cv::Mat multMat = inputCue.mul(matchMat);
+
+        double maxValue = std::numeric_limits<double>::min();
+        double minVal;
+        cv::minMaxLoc(multMat, &minVal, &maxValue);
+        //Does any part overlap with the cue? Then we can add the current i,j Position to our OutputMatrix
+        if (maxValue >  mCueThreshold->getValue()) // Problem, wie groß sind diese Gewichte wohl so?
+         {
+           auto pair = it->first;
+//           std::cout<<"maxValue= " << maxValue << " mCueThreshold" << mCueThreshold->getValue() <<std::endl;
+           output.at<float>(pair.second,pair.first) = maxValue;
+         }
       }
     }
   }
@@ -252,14 +202,16 @@ cv::Mat cedar::proc::steps::FourDimHebbMap::retrieveCuedOutput()
 
 void cedar::proc::steps::FourDimHebbMap::eulerStep(const cedar::unit::Time &time)
 {
+
   if (mAssoInput && mInputSum && mReadOutTrigger)
   {
+    cv::Mat currentInputMap = mReadOutTrigger->getData();
+    currentInputMap.convertTo(currentInputMap, CV_8UC1);
+    cv::findNonZero(currentInputMap, mNonZeroElements);
     cv::Mat &rewardTrigger = this->mInputSum->getData();
     cedar::proc::steps::Sum::sumSlot(this->getInputSlot(mRewardInputName), this->mInputSum->getData(), false);
     if (rewardTrigger.at<float>(0, 0) > mRewardThreshold->getValue())
     {
-//      std::cout << "Surpass the trigger!" <<std::endl;
-//      this->createFieldRecruit();
       if (!mIsRewarded && mUseRewardDuration->getValue())
       {
         mElapsedTime = 0;
@@ -272,21 +224,40 @@ void cedar::proc::steps::FourDimHebbMap::eulerStep(const cedar::unit::Time &time
         //Apply Learning Rule
         double learnRate = mLearnRatePositive->getValue();
         cv::Mat currentAssoMat = mAssoInput->getData();
-        cv::Mat currentInputMap = mReadOutTrigger->getData();
 
-        for (unsigned int x = 0; x < mWeightSizeX; x++)
+        for (unsigned int i = 0; i < mNonZeroElements.total(); i++)
         {
-          for (unsigned int y = 0; y < mWeightSizeY; y++)
+          int x = mNonZeroElements.at<cv::Point>(i).x;
+          int y = mNonZeroElements.at<cv::Point>(i).y;
+
+          std::pair<int,int> curPair = std::pair<int,int>(x,y);
+          auto iterator = mWeightMap.find(curPair);
+          if(iterator != mWeightMap.end()) // Update Existing Element
           {
-            //Hebbian Approach
-//               mWeights.at(x).at(y) = mWeights.at(x).at(y) + currentInputMap.at<float>(x, y)* learnRate * (currentAssoMat -mWeights.at(x).at(y));
-            //Preshape Approach without decay
-            cv::Mat normalizeMat = mWeights.at(x).at(y) + currentInputMap.at<float>(x, y) * learnRate * currentAssoMat;
-            cv::min(normalizeMat, mMatrixOfOnes, normalizeMat); // Ensure that no MatrixValue surpasses One
-            mWeights.at(x).at(y) = normalizeMat;
-//            mWeights.at(x).at(y) = mWeights.at(x).at(y) + currentInputMap.at<float>(x, y)* learnRate * currentAssoMat;
+            iterator->second = iterator->second + +learnRate * currentAssoMat;
           }
+          else // Insert new Element
+          {
+            mWeightMap[curPair] = learnRate * currentAssoMat;
+          }
+//          mWeights.at(y).at(x) = mWeights.at(y).at(x) + learnRate * currentAssoMat;
+          //One could normalize here
         }
+
+//        for (unsigned int x = 0; x < mWeightSizeX; x++)
+//        {
+//          for (unsigned int y = 0; y < mWeightSizeY; y++)
+//          {
+//            //Hebbian Approach
+////               mWeights.at(x).at(y) = mWeights.at(x).at(y) + currentInputMap.at<float>(x, y)* learnRate * (currentAssoMat -mWeights.at(x).at(y));
+
+////            Preshape Approach without decay
+////            This approach ensures with currentInputMap.at<float>(x,y) that stuff is only learnend at the right positions. But maybe we can reduce iterating!
+//            cv::Mat normalizeMat = mWeights.at(x).at(y) + currentInputMap.at<float>(x, y) * learnRate * currentAssoMat;
+//            cv::min(normalizeMat, mMatrixOfOnes, normalizeMat); // Ensure that no MatrixValue surpasses One
+//            mWeights.at(x).at(y) = normalizeMat;
+//          }
+//        }
       }
     } else if (mUseRewardDuration->getValue())
     {
@@ -346,6 +317,9 @@ void cedar::proc::steps::FourDimHebbMap::reset()
 void cedar::proc::steps::FourDimHebbMap::resetWeights()
 {
   initializeWeightMatrix();
+  cv::Mat currentInputMap = mReadOutTrigger->getData();
+  currentInputMap.convertTo(currentInputMap, CV_8UC1);
+  cv::findNonZero(currentInputMap, mNonZeroElements);
   this->mWeightOutput->setData(retrieveWeightedOutput());
   this->mCueOutput->setData(retrieveCuedOutput());
   this->emitOutputPropertiesChangedSignal(mTriggerOutputName);

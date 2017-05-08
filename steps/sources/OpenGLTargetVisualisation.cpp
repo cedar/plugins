@@ -83,5 +83,5 @@ cedar::proc::sources::OpenGLTargetVisualisation::OpenGLTargetVisualisation()
 
 void cedar::proc::sources::OpenGLTargetVisualisation::compute(const cedar::proc::Arguments&)
 {
-
+  //not yet implemented!
 }
