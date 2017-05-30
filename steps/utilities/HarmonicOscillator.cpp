@@ -67,7 +67,7 @@ void cedar::proc::steps::HarmonicOscillator::eulerStep(const cedar::unit::Time& 
 
     cedar::aux::ConstDataPtr overWriteInput = this->getInputSlot("overwriteInput")->getData();
     cedar::aux::ConstDataPtr overWritePeakDetector = this->getInputSlot("overwritePeakDetector")->getData();
-    if (boost::dynamic_pointer_cast<const cedar::aux::MatData>(overWriteInput) && boost::dynamic_pointer_cast<const cedar::aux::MatData>(overWriteInput))
+    if (boost::dynamic_pointer_cast<const cedar::aux::MatData>(overWriteInput) && boost::dynamic_pointer_cast<const cedar::aux::MatData>(overWritePeakDetector))
     {
       auto overWriteMat = overWriteInput->getData<cv::Mat>().clone();
       auto overWritePeak = overWritePeakDetector->getData<cv::Mat>().clone();
@@ -284,15 +284,15 @@ void cedar::proc::steps::HarmonicOscillator::reset()
   }
 }
 
-cedar::proc::DataSlot::VALIDITY cedar::proc::steps::HarmonicOscillator::determineInputValidity(cedar::proc::ConstDataSlotPtr, cedar::aux::ConstDataPtr data) const
+cedar::proc::DataSlot::VALIDITY cedar::proc::steps::HarmonicOscillator::determineInputValidity(cedar::proc::ConstDataSlotPtr slot, cedar::aux::ConstDataPtr data) const
 {
   if (cedar::aux::ConstMatDataPtr input = boost::dynamic_pointer_cast<const cedar::aux::MatData>(data))
   {
-    if (input && input->getDimensionality() == 1 && cedar::aux::math::get1DMatrixSize(input->getData()) == _mDimensionality->getValue())
+    if (input && input->getDimensionality() == 1 && cedar::aux::math::get1DMatrixSize(input->getData()) == _mDimensionality->getValue() && (slot->getName() == "lambda" || slot->getName() == "overwriteInput"))
     {
       return cedar::proc::DataSlot::VALIDITY_VALID;
     }
-    if (_mDimensionality->getValue() == 1 && input->getDimensionality() == 0)
+    if (input->getDimensionality() == 0 && slot->getName() == "overwritePeakDetector")
     {
       return cedar::proc::DataSlot::VALIDITY_VALID;
     }
