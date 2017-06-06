@@ -204,6 +204,7 @@ void cedar::proc::steps::RewardHebbTrace::eulerStep(const cedar::unit::Time &tim
 
   if(mAssoInput)
   {
+    //Calculate the reciprocal Output
     //Somehow match the current Input with the learned Weights
     cv::Mat currentAssoMat = mAssoInput->getData();
     cv::Mat currentWeights = mConnectionWeights->getData();
