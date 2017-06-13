@@ -75,7 +75,7 @@ void cedar::proc::steps::HarmonicOscillator::eulerStep(const cedar::unit::Time& 
       {
         p = overWriteMat;
         lambdaMat = overWriteMat;
-        std::cout << "Current HarmonicOscillatorPos is overwritten to: " << p << std::endl;
+//        std::cout << "Current HarmonicOscillatorPos is overwritten to: " << p << std::endl;
       }
     }
 
