@@ -1,7 +1,7 @@
 # all options that are specified with a keyword are optional (e.g., MOC
 DECLARE_STEP(cedar::proc::steps::ApproximateCoupling# the class name as used in the code; will be added to the plugin.cpp
 #  ADDITIONAL_SOURCES my_source.cpp
-             CATEGORY         "Utilities" # the category in which the step appears in cedar
+             CATEGORY         "Oscillator" # the category in which the step appears in cedar
              MOC
 #  ADDITIONAL_MOC_HEADERS my_special_field.h # we may also want to moc some headers for the step (usually just one)
   DESCRIPTION      "bla"
