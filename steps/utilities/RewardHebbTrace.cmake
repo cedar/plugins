@@ -1,5 +1,5 @@
 DECLARE_STEP(cedar::proc::steps::RewardHebbTrace
-             CATEGORY         "Utilities"
+             CATEGORY         "DFT"
              MOC
              DESCRIPTION      "A step that learns an associated input in presence of a reward signal"
              MAINTAINER       "Jan Tekuelve"

@@ -1,5 +1,5 @@
 DECLARE_STEP(cedar::proc::steps::ShiftedAddition
-  CATEGORY "Utilities"
+  CATEGORY "Arrays"
   MOC
   MAINTAINER "Mathis Richter"
 )
