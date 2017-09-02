@@ -70,6 +70,9 @@ public:
   //!@brief The standard constructor.
   ApproximateInput();
 
+  static float calculateMaxVelocity(float D, float c, float tf, float tau, float
+  h);
+
   //--------------------------------------------------------------------------------------------------------------------
   // public slots
   //--------------------------------------------------------------------------------------------------------------------

@@ -111,6 +111,8 @@ Finally, you can add all classes of a kind using these commands:
 | **Oscillator**                                                                                                |
 | *ApproximateCoupling*        | bla                                                                            |
 | *ApproximateInput*           | bla                                                                            |
+| *EquidistantRidge*           | no description.                                                                |
+| *HarmonicOscillator*         | A looped step that employs the harmonic Oscillator Formula pdotdot = -K(p-x)-B*pdot. K and B are automatically set to the critically damped solution. |
 | **Programming**                                                                                               |
 | *BufferThief*                | This step can grab any buffer from a step in the same architecture and output the data in the buffer. Use with caution, as this may lead to issues due to unsafe/unlocked data. |
 | *Demultiplexer*              | Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).    |
@@ -118,39 +120,12 @@ Finally, you can add all classes of a kind using these commands:
 | *LabelWMAnnotator*           | Takes a yarp-friendly label WM representation and puts labels into an image.   |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
 | *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
-| **Robotics**                                                                                                  |
-| *HarmonicOscillator*         | A looped step that employs the harmonic Oscillator Formula pdotdot = -K(p-x)-B*pdot. K and B are automatically set to the critically damped solution. |
 | **Sources**                                                                                                   |
 | *OpenGLTargetVisualisation*  | A step that visualizes a colored blob in the 3D Caren simulation               |
 | *ImageProvider*              | A step that outputs an image from a directory based on an index specified via a parameter. |
 | *KinectReader*               | A source that reads a Kinect camera, yielding images and depth images, as well as a RGBA point cloud. |
+| *LinearSpatialPattern*       | A linear spatial pattern                                                       |
 | *SpatialPattern*             | Outputs a matrix of synaptic weights that correspond to a spatial relational template (e.g., "to the left of"). |
-| **Utilities**                                                                                                 |
-| *ApproximateCoupling*        | bla                                                                            |
-| *ApproximateInput*           | bla                                                                            |
-| *AttentionSlice*             | A step that determines the location of the maximum in an activation matrix and cuts out a region around this location from an input image. |
-| *BufferThief*                | This step can grab any buffer from a step in the same architecture and output the data in the buffer. Use with caution, as this may lead to issues due to unsafe/unlocked data. |
-| *ConvertDepthToXyz*          | A step that converts depth data into 3D object data with scale and matrix center |
-| *CrossCorrelation*           | Calculates the cross correlation in different configurations.                  |
-| *Demultiplexer*              | Splits a vector (1xn or nx1 matrix) into individual scalars (1x1 matrices).    |
-| *EgoToBirdView*              | A step that converts camera input and distance information to a top-down representation. |
-| *ElementwiseDivide*          | To input matrices Nom and Denom will be divided elementwisely. The output is Nom/(Denom + scalar). "scalar" is a scalar and configurable parameter. This value is added to all elements in the Denom matrix to prevent dividing by zero or very small values. |
-| *FourDimHebbMap*             | A step that learns an associated 2D input for each activation in a 2D field in presence of a reward signal |
-| *HarmonicOscillator*         | A looped step that employs the harmonic Oscillator Formula pdotdot = -K(p-x)-B*pdot. K and B are automatically set to the critically damped solution. |
-| *HyperAcuteRescaling*        | Rescales an input matrix so that as little information as possible is lost. Note that this step's output is not properly normalized. |
-| *Integrator*                 | A looped step that integrates nx1 inputs across time.                          |
-| *LabelString*                | Outputs a label and ordered list of labels for activation from a label field.  |
-| *LabelWMAnnotator*           | Takes a yarp-friendly label WM representation and puts labels into an image.   |
-| *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
-| *MaxPooling*                 | Subsamples a matrix by taking the maximum over rectangular regions.            |
-| *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
-| *PadAndTranslate*            | A step that converts a 1D representation into a larger frame and translates the center of the 1D representation to the position given by the skalar-translation input. Borders are cyclic. |
-| *PointWiseNormalization*     | Normalizes the entries along one dimension of a matrix.                        |
-| *RewardHebbTrace*            | A step that learns an associated input in presence of a reward signal          |
-| *ShiftedAddition*            | no description.                                                                |
-| *TransformPointCloud*        | A step that performs geometric operations on a point cloud, yielding the transformed point cloud and camera position. |
-| *WeightedSum*                | A looped step that multiplies each input value with a given weight and sums them up across each input dimension. The given weight function encodes the distance from the center of the input matrix. This step is used to calculate a velocity signal dependent on the distance between a peak position and the center of the input matrix. |
-| *WeightedSumOfSlices*        | Calculates a weighted sum of the entries in a 3d or 4d matrix along the first dimension. |
 
 
 
