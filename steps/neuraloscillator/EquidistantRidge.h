@@ -1,7 +1,7 @@
 /*======================================================================================================================
 
-    Copyright 2011, 2012, 2013 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
- 
+    Copyright 2011 Institut fuer Neuroinformatik, Ruhr-Universitaet Bochum, Germany
+
     This file is part of cedar.
 
     cedar is free software: you can redistribute it and/or modify it under
@@ -22,73 +22,72 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        ApproximateCoupling.h
+    File:        EquidistantRidge.h
 
     Maintainer:  
     Email:       
     Date:        
 
-    Description: 
+    Description:
 
     Credits:
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_APPROXIMATE_COUPLING_H
-#define CEDAR_PROC_STEPS_APPROXIMATE_COUPLING_H
+#ifndef CEDAR_PROC_STEPS_EQUIDIESTANT_RIDGE_H
+#define CEDAR_PROC_STEPS_EQUIDIESTANT_RIDGE_H
 
 // LOCAL INCLUDES
-#include "steps/neuraloscillator/ApproximateCoupling.fwd.h"
+#include "steps/neuraloscillator/EquidistantRidge.fwd.h"
 
 // PROJECT INCLUDES
 
 // SYSTEM INCLUDES
 #include <cedar/processing/Step.h>
-#include <cedar/auxiliaries/MatData.h>
-#include <cedar/auxiliaries/UIntParameter.h>
-#include <vector>
+#include <cedar/auxiliaries/ObjectParameterTemplate.fwd.h>
+#include <cedar/auxiliaries/math/TransferFunction.h>
+#include <cedar/auxiliaries/BoolParameter.fwd.h>
+#include <cedar/auxiliaries/UIntParameter.fwd.h>
+#include <cedar/auxiliaries/DoubleParameter.fwd.h>
+#include <cedar/auxiliaries/MatData.fwd.h>
 
 
-/*!@todo describe.
- *
- * @todo describe more.
+/*!@brief A processing step that generates spatial patterns for "left", "right", "above", and "below".
  */
-class cedar::proc::steps::ApproximateCoupling : public cedar::proc::Step
+class cedar::proc::steps::EquidistantRidge : public cedar::proc::Step
 {
   //--------------------------------------------------------------------------------------------------------------------
   // macros
   //--------------------------------------------------------------------------------------------------------------------
   Q_OBJECT
+
   //--------------------------------------------------------------------------------------------------------------------
   // nested types
   //--------------------------------------------------------------------------------------------------------------------
+  typedef cedar::aux::ObjectParameterTemplate<cedar::aux::math::TransferFunction> SigmoidParameter;
+
+  //!@cond SKIPPED_DOCUMENTATION
+  CEDAR_GENERATE_POINTER_TYPES_INTRUSIVE(SigmoidParameter);
+  //!@endcond
 
   //--------------------------------------------------------------------------------------------------------------------
   // constructors and destructor
   //--------------------------------------------------------------------------------------------------------------------
 public:
   //!@brief The standard constructor.
-  ApproximateCoupling();
+  EquidistantRidge();
 
-  //--------------------------------------------------------------------------------------------------------------------
-  // public slots
-  //--------------------------------------------------------------------------------------------------------------------
-public slots:
-  //@called when the vector dimension changes
-  void vectorDimensionChanged();
+  //!@brief Destructor
+  ~EquidistantRidge();
+
   //--------------------------------------------------------------------------------------------------------------------
   // public methods
   //--------------------------------------------------------------------------------------------------------------------
 public:
-  void inputConnectionChanged(const std::string& inputName);
-  //!@brief input verification
-  cedar::proc::DataSlot::VALIDITY determineInputValidity
-  (
-    cedar::proc::ConstDataSlotPtr slot,
-    cedar::aux::ConstDataPtr data
-  )const;
+  void compute(const cedar::proc::Arguments&);
 
-  static float calculateCouplingFromTF(float tf);
+public slots:
+  void recompute();
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -100,31 +99,29 @@ protected:
   // private methods
   //--------------------------------------------------------------------------------------------------------------------
 private:
-  void compute(const cedar::proc::Arguments&);
 
   //--------------------------------------------------------------------------------------------------------------------
   // members
   //--------------------------------------------------------------------------------------------------------------------
 protected:
   // none yet
+
 private:
-  //output vector
-  cedar::aux::MatDataPtr mOutput;
-  //input scalars
-  std::vector< cedar::aux::ConstMatDataPtr > mInputs;
+  // inputs
+  // none
+
+  // outputs
+  cedar::aux::MatDataPtr mPattern;
 
   //--------------------------------------------------------------------------------------------------------------------
   // parameters
   //--------------------------------------------------------------------------------------------------------------------
-protected:
-  // none yet
-
 private:
-  //Parameter for the dimension of the output vector
-  cedar::aux::UIntParameterPtr _mOutputDimension;
+  cedar::aux::BoolParameterPtr _mInvertSides;
+  cedar::aux::BoolParameterPtr _mHorizontalPattern;
+  cedar::aux::UIntParameterPtr _mSizeX;
+  cedar::aux::UIntParameterPtr _mSizeY;
+  SigmoidParameterPtr _mSigmoid;
+}; // class cedar::proc::steps::EquidistantRidge
 
-}; // cedar::proc::steps::ApproximateCoupling
-
-#endif // CEDAR_PROC_STEPS_APPROXIMATE_COUPLING_H
-
-
+#endif // CEDAR_PROC_STEPS_EQUIDIESTANT_RIDGE_H

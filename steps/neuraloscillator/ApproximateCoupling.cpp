@@ -24,9 +24,9 @@
 
     File:        ApproximateCoupling.cpp
 
-    Maintainer:  Guido Knips
-    Email:       guido.knips@ini.rub.de
-    Date:        2013 12 04
+    Maintainer:  
+    Email:       
+    Date:        
 
     Description:
 
