@@ -36,6 +36,9 @@
 
 // LOCAL INCLUDES
 #include "steps/neuraloscillator/EquidistantRidge.h"
+#include "ApproximateInput.h"
+#include "ApproximateCoupling.h"
+#include "ApproximateCouplingVector.h"
 
 // SYSTEM INCLUDES
 #include <cedar/auxiliaries/assert.h>
@@ -50,6 +53,8 @@
 #include <cedar/auxiliaries/math/transferFunctions/AbsSigmoid.h>
 #include <cedar/auxiliaries/math/tools.h>
 #include <cmath>
+#include <boost/pointer_cast.hpp>
+#include <iostream>
 
 //----------------------------------------------------------------------------------------------------------------------
 // constructors and destructor
@@ -57,19 +62,37 @@
 
 cedar::proc::steps::EquidistantRidge::EquidistantRidge()
 :
-mPattern(new cedar::aux::MatData(cv::Mat::zeros(10, 10, CV_32F))),
-_mInvertSides(new cedar::aux::BoolParameter(this, "invert sides", false)),
-_mHorizontalPattern(new cedar::aux::BoolParameter(this, "horizontal pattern", false)),
-_mSizeX(new cedar::aux::UIntParameter(this, "size x", 10, cedar::aux::UIntParameter::LimitType::positive(1000))),
-_mSizeY(new cedar::aux::UIntParameter(this, "size y", 10, cedar::aux::UIntParameter::LimitType::positive(1000)))
+//mDistance(new cedar::aux::MatData(cv::Mat::zeros(50, 1, CV_32F))),
+//mDuration(new cedar::aux::MatData(cv::Mat::zeros(50, 1, CV_32F))),
+mRidge(new cedar::aux::MatData(cv::Mat::zeros(50, 50, CV_32F))),
+mRidgeDuration(new cedar::aux::MatData(cv::Mat::zeros(50, 50, CV_32F))),
+mRidgeVelocity(new cedar::aux::MatData(cv::Mat::zeros(50, 50, CV_32F))),
+_mMinimalDuration(new cedar::aux::DoubleParameter(this, "duration min", 1.0)),
+_mMaximalDuration(new cedar::aux::DoubleParameter(this, "duration max", 3.0)),
+_mMinimalDistance(new cedar::aux::DoubleParameter(this, "distance min", 0.0)),
+_mMaximalDistance(new cedar::aux::DoubleParameter(this, "distance max", 1.0)),
+_mMinimalVelocity(new cedar::aux::DoubleParameter(this, "velocity min", 0.0)),
+_mMaximalVelocity(new cedar::aux::DoubleParameter(this, "velocity max", 7.5)),
+_mVelocitySize(new cedar::aux::UIntParameter(this, "velocity size", 50)),
+_mTau(new cedar::aux::DoubleParameter(this, "tau", 1.0)),
+_mH(new cedar::aux::DoubleParameter(this, "h", 1.0))
 {
-  // output
-  this->declareOutput("spatial pattern", mPattern);
+  // inputs
+  this->declareInput("distance");
+  this->declareInput("duration");
 
-  QObject::connect(_mInvertSides.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
-  QObject::connect(_mHorizontalPattern.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
-  QObject::connect(_mSizeX.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
-  QObject::connect(_mSizeY.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  // output
+  this->declareOutput("equidistant ridge", mRidge);
+
+  QObject::connect(_mMinimalDuration.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mMaximalDuration.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mMinimalDistance.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mMaximalDistance.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mMinimalVelocity.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mMaximalVelocity.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mVelocitySize.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mTau.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
+  QObject::connect(_mH.get(), SIGNAL(valueChanged()), this, SLOT(recompute()));
 
   this->recompute();
 }
@@ -82,49 +105,111 @@ cedar::proc::steps::EquidistantRidge::~EquidistantRidge()
 // methods
 //----------------------------------------------------------------------------------------------------------------------
 
-void cedar::proc::steps::EquidistantRidge::recompute()
+float cedar::proc::steps::EquidistantRidge::calculateDistanceFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max)
 {
-  unsigned int size_x = _mSizeX->getValue();
-  unsigned int size_y = _mSizeY->getValue();
+  return min + ( max-min ) * static_cast<float>(i) / static_cast<float>(siz);
+}
 
-  double invert_sides = 1.0;
+float cedar::proc::steps::EquidistantRidge::calculateVelocityFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max)
+{
+  return min + ( max-min ) * static_cast<float>(i) / static_cast<float>(siz);
+}
 
-  // this will switch the sides on which the pattern strengthens and attenuates
-  // to be able to generate patterns for left/right (or top/bottom)
-  if (_mInvertSides->getValue())
+void cedar::proc::steps::EquidistantRidge::internal_recompute()
+{
+  auto mDistanceInput= getInput("distance");
+  
+  if (!mDistanceInput)
+    return;
+  
+  auto mDistance= mDistanceInput->getData<cv::Mat>();
+
+  auto mDurationInput= getInput("duration");
+  
+  if (!mDurationInput)
+    return;
+
+  auto mDuration= mDurationInput->getData<cv::Mat>();
+
+  if (mDistance.empty()
+      || mDuration.empty())
+    return;
+
+  unsigned int tf_index= 0;
+  unsigned int tf_index_max= mDuration.rows;
+
+  unsigned int distance_index_max= mDistance.rows - 1;
+  unsigned int velocity_index_max= _mVelocitySize->getValue() - 1;
+
+  mRidge->getData()= cv::Mat::zeros(velocity_index_max + 1,
+                          tf_index_max, 
+                          CV_32F);
+  mRidgeDuration->getData()= cv::Mat::zeros(velocity_index_max + 1,
+                          tf_index_max, 
+                          CV_32F);
+  mRidgeVelocity->getData()= cv::Mat::zeros(velocity_index_max + 1,
+                          tf_index_max, 
+                          CV_32F);
+
+  auto tf_min = _mMinimalDuration->getValue();
+  auto tf_max = _mMaximalDuration->getValue();
+  auto dist_min = _mMinimalDistance->getValue();
+  auto dist_max = _mMaximalDistance->getValue();
+  auto vel_min  = _mMinimalVelocity->getValue();
+  auto vel_max  = _mMaximalVelocity->getValue();
+  auto tau = _mTau->getValue();
+  auto h = _mH->getValue();
+
+  for (; tf_index < tf_index_max; tf_index++)
   {
-    invert_sides = -1.0;
-  }
+    // for each duration
+    auto oneTF = cedar::proc::steps::ApproximateCouplingVector::calculateDurationFromIndex(tf_index, tf_index_max, tf_min, tf_max);
+    auto oneC= cedar::proc::steps::ApproximateCoupling::calculateCouplingFromTF(oneTF);
 
-  mPattern->getData() = cv::Mat(size_x, size_y, CV_32F);
-
-  // go through all positions of the pattern
-  for (unsigned int i = 0; i < size_x; ++i)
-  {
-    for (unsigned int j = 0; j < size_y; ++j)
+    // fill straigth ridge:
+    unsigned int velocity_index = 0;
+    for (; velocity_index <= velocity_index_max; velocity_index++)
     {
-      double x = 0;
-      double y = 0;
+      mRidgeDuration->getData().at<float>(velocity_index, tf_index)
+            = static_cast<float>( mDuration.at<float>(tf_index) );
 
-      // this will rotate the pattern by 90 degrees
-      if (_mHorizontalPattern->getValue())
+
+      float velmax;
+      velmax= calculateVelocityFromIndex(velocity_index, velocity_index_max, vel_min, vel_max);
+   
+      float fordistance;
+      fordistance= cedar::proc::steps::ApproximateInput::calculateDistance( 
+        velmax, oneC, oneTF, tau, h);
+
+      unsigned int distance_index;
+      distance_index= floor( ( fordistance - dist_min)
+                                          / (dist_max - dist_min ) 
+                                          * distance_index_max );
+
+      if (distance_index > distance_index_max)
       {
-        x = y;
-        y = x;
+        // todo: error
+        std::cout << "Equidistant Ridge max distance too small" << std::endl;
+        continue;
       }
 
-      double value;
-
-      // generate the pattern as a weighted sum of the gaussian and the sigmoid
-      mPattern->getData().at<float>(i, j)
-        = static_cast<float>( value );
+      mRidgeVelocity->getData().at<float>(velocity_index, tf_index)
+              = static_cast<float>( mDistance.at<float>( distance_index ) );
     }
+
   }
 
+  mRidge->getData()= mRidgeVelocity->getData() + mRidgeDuration->getData();
+}
+
+void cedar::proc::steps::EquidistantRidge::recompute()
+{
+  internal_recompute();
   // this triggers all connected steps.
   this->onTrigger();
 }
 
 void cedar::proc::steps::EquidistantRidge::compute(const cedar::proc::Arguments&)
 {
+  internal_recompute();
 }

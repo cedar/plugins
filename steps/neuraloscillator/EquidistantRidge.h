@@ -85,6 +85,8 @@ public:
   //--------------------------------------------------------------------------------------------------------------------
 public:
   void compute(const cedar::proc::Arguments&);
+  static float calculateDistanceFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max);
+  static float calculateVelocityFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max);
 
 public slots:
   void recompute();
@@ -99,6 +101,7 @@ protected:
   // private methods
   //--------------------------------------------------------------------------------------------------------------------
 private:
+  void internal_recompute();
 
   //--------------------------------------------------------------------------------------------------------------------
   // members
@@ -108,20 +111,28 @@ protected:
 
 private:
   // inputs
+  //cedar::aux::MatDataPtr mDistance;
+  //cedar::aux::MatDataPtr mDuration;
   // none
 
   // outputs
-  cedar::aux::MatDataPtr mPattern;
+  cedar::aux::MatDataPtr mRidge;
 
+  cedar::aux::MatDataPtr mRidgeDuration;
+  cedar::aux::MatDataPtr mRidgeVelocity;
   //--------------------------------------------------------------------------------------------------------------------
   // parameters
   //--------------------------------------------------------------------------------------------------------------------
 private:
-  cedar::aux::BoolParameterPtr _mInvertSides;
-  cedar::aux::BoolParameterPtr _mHorizontalPattern;
-  cedar::aux::UIntParameterPtr _mSizeX;
-  cedar::aux::UIntParameterPtr _mSizeY;
-  SigmoidParameterPtr _mSigmoid;
+  cedar::aux::DoubleParameterPtr _mMinimalDuration;
+  cedar::aux::DoubleParameterPtr _mMaximalDuration;
+  cedar::aux::DoubleParameterPtr _mMinimalDistance;
+  cedar::aux::DoubleParameterPtr _mMaximalDistance;
+  cedar::aux::DoubleParameterPtr _mMinimalVelocity;
+  cedar::aux::DoubleParameterPtr _mMaximalVelocity;
+  cedar::aux::UIntParameterPtr   _mVelocitySize;
+  cedar::aux::DoubleParameterPtr _mTau;
+  cedar::aux::DoubleParameterPtr _mH;
 }; // class cedar::proc::steps::EquidistantRidge
 
 #endif // CEDAR_PROC_STEPS_EQUIDIESTANT_RIDGE_H

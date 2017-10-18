@@ -22,23 +22,24 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        ApproximateInput.h
+    File:        ApproximateCouplingVector.h
 
-    Maintainer:  Guido Knips
-    Email:       guido.knips@ini.rub.de
-    Date:        2013 12 04
+    Maintainer:  
+    Email:       
+    Date:        
 
-    Description: Takes a number of scalar inputs and copies them into a one-dimensional vector
+    Description: 
 
     Credits:
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_APPROXIMATE_INPUT_H
-#define CEDAR_PROC_STEPS_APPROXIMATE_INPUT_H
+#ifndef CEDAR_PROC_STEPS_APPROXIMATE_VECTOR_COUPLING_H
+#define CEDAR_PROC_STEPS_APPROXIMATE_VECTOR_COUPLING_H
 
 // LOCAL INCLUDES
-#include "steps/neuraloscillator/ApproximateInput.fwd.h"
+#include "steps/neuraloscillator/ApproximateCouplingVector.fwd.h"
+
 // PROJECT INCLUDES
 
 // SYSTEM INCLUDES
@@ -53,7 +54,7 @@
  *
  * @todo describe more.
  */
-class cedar::proc::steps::ApproximateInput : public cedar::proc::Step
+class cedar::proc::steps::ApproximateCouplingVector : public cedar::proc::Step
 {
   //--------------------------------------------------------------------------------------------------------------------
   // macros
@@ -68,16 +69,14 @@ class cedar::proc::steps::ApproximateInput : public cedar::proc::Step
   //--------------------------------------------------------------------------------------------------------------------
 public:
   //!@brief The standard constructor.
-  ApproximateInput();
-
-  static float calculateMaxVelocity(float D, float c, float tf, float tau, float
-  h);
-  static float calculateDistance(float s, float c, float tf, float tau, float h);
+  ApproximateCouplingVector();
 
   //--------------------------------------------------------------------------------------------------------------------
   // public slots
   //--------------------------------------------------------------------------------------------------------------------
 public slots:
+  //@called when the vector dimension changes
+  void vectorDimensionChanged();
   //--------------------------------------------------------------------------------------------------------------------
   // public methods
   //--------------------------------------------------------------------------------------------------------------------
@@ -89,6 +88,8 @@ public:
     cedar::proc::ConstDataSlotPtr slot,
     cedar::aux::ConstDataPtr data
   )const;
+
+  static float calculateDurationFromIndex(unsigned int i, unsigned int size, unsigned int min, unsigned int max);
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -111,7 +112,6 @@ private:
   //output vector
   cedar::aux::MatDataPtr mOutput;
   //input scalars
-  std::vector< cedar::aux::ConstMatDataPtr > mInputs;
 
   //--------------------------------------------------------------------------------------------------------------------
   // parameters
@@ -121,11 +121,13 @@ protected:
 
 private:
   //Parameter for the dimension of the output vector
-  cedar::aux::DoubleParameterPtr _mTau;
-  cedar::aux::DoubleParameterPtr _mH;
+  cedar::aux::UIntParameterPtr _mOutputDimension;
+  cedar::aux::UIntParameterPtr _mSize;
+  cedar::aux::DoubleParameterPtr _mMinimalDuration;
+  cedar::aux::DoubleParameterPtr _mMaximalDuration;
 
-}; // cedar::proc::steps::ApproximateInput
+}; // cedar::proc::steps::ApproximateCouplingVector
 
-#endif // CEDAR_PROC_STEPS_APPROXIMATE_INPUT_H
+#endif // CEDAR_PROC_STEPS_APPROXIMATE_VECTOR_COUPLING_H
 
 
