@@ -1,0 +1,11 @@
+syntax:glob
+build/*
+cmake-build-debug/*
+project.conf
+buildset.cmake
+.idea/*
+
+syntax: glob
+.project
+syntax: glob
+.cproject
