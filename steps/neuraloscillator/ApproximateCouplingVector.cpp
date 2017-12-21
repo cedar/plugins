@@ -54,7 +54,7 @@ cedar::proc::steps::ApproximateCouplingVector::ApproximateCouplingVector()
 :
 Step(true), //is looped, since a large number of independent inputs leads to spam of "compute canceled" messaged
 mOutput(new cedar::aux::MatData(cv::Mat::zeros(50,1, CV_32F))),
-_mSize(new cedar::aux::UIntParameter(this, "Size", 50,1, 1000)),
+_mSize(new cedar::aux::UIntParameter(this, "size", 50,1, 1000)),
 _mMinimalDuration(new cedar::aux::DoubleParameter(this, "duration min", 1.0)),
 _mMaximalDuration(new cedar::aux::DoubleParameter(this, "duration max", 3.0))
 {
