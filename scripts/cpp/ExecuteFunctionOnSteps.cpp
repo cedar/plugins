@@ -82,6 +82,9 @@ void cedar::proc::scripts::ExecuteFunctionOnSteps::run()
     case FunctionName::ResetWeights :
       this->rewardHebbianTraceResetWeights();
       break;
+	case FunctionName::ResetMemory :
+      this->preshapeResetMemory();
+      break;
     default:
       std::cout << "Function was not specified!" << std::endl;
   }
@@ -96,5 +99,17 @@ void cedar::proc::scripts::ExecuteFunctionOnSteps::rewardHebbianTraceResetWeight
   {
     auto hebbTraceStep = *it;
     hebbTraceStep->resetWeights();
+  }
+}
+
+void cedar::proc::scripts::ExecuteFunctionOnSteps::preshapeResetMemory()
+{
+  std::set<cedar::dyn::PreshapePtr> preShapes = this->getGroup()->findAll<cedar::dyn::Preshape>(
+          true);
+
+  for (auto it = preShapes.begin(); it != preShapes.end(); it++)
+  {
+    auto preshape = *it;
+    preshape->resetMemory();
   }
 }
