@@ -44,6 +44,7 @@
 #include <cedar/processing/Step.h>
 #include <cedar/auxiliaries/MatData.fwd.h>
 #include "cedar/auxiliaries/IntParameter.h"
+#include "cedar/auxiliaries/BoolParameter.h"
 
 // FORWARD DECLARATIONS
 #include "steps/utilities/PadAndTranslate.fwd.h"
@@ -106,6 +107,8 @@ protected:
 private:
 
   cedar::aux::IntParameterPtr  mOutputSize;
+  cedar::aux::BoolParameterPtr mIsReverse;
+  cedar::aux::BoolParameterPtr mIsCyclic;
   cedar::aux::MatDataPtr mOutput;
   // none yet
 
