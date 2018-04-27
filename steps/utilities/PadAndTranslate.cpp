@@ -51,6 +51,8 @@
 
 cedar::proc::steps::PadAndTranslate::PadAndTranslate():
 mOutputSize(new cedar::aux::IntParameter(this,"OutputSize")),
+mIsReverse(new cedar::aux::BoolParameter(this,"reverse tAndP",false)),
+mIsCyclic(new cedar::aux::BoolParameter(this,"is cyclic",true)),
 mOutput(new cedar::aux::MatData(cv::Mat::zeros(mOutputSize->getValue(), 1, CV_32F)))
 {
 	this->declareInput("input", true);
@@ -78,28 +80,64 @@ void cedar::proc::steps::PadAndTranslate::compute(const cedar::proc::Arguments&)
 		cv::Mat translationMat = inputTranslation->getData<cv::Mat>().clone();
 		int inputRows = inputMat.rows;
 
-
 		if(translationMat.rows ==1 && translationMat.cols==1)
 		{
-			int translation = boost::numeric_cast<int>(translationMat.at<float>(0,0));
-				for(int i= 0;i<inputRows;i++)
-				{
-					int translatedPos = i+translation-(inputRows/2);
+      int translation = boost::numeric_cast<int>(translationMat.at<float>(0, 0));
+			if (!mIsReverse->getValue())
+			{
+        if(mOutputSize->getValue()>inputRows)
+        {
+          for (int i = 0; i < inputRows; i++)
+          {
+            int translatedPos = i + translation - (inputRows / 2);
 
-					if(translatedPos > mOutputSize->getValue()||translatedPos <0)
-					{
-                        //Todo: Make the cyclic Boundaries a Parameter Option
-						translatedPos = (translatedPos+mOutputSize->getValue())%mOutputSize->getValue();
-					}
-					if(translatedPos>=0 && translatedPos<mOutputSize->getValue())
-					{
-					outputMat.at<float>(translatedPos,0) = inputMat.at<float>(i,0);
-					}
-				}
-			output = outputMat;
+            if ((translatedPos > mOutputSize->getValue() || translatedPos < 0) && mIsCyclic->getValue())
+            {
+              translatedPos = (translatedPos + mOutputSize->getValue()) % mOutputSize->getValue();
+            }
+
+            if (translatedPos >= 0 && translatedPos < mOutputSize->getValue())
+            {
+              outputMat.at<float>(translatedPos, 0) = inputMat.at<float>(i, 0);
+            }
+          }
+        }
+        else
+        {
+          std::cout<<"In this mode the outputsize should be greater than the inputsize"<<std::endl;
+        }
+
+
+			} else
+      { // Sort of cut Out around the current Position
+        if(mOutputSize->getValue()<inputRows)
+        {
+          for (int i = 0;
+               i < mOutputSize->getValue(); i++)
+          {
+            float newValue = 0; // Padding with Zeros
+			int translatedPos = translation - (mOutputSize->getValue() / 2) + i;
+			//std::cout<<"Translated Pos is at: "<< translatedPos << std::endl;
+            if(translatedPos>=0 && translatedPos<inputRows)
+            {
+              newValue = inputMat.at<float>(translatedPos,0);
+            }
+            
+            outputMat.at<float>(i, 0) = newValue;
+          }
+        }
+        else
+        {
+          std::cout<<"In this mode the outputsize should be smaller than the inputsize"<<std::endl;
+        }
+
+			}
 		}
-	}
+  }
+
+		output = outputMat;
 }
+
 
 
 void cedar::proc::steps::PadAndTranslate::updateOutputSize()
@@ -119,7 +157,7 @@ cedar::proc::DataSlot::VALIDITY cedar::proc::steps::PadAndTranslate::determineIn
 {
 	if (cedar::aux::ConstMatDataPtr input = boost::dynamic_pointer_cast<const cedar::aux::MatData>(data))
 	{
-		if (input && input->getDimensionality() == 1 && slot->getName()=="input" &&( input->getData().rows < mOutputSize->getValue() ))
+		if (input && input->getDimensionality() == 1 && slot->getName()=="input")
 		{
 			return cedar::proc::DataSlot::VALIDITY_VALID;
 		}

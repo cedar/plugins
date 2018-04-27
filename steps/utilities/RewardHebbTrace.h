@@ -22,7 +22,7 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        ImprintHebb.h
+    File:        RewardHebbTrace.h
 
     Maintainer:  Jan Tekülve
     Email:       jan.tekuelve@ini.rub.de
@@ -129,6 +129,7 @@ protected:
   cedar::aux::DoubleVectorParameterPtr mWeightSigmas;
   cedar::aux::DoubleParameterPtr mWeightAmplitude;
   cedar::aux::DoubleParameterPtr mRewardThreshold;
+  cedar::aux::DoubleParameterPtr mLearnedThreshold;
 
 private:
 
