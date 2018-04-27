@@ -126,6 +126,7 @@ private:
 private:
   cedar::aux::DoubleParameterPtr _mMinimalDuration;
   cedar::aux::DoubleParameterPtr _mMaximalDuration;
+  cedar::aux::DoubleParameterPtr _mDurationOffset;
   cedar::aux::DoubleParameterPtr _mMinimalDistance;
   cedar::aux::DoubleParameterPtr _mMaximalDistance;
   cedar::aux::DoubleParameterPtr _mMinimalVelocity;
