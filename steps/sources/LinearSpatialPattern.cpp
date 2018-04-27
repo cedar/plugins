@@ -59,10 +59,10 @@
 cedar::proc::steps::LinearSpatialPattern::LinearSpatialPattern()
 :
 mPattern(new cedar::aux::MatData(cv::Mat::zeros(10, 10, CV_32F))),
-_mStart(new cedar::aux::DoubleParameter(this, "lowest", 0.0)),
-_mEnd(new cedar::aux::DoubleParameter(this, "upmost", 1.0)),
 _mSizeX(new cedar::aux::UIntParameter(this, "size x", 50, cedar::aux::UIntParameter::LimitType::positive(1000))), 
-_mSizeY(new cedar::aux::UIntParameter(this, "size y", 50, cedar::aux::UIntParameter::LimitType::positive(1000)))
+_mSizeY(new cedar::aux::UIntParameter(this, "size y", 50, cedar::aux::UIntParameter::LimitType::positive(1000))),
+_mStart(new cedar::aux::DoubleParameter(this, "lowest", 0.0)),
+_mEnd(new cedar::aux::DoubleParameter(this, "upmost", 1.0))
 {
   // output
   this->declareOutput("spatial pattern", mPattern);

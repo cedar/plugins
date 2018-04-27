@@ -117,10 +117,11 @@ private:
   // parameters
   //--------------------------------------------------------------------------------------------------------------------
 private:
-  cedar::aux::DoubleParameterPtr _mStart;
-  cedar::aux::DoubleParameterPtr _mEnd;
   cedar::aux::UIntParameterPtr   _mSizeX;
   cedar::aux::UIntParameterPtr   _mSizeY;
+  cedar::aux::DoubleParameterPtr _mStart;
+  cedar::aux::DoubleParameterPtr _mEnd;
+
 }; // class cedar::proc::steps::LinearSpatialPattern
 
 #endif // CEDAR_PROC_STEPS_LINEAR_SPATIAL_PATTERN_H
