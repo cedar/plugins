@@ -49,6 +49,8 @@
 #include "cedar/units/Time.h"
 #include "cedar/units/prefixes.h"
 #include "cedar/processing/steps/Sum.h"
+#include <cedar/auxiliaries/math/TransferFunction.h>
+#include "cedar/auxiliaries/math/transferFunctions/HeavisideSigmoid.h"
 
 // SYSTEM INCLUDES
 #include <iostream>
@@ -74,6 +76,7 @@ cedar::proc::steps::RewardHebbTrace::RewardHebbTrace()
                 new cedar::aux::DoubleVectorParameter(this, "weight sigmas", mAssociationDimension->getValue(), 3)),
         mWeightAmplitude(new cedar::aux::DoubleParameter(this, "weight amplitude", 6)),
         mRewardThreshold(new cedar::aux::DoubleParameter(this, "reward threshold", 0.5)),
+        mLearnedThreshold(new cedar::aux::DoubleParameter(this, "rec. weight threshold", 0.5,0,1)),
         // outputs
         mConnectionWeights(new cedar::aux::MatData(cv::Mat::zeros(100, 100, CV_32F))),
         mWeightOutput((new cedar::aux::MatData(cv::Mat::zeros(100, 100, CV_32F)))),
@@ -167,7 +170,7 @@ void cedar::proc::steps::RewardHebbTrace::eulerStep(const cedar::unit::Time &tim
   {
     cv::Mat &trigger = this->mInputSum->getData();
     cedar::proc::steps::Sum::sumSlot(this->getInputSlot(mRewardInputName), this->mInputSum->getData(), false);
-    if (trigger.at<float>(0, 0) > mRewardThreshold->getValue()) // It is assumed that a change greater than 0.1 is not noise
+    if (trigger.at<float>(0, 0) > mRewardThreshold->getValue())
     {
 //      std::cout << "Surpass the trigger!" <<std::endl;
 //      this->createFieldRecruit();
@@ -210,7 +213,14 @@ void cedar::proc::steps::RewardHebbTrace::eulerStep(const cedar::unit::Time &tim
     cv::Mat currentWeights = mConnectionWeights->getData();
 
     cv::Mat compMultiplication = currentAssoMat.mul(currentWeights);
-    float summedMatrix = cv::sum(compMultiplication)[0];
+//    Because right now the data will always be in 0s or 1s, we need to also threshold the learned weights here. Just to make tuning easier for now. Other way would be to make sure that learned weights
+//    stay at a value of 1.
+    cedar::aux::math::TransferFunctionPtr transferFunctionPtr = cedar::aux::math::HeavisideSigmoidPtr(new cedar::aux::math::HeavisideSigmoid(mLearnedThreshold->getValue()));
+    cv::Mat threshHoldedMultiplication = transferFunctionPtr->compute(compMultiplication);
+
+
+
+    float summedMatrix = cv::sum(threshHoldedMultiplication)[0];
     cv::Mat recOutput = cv::Mat::zeros(1,1,CV_32F);
     recOutput.at<float>(0,0) = summedMatrix;
 

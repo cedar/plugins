@@ -54,11 +54,10 @@
 #include <cedar/auxiliaries/IntParameter.h>
 #include "cedar/auxiliaries/EnumType.h"
 #include "cedar/auxiliaries/EnumParameter.h"
+#include "cedar/dynamics/fields/Preshape.h"
 // SYSTEM INCLUDES
 
-/*!This Script should be run once to connect Steps in the Architecture with a recruit function of this script.
- * Then during runtime, whenever the connected steps emit the specified signal, a new group, specified in the appropiate Scriptparameters, should be created.
- * For each recruit Routine you need to add a new Enum, and a new slot function that connects the newly created group in your desired way.
+/*!This Script should be run to exectue a specified function on all steps of the chosen type
  *
  */
 class cedar::proc::scripts::ExecuteFunctionOnSteps : public cedar::proc::CppScript
@@ -82,6 +81,7 @@ Q_OBJECT
     static void construct()
     {
       mType.type()->def(cedar::aux::Enum(ResetWeights, "RewardHebbTrace->resetWeights()"));
+	  mType.type()->def(cedar::aux::Enum(ResetMemory, "Preshape->resetMemory()"));
     }
 
     //! @returns A const reference to the base enum object.
@@ -99,6 +99,7 @@ Q_OBJECT
   public:
     //! flag for linear weights with a noise term at the outskirts
     static const Id ResetWeights = 0;
+	static const Id ResetMemory = 1;
 
   private:
     static cedar::aux::EnumType<FunctionName> mType;
@@ -134,6 +135,7 @@ protected:
 private:
   void run();
   void rewardHebbianTraceResetWeights();
+  void preshapeResetMemory();
   // none yet
 
   //--------------------------------------------------------------------------------------------------------------------
