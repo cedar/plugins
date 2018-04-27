@@ -69,6 +69,7 @@ mRidgeDuration(new cedar::aux::MatData(cv::Mat::zeros(50, 50, CV_32F))),
 mRidgeVelocity(new cedar::aux::MatData(cv::Mat::zeros(50, 50, CV_32F))),
 _mMinimalDuration(new cedar::aux::DoubleParameter(this, "duration min", 1.0)),
 _mMaximalDuration(new cedar::aux::DoubleParameter(this, "duration max", 3.0)),
+_mDurationOffset(new cedar::aux::DoubleParameter(this, "duration offset", 0.0)),
 _mMinimalDistance(new cedar::aux::DoubleParameter(this, "distance min", 0.0)),
 _mMaximalDistance(new cedar::aux::DoubleParameter(this, "distance max", 1.0)),
 _mMinimalVelocity(new cedar::aux::DoubleParameter(this, "velocity min", 0.0)),
@@ -159,12 +160,42 @@ void cedar::proc::steps::EquidistantRidge::internal_recompute()
   auto vel_max  = _mMaximalVelocity->getValue();
   auto tau = _mTau->getValue();
   auto h = _mH->getValue();
+ 
 
+  ////// maxima des Inputs finden ////////////
+  float distance_peak_value, tf_peak_value;
+  float distance_index_of_peak, tf_index_of_peak;
+  tf_index= 0;
+  for (; tf_index < tf_index_max; tf_index++)
+  {
+    auto tmp= mDuration.at<float>(tf_index);
+    if (tmp > tf_peak_value)
+    {
+      tf_peak_value= tmp;
+      tf_index_of_peak= tf_index;
+    }
+  }
+
+  unsigned int distance_index;
+  distance_index= 0;
+  for (; distance_index < distance_index_max; distance_index++)
+  {
+    auto tmp= mDistance.at<float>(distance_index);
+    if (tmp > distance_peak_value)
+    {
+      distance_peak_value= tmp;
+      distance_index_of_peak= distance_index;
+    }
+  }
+  //////////////////////////////////////////////
+
+
+  tf_index= 0;
   for (; tf_index < tf_index_max; tf_index++)
   {
     // for each duration
     auto oneTF = cedar::proc::steps::ApproximateCouplingVector::calculateDurationFromIndex(tf_index, tf_index_max, tf_min, tf_max);
-    auto oneC= cedar::proc::steps::ApproximateCoupling::calculateCouplingFromTF(oneTF);
+    auto oneC= cedar::proc::steps::ApproximateCoupling::calculateCouplingFromTF(oneTF - _mDurationOffset->getValue() );
 
     // fill straigth ridge:
     unsigned int velocity_index = 0;
@@ -174,14 +205,48 @@ void cedar::proc::steps::EquidistantRidge::internal_recompute()
             = static_cast<float>( mDuration.at<float>(tf_index) );
 
 
-      float velmax;
-      velmax= calculateVelocityFromIndex(velocity_index, velocity_index_max, vel_min, vel_max);
+//      float velmax;
+//      velmax= calculateVelocityFromIndex(velocity_index, velocity_index_max, vel_min, vel_max);
    
-      float fordistance;
-      fordistance= cedar::proc::steps::ApproximateInput::calculateDistance( 
-        velmax, oneC, oneTF, tau, h);
+      float fordistance= 0;
+      //fordistance= cedar::proc::steps::ApproximateInput::calculateDistance( 
+      //  velmax, oneC, oneTF, tau, h);
 
-      unsigned int distance_index;
+      float tf_peak_index;
+      unsigned int peak_est_range= 3;
+
+      tf_peak_index= tf_index_of_peak - peak_est_range; // TODO
+      for( ; tf_peak_index < tf_index_of_peak + peak_est_range; tf_peak_index++ )
+      {
+        float distance_peak_index;
+        float sigma= 5.0; // TODO
+
+        distance_peak_index= distance_index_of_peak - peak_est_range; // TODO
+        for( ; distance_peak_index < distance_index_of_peak + peak_est_range; distance_peak_index++ )
+        {
+          float s_here= 1.0 
+                        / ( sqrt( 2.0 * 3.14 ) * sigma )
+                        * exp( - pow( ( distance_peak_index  
+                                        - distance_index_of_peak 
+                                      ) 
+                                      / sigma,
+                                      2.0 ) 
+                               / 2.0
+                              ); // TODO
+
+          fordistance+= 
+            cedar::proc::steps::ApproximateInput::calculateDistance(
+                 s_here, 
+                 oneC, 
+                 oneTF, 
+                 tau, 
+                 h);
+
+        }
+      }
+
+
+
       distance_index= floor( ( fordistance - dist_min)
                                           / (dist_max - dist_min ) 
                                           * distance_index_max );
@@ -189,7 +254,7 @@ void cedar::proc::steps::EquidistantRidge::internal_recompute()
       if (distance_index > distance_index_max)
       {
         // todo: error
-        std::cout << "Equidistant Ridge max distance too small" << std::endl;
+        std::cout << "Equidistant Ridge max distance too small (" << distance_index << " vs max: " << distance_index_max << ")" << std::endl;
         continue;
       }
 
@@ -199,7 +264,8 @@ void cedar::proc::steps::EquidistantRidge::internal_recompute()
 
   }
 
-  mRidge->getData()= mRidgeVelocity->getData() + mRidgeDuration->getData();
+  mRidge->getData()= mRidgeVelocity->getData() 
+                     ;//+ mRidgeDuration->getData();
 }
 
 void cedar::proc::steps::EquidistantRidge::recompute()
