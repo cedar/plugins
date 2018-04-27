@@ -102,16 +102,15 @@ Finally, you can add all classes of a kind using these commands:
 | *MotionGradient*             | This class provides a cedar processing step implementing the OpenCV function calcMotionGradient. |
 | **Nao**                                                                                                       |
 | *NaoCamera*                  | Nao's camera.                                                                  |
+| **Neural Timer**                                                                                              |
+| *ApproximateCoupling*        | no description.                                                                            
+| *EquidistantMatrix*          | no description.                                                                |
 | **Object Recognition**                                                                                        |
 | *FeatureStacks*              | This step builds localized histograms around keypoints. See Lomp et al. (2014) for details. |
 | *KeypointEdgeHistogramExtractor* | This step builds localized histograms around keypoints using shape features.   |
 | *ReceptiveFieldHistogram*    | Extracts histograms using localized receptive fields.                          |
 | *TopDownReconstruction*      | Reconstructs a shape based object representation.                              |
 | *ViewCombination*            | Subsamples discrete activation fields by summing up neighboring sampling points (1D only). This is intended for object recognition, where multiple nodes representing multiple object views may be summed to form a representation of a single object. |
-| **Oscillator**                                                                                                |
-| *ApproximateCoupling*        | bla                                                                            |
-| *ApproximateInput*           | bla                                                                            |
-| *EquidistantRidge*           | no description.                                                                |
 | *HarmonicOscillator*         | A looped step that employs the harmonic Oscillator Formula pdotdot = -K(p-x)-B*pdot. K and B are automatically set to the critically damped solution. |
 | **Programming**                                                                                               |
 | *BufferThief*                | This step can grab any buffer from a step in the same architecture and output the data in the buffer. Use with caution, as this may lead to issues due to unsafe/unlocked data. |
@@ -120,6 +119,7 @@ Finally, you can add all classes of a kind using these commands:
 | *LabelWMAnnotator*           | Takes a yarp-friendly label WM representation and puts labels into an image.   |
 | *MatrixThreadDecoupler*      | A looped step that makes a copy of its input matrix. This may help make threads more independent of each other. |
 | *Multiplexer*                | Joins several scalars (1x1 matrices) into a vector (nx1 matrix).               |
+| *TwoStepInput*               | Jans 2 step input                                                              |
 | **Sources**                                                                                                   |
 | *OpenGLTargetVisualisation*  | A step that visualizes a colored blob in the 3D Caren simulation               |
 | *ImageProvider*              | A step that outputs an image from a directory based on an index specified via a parameter. |
