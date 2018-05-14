@@ -38,6 +38,7 @@
 #include "steps/neuraloscillator/ApproximateInput.h"
 
 // PROJECT INCLUDES
+#include "steps/neuraloscillator/NeuralTimer.h"
 
 // SYSTEM INCLUDES
 #include <sstream>
@@ -72,31 +73,13 @@ _mH( new cedar::aux::DoubleParameter ( this, "h (negative)", -5.0, -100000.0, 0.
 float cedar::proc::steps::ApproximateInput::calculateMaxVelocity(float D, float
 c, float tf, float tau, float h)
 {
-  float C3 = ( c*c -1 ) / ( (c+1)*(c+1) );
-  //( c - 1 ) / ( c + 1 );
-
-  float nenner = tau*tau*(c+1.0)/pow(c*c+1, 2.0)
-                 *(c + C3 - C3*tf/tau*(c*c+1.0)
-                   + exp( -tf/tau )
-                     * ( - sin(c*tf/tau) - c*cos(c*tf/tau) + c*C3*sin(c*tf/tau) - C3*cos(c*tf/tau) ));
-  float newS = D / nenner - h; // h is negative!
-
-  return newS;
+  return cedar::proc::steps::NeuralTimer::calculateInputS(D, c, tf, tau, h);
 }
 
 float cedar::proc::steps::ApproximateInput::calculateDistance(float s, float
 c, float tf, float tau, float h)
 {
-  float C3 = ( c*c -1 ) / ( (c+1)*(c+1) );
-  //( c - 1 ) / ( c + 1 );
-
-  float nenner = tau*tau*(c+1.0)/pow(c*c+1, 2.0)
-                 *(c + C3 - C3*tf/tau*(c*c+1.0)
-                   + exp( -tf/tau )
-                     * ( - sin(c*tf/tau) - c*cos(c*tf/tau) + c*C3*sin(c*tf/tau) - C3*cos(c*tf/tau) ));
-
-  float newD = ( s + h ) * (nenner);
-  return newD;
+  return cedar::proc::steps::NeuralTimer::calculateBaseIntegral(s, c, tf, tau, h);
 }
 
 void cedar::proc::steps::ApproximateInput::compute(const cedar::proc::Arguments&)

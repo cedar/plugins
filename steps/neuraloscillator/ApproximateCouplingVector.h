@@ -89,7 +89,7 @@ public:
     cedar::aux::ConstDataPtr data
   )const;
 
-  static float calculateDurationFromIndex(unsigned int i, unsigned int size, unsigned int min, unsigned int max);
+  static float calculateDurationFromIndex(unsigned int i, unsigned int size, float min, float max);
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
