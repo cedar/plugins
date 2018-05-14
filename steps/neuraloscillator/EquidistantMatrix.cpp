@@ -96,12 +96,12 @@ cedar::proc::steps::EquidistantMatrix::~EquidistantMatrix()
 // methods
 //----------------------------------------------------------------------------------------------------------------------
 
-float cedar::proc::steps::EquidistantMatrix::calculateDistanceFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max)
+float cedar::proc::steps::EquidistantMatrix::calculateDistanceFromIndex(unsigned int i, unsigned int siz, float min, float max)
 {
   return min + ( max-min ) * static_cast<float>(i) / static_cast<float>(siz);
 }
 
-float cedar::proc::steps::EquidistantMatrix::calculateVelocityFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max)
+float cedar::proc::steps::EquidistantMatrix::calculateVelocityFromIndex(unsigned int i, unsigned int siz, float min, float max)
 {
   return min + ( max-min ) * static_cast<float>(i) / static_cast<float>(siz);
 }

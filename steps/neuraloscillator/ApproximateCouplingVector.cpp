@@ -70,7 +70,7 @@ _mMaximalDuration(new cedar::aux::DoubleParameter(this, "duration max", 3.0))
 //----------------------------------------------------------------------------------------------------------------------
 
 
-float cedar::proc::steps::ApproximateCouplingVector::calculateDurationFromIndex(unsigned int i, unsigned int siz, unsigned int min, unsigned int max)
+float cedar::proc::steps::ApproximateCouplingVector::calculateDurationFromIndex(unsigned int i, unsigned int siz, float min, float max)
 {
   return min + ( max-min ) * static_cast<float>(i) / static_cast<float>(siz);
 }

@@ -22,7 +22,7 @@
     Institute:   Ruhr-Universitaet Bochum
                  Institut fuer Neuroinformatik
 
-    File:        EquidistantRidge.h
+    File:        NeuralTimer.h
 
     Maintainer:  
     Email:       
@@ -34,11 +34,11 @@
 
 ======================================================================================================================*/
 
-#ifndef CEDAR_PROC_STEPS_EQUIDISTANT_MATRIX_RIDGE_H
-#define CEDAR_PROC_STEPS_EQUIDISTANT_MATRIX_RIDGE_H
+#ifndef CEDAR_PROC_STEPS_NERUAL_TIMER_H
+#define CEDAR_PROC_STEPS_NERUAL_TIMER_H
 
 // LOCAL INCLUDES
-#include "steps/neuraloscillator/EquidistantMatrix.fwd.h"
+#include "steps/neuraloscillator/NeuralTimer.fwd.h"
 
 // PROJECT INCLUDES
 
@@ -54,7 +54,7 @@
 
 /*!@brief A processing step that generates spatial patterns for "left", "right", "above", and "below".
  */
-class cedar::proc::steps::EquidistantMatrix : public cedar::proc::Step
+class cedar::proc::steps::NeuralTimer : public cedar::proc::Step
 {
   //--------------------------------------------------------------------------------------------------------------------
   // macros
@@ -64,32 +64,32 @@ class cedar::proc::steps::EquidistantMatrix : public cedar::proc::Step
   //--------------------------------------------------------------------------------------------------------------------
   // nested types
   //--------------------------------------------------------------------------------------------------------------------
-  typedef cedar::aux::ObjectParameterTemplate<cedar::aux::math::TransferFunction> SigmoidParameter;
-
-  //!@cond SKIPPED_DOCUMENTATION
-  CEDAR_GENERATE_POINTER_TYPES_INTRUSIVE(SigmoidParameter);
-  //!@endcond
 
   //--------------------------------------------------------------------------------------------------------------------
   // constructors and destructor
   //--------------------------------------------------------------------------------------------------------------------
 public:
   //!@brief The standard constructor.
-  EquidistantMatrix();
+  NeuralTimer();
 
   //!@brief Destructor
-  ~EquidistantMatrix();
+  ~NeuralTimer();
 
   //--------------------------------------------------------------------------------------------------------------------
   // public methods
   //--------------------------------------------------------------------------------------------------------------------
 public:
   void compute(const cedar::proc::Arguments&);
-  static float calculateDistanceFromIndex(unsigned int i, unsigned int siz, float min, float max);
-  static float calculateVelocityFromIndex(unsigned int i, unsigned int siz, float min, float max);
 
-public slots:
-  void recompute();
+
+  static float calculateUofT(float t, float s, float c, float tau, float h);
+  static float calculateUDotofT(float t, float s, float c, float tau, float h);
+  static float calculateCouplingFromTF(float tf);
+  static float calculateInputS(float D, float c, float tf, float tau, float
+  h);
+  static float calculateBaseIntegral(float s, float c, float tf, float tau, float h);
+  static float calculateTMaxOfU(float c);
+  static float calculateModIntegral(float s, float c, float tf, float tau, float h);
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -101,7 +101,10 @@ protected:
   // private methods
   //--------------------------------------------------------------------------------------------------------------------
 private:
-  void internal_recompute();
+  void recompute();
+
+public slots:
+  void stuffChanged();
 
   //--------------------------------------------------------------------------------------------------------------------
   // members
@@ -114,23 +117,18 @@ private:
   // none
 
   // outputs
-  cedar::aux::MatDataPtr mMatrix;
+  cedar::aux::MatDataPtr mMatrixWBase;
+  cedar::aux::MatDataPtr mMatrixWMod;
+  cedar::aux::MatDataPtr mCouplingOut;
 
   //--------------------------------------------------------------------------------------------------------------------
   // parameters
   //--------------------------------------------------------------------------------------------------------------------
 private:
-  cedar::aux::UIntParameterPtr _mSizeX;
-  cedar::aux::UIntParameterPtr _mSizeY;
-
-  cedar::aux::DoubleParameterPtr _mMinimalDuration;
-  cedar::aux::DoubleParameterPtr _mMaximalDuration;
-  cedar::aux::DoubleParameterPtr _mDurationOffset;
-  cedar::aux::DoubleParameterPtr _mMinimalDistance;
-  cedar::aux::DoubleParameterPtr _mMaximalDistance;
 
   cedar::aux::DoubleParameterPtr _mTau;
   cedar::aux::DoubleParameterPtr _mH;
+  cedar::aux::DoubleParameterPtr _mS;
 }; // class cedar::proc::steps::EquidistantRidge
 
 #endif // CEDAR_PROC_STEPS_EQUIDIESTANT_RIDGE3_H
