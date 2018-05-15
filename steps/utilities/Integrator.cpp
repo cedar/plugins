@@ -136,7 +136,9 @@ void cedar::proc::steps::Integrator::reset()
 
 cedar::proc::DataSlot::VALIDITY cedar::proc::steps::Integrator::determineInputValidity(cedar::proc::ConstDataSlotPtr slot, cedar::aux::ConstDataPtr data) const
 {
-  if (cedar::aux::ConstMatDataPtr input = boost::dynamic_pointer_cast<const cedar::aux::MatData>(data))
+  cedar::aux::ConstMatDataPtr input;
+  if (data
+      && (input = boost::dynamic_pointer_cast<const cedar::aux::MatData>(data)))
   {
     unsigned int matrixRows = input->getData().rows;
     unsigned int matrixColumns = input->getData().cols;
