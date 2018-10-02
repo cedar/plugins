@@ -70,7 +70,6 @@ Finally, you can add all classes of a kind using these commands:
 | *HyperAcuteRescaling*        | Rescales an input matrix so that as little information as possible is lost. Note that this step's output is not properly normalized. |
 | *MaxPooling*                 | Subsamples a matrix by taking the maximum over rectangular regions.            |
 | *PadAndTranslate*            | A step that converts a 1D representation into a larger frame and translates the center of the 1D representation to the position given by the skalar-translation input. Borders are cyclic. |
-| *ShiftedAddition*            | no description.                                                                |
 | *WeightedSum*                | A looped step that multiplies each input value with a given weight and sums them up across each input dimension. The given weight function encodes the distance from the center of the input matrix. This step is used to calculate a velocity signal dependent on the distance between a peak position and the center of the input matrix. |
 | *WeightedSumOfSlices*        | Calculates a weighted sum of the entries in a 3d or 4d matrix along the first dimension. |
 | **DFT**                                                                                                       |
@@ -79,7 +78,6 @@ Finally, you can add all classes of a kind using these commands:
 | *RewardHebbTrace*            | A step that learns an associated input in presence of a reward signal          |
 | **Dynamics**                                                                                                  |
 | *InhibitoryNeuron*           | A single neuron with the dynamics tau * dv/dt = -sigmoid(s) * tanh(beta * (v - s)) - (1 - sigmoid(s)) * v, where v is the state of the system, beta defines the slope of change and s is the input, projected to zero dimensions by summing. |
-| *SerialOrderRecruiting*      | An Extension of the Serial Order Step, that allows a dynamic growth of serial order nodes and optionally a recruition of additional Groups toghether with the RecruitGroupsScript. |
 | *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
 | **Image Processing**                                                                                          |
 | *ConvertDepthToXyz*          | A step that converts depth data into 3D object data with scale and matrix center |
@@ -146,6 +144,10 @@ Finally, you can add all classes of a kind using these commands:
 | *localized histogram forward shift* | Template forward shifting localized histograms within the CF thesis architecture. |
 | *steering filter bank*       | Applies a bank of steering filters and calculates energy and angle for each pixel. |
 
+
+
+
+# Devices included in the plugin #
 
 
 

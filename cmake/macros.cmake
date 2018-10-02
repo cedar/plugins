@@ -411,6 +411,89 @@ macro(ADD_KERNEL_SOURCES_TO_BUILD FULL_CLASS_NAME)
   endif (NOT KERNEL_IN_BUILD)
 endmacro(ADD_KERNEL_SOURCES_TO_BUILD)
 
+
+#
+# macro ADD_COMPONENT_TO_BUILD
+#
+macro(ADD_COMPONENT_TO_BUILD FULL_CLASS_NAME)
+  IS_CLASS_IN_BUILD(${FULL_CLASS_NAME} COMPONENT)
+  if (NOT COMPONENT_IN_BUILD)
+    ADD_CLASS_TO_BUILD_COMMON(${FULL_CLASS_NAME})
+    NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+    
+    set(decl " {\n")
+    set(decl "${decl}    cedar::dev::ComponentDeclarationPtr declaration\n")
+    set(decl "${decl}    (\n")
+    set(decl "${decl}      new cedar::dev::ComponentDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")\n")
+    set(decl "${decl}    );\n")
+   
+    set(deprecated_names "${DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}}")
+    if (deprecated_names)
+      foreach (deprecated_name ${deprecated_names})
+        string(REPLACE "::" "." deprecated_name ${deprecated_names})
+        set(decl "${decl}    declaration->deprecatedName(\"${deprecated_name}\");\n")
+      endforeach()
+    endif()
+    
+    # add deprecation, if set ${NORMALIZED_CLASS_NAME}_DEPRECATION
+    set (deprecation "${${NORMALIZED_CLASS_NAME}_DEPRECATION}")
+    if (deprecation)
+      set(decl "${decl}    declaration->deprecate(\"${deprecation}\");\n")
+    endif()
+    
+    set(decl "${decl}    plugin->add(declaration);\n")
+    set(decl "${decl}  }\n")
+    set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
+      
+    foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
+      set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
+    endforeach()
+  endif (NOT COMPONENT_IN_BUILD)
+endmacro(ADD_COMPONENT_TO_BUILD)
+
+
+#
+# macro ADD_CHANNEL_TO_BUILD
+#
+macro(ADD_CHANNEL_TO_BUILD FULL_CLASS_NAME)
+  IS_CLASS_IN_BUILD(${FULL_CLASS_NAME} CHANNEL)
+  if (NOT CHANNEL_IN_BUILD)
+    ADD_CLASS_TO_BUILD_COMMON(${FULL_CLASS_NAME})
+    NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+    
+    set(decl " {\n")
+    set(decl "${decl}    cedar::dev::ChannelDeclarationPtr declaration\n")
+    set(decl "${decl}    (\n")
+    set(decl "${decl}      new cedar::dev::ChannelDeclarationTemplate<${FULL_CLASS_NAME}>(\"${CATEGORY_${NORMALIZED_CLASS_NAME}}\")\n")
+    set(decl "${decl}    );\n")
+   
+    set(deprecated_names "${DEPRECATED_NAMES_${NORMALIZED_CLASS_NAME}}")
+    if (deprecated_names)
+      foreach (deprecated_name ${deprecated_names})
+        string(REPLACE "::" "." deprecated_name ${deprecated_names})
+        set(decl "${decl}    declaration->deprecatedName(\"${deprecated_name}\");\n")
+      endforeach()
+    endif()
+    
+    # add deprecation, if set ${NORMALIZED_CLASS_NAME}_DEPRECATION
+    set (deprecation "${${NORMALIZED_CLASS_NAME}_DEPRECATION}")
+    if (deprecation)
+      set(decl "${decl}    declaration->deprecate(\"${deprecation}\");\n")
+    endif()
+    
+    set(decl "${decl}    plugin->add(declaration);\n")
+    set(decl "${decl}  }\n")
+    set(PLUGIN_DECLARATIONS "${PLUGIN_DECLARATIONS} ${decl}")
+      
+    foreach (header ${header_files_${NORMALIZED_CLASS_NAME}})
+      set(PLUGIN_INCLUDE_FILES "${PLUGIN_INCLUDE_FILES} \#include \"${header}\"\n")
+    endforeach()
+  endif (NOT CHANNEL_IN_BUILD)
+endmacro(ADD_CHANNEL_TO_BUILD)
+
+
+
+
 #
 # macro ADD_KERNEL_SOURCES_TO_BUILD
 #

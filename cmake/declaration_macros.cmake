@@ -154,6 +154,50 @@ macro(DECLARE_KERNEL FULL_CLASS_NAME)
   PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(KERNEL ${FULL_CLASS_NAME})
 endmacro(DECLARE_KERNEL)
 
+# This is a macro called by component description files.
+#
+# It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional.
+# TODO this macro is highly redundant with DECLARE_STEP
+macro(DECLARE_COMPONENT FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  # register the step with the list of steps
+  list(APPEND known_component ${FULL_CLASS_NAME})
+  
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
+  
+  SET_DEFAULT_CLASS_DECLARATION_ARGUMENTS(COMPONENT)
+  PARSE_DEFAULT_ARGUMENTS(COMPONENT ${ARGN})
+  PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(COMPONENT ${FULL_CLASS_NAME})
+endmacro(DECLARE_COMPONENT)
+
+# This is a macro called by channel description files.
+#
+# It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
+# description etc. All but the first (full class name) parameters are optional.
+# TODO this macro is highly redundant with DECLARE_STEP
+macro(DECLARE_CHANNEL FULL_CLASS_NAME)
+  # extract the class name, without the namespace
+  EXTRACT_CLASS_NAME(${FULL_CLASS_NAME})
+  # normalize the class name so it can be used to declare variables
+  NORMALIZE_CLASS_NAME(${FULL_CLASS_NAME})
+  
+  # register the step with the list of steps
+  list(APPEND known_component ${FULL_CLASS_NAME})
+  
+  # append the auto-determined cpp and h file for the class
+  DECLARE_CLASS_FILES(${FULL_CLASS_NAME})
+  
+  SET_DEFAULT_CLASS_DECLARATION_ARGUMENTS(CHANNEL)
+  PARSE_DEFAULT_ARGUMENTS(CHANNEL ${ARGN})
+  PROCESS_DEFAULT_CLASS_DECLARATION_ARGUMENTS(CHANNEL ${FULL_CLASS_NAME})
+endmacro(DECLARE_CHANNEL)
+
 # This is a macro called by script description files.
 #
 # It automatically generates build information required for the kernel, namely, the cpp and header files, icon,
@@ -247,9 +291,9 @@ endmacro(DECLARE_PLUGIN)
 
 # TODO describe syntax
 macro(ADD_TO_PLUGIN)
-  set(OPTIONS ALL_STEPS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS ALL_GROUP_TEMPLATES ALL_SCRIPTS)
-  set(ONE_VALUE_OPTIONS STEP CATEGORY KERNEL DATA_STRUCTURE PLOT GROUP_TEMPLATE SCRIPT)
-  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES KERNELS DATA_STRUCTURES PLOTS GROUP_TEMPLATES SCRIPTS)
+  set(OPTIONS ALL_STEPS ALL_COMPONENTS ALL_CHANNELS ALL_KERNELS ALL_DATA_STRUCTURES ALL_PLOTS ALL_GROUP_TEMPLATES ALL_SCRIPTS)
+  set(ONE_VALUE_OPTIONS STEP CATEGORY COMPONENT CHANNEL KERNEL DATA_STRUCTURE PLOT GROUP_TEMPLATE SCRIPT)
+  set(MULTI_VALUE_OPTIONS STEPS CATEGORIES COMPONENTS CHANNELS KERNELS DATA_STRUCTURES PLOTS GROUP_TEMPLATES SCRIPTS)
   
   cmake_parse_arguments(ADD_TO_PLUGIN "${OPTIONS}" "${ONE_VALUE_OPTIONS}" "${MULTI_VALUE_OPTIONS}" ${ARGN})
 
@@ -260,7 +304,19 @@ macro(ADD_TO_PLUGIN)
       ADD_STEP_TO_BUILD(${FULL_CLASS_NAME})
     endforeach()
   endif()
-  
+
+  if (ADD_TO_PLUGIN_ALL_COMPONENTS)
+    foreach (FULL_CLASS_NAME ${known_components})
+      ADD_COMPONENT_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+
+  if (ADD_TO_PLUGIN_ALL_CHANNELS)
+    foreach (FULL_CLASS_NAME ${known_channels})
+      ADD_CHANNEL_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+   
   if (ADD_TO_PLUGIN_ALL_KERNELS)
     foreach (FULL_CLASS_NAME ${known_kernels})
       ADD_KERNEL_SOURCES_TO_BUILD(${FULL_CLASS_NAME})
@@ -313,7 +369,29 @@ macro(ADD_TO_PLUGIN)
       ADD_GROUP_TEMPLATE_TO_BUILD(${GROUP_NAME})
     endforeach()
   endif()
+
+  # component
+  if (ADD_TO_PLUGIN_COMPONENT)
+    ADD_COMPONENT_TO_BUILD(${ADD_TO_PLUGIN_COMPONENT})
+  endif()
   
+  if (ADD_TO_PLUGIN_COMPONENTS)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_COMPONENTS})
+      ADD_COMPONENT_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+
+  # channel
+  if (ADD_TO_PLUGIN_CHANNEL)
+    ADD_CHANNEL_TO_BUILD(${ADD_TO_PLUGIN_CHANNEL})
+  endif()
+  
+  if (ADD_TO_PLUGIN_CHANNELS)
+    foreach (FULL_CLASS_NAME ${ADD_TO_PLUGIN_CHANNELS})
+      ADD_CHANNEL_TO_BUILD(${FULL_CLASS_NAME})
+    endforeach()
+  endif()
+
   # kernels
   if (ADD_TO_PLUGIN_KERNEL)
     ADD_KERNEL_SOURCES_TO_BUILD(${ADD_TO_PLUGIN_KERNEL})

@@ -10,6 +10,10 @@
 
 @GROUP_TEMPLATE_LIST_TEXT@
 
+# Devices included in the plugin #
+
+@DEVICE_LIST_TEXT@
+
 # Kernels included in the plugin #
 
 @KERNEL_LIST_TEXT@

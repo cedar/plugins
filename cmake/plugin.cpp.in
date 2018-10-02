@@ -44,6 +44,8 @@
 #include <cedar/processing/ElementDeclaration.h>
 #include <cedar/processing/CppScriptDeclaration.h>
 #include <cedar/processing/GroupDeclaration.h>
+#include <cedar/devices/ComponentDeclaration.h>
+#include <cedar/devices/ChannelDeclaration.h>
 #include <cedar/auxiliaries/kernel/Kernel.h>
 #include <cedar/auxiliaries/gui/PlotDeclaration.h>
 #include <cedar/auxiliaries/PluginDeclarationList.h>
