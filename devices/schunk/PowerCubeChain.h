@@ -113,7 +113,11 @@ protected:
   // none yet
 
 private:
-  //! a mapping from joint position in the chain to module id
+  //! a mapping from joint position in the chain to module ID (an integer specific to every PowerCube module)
+  //
+  // In the configuration file, make sure to put a module ID for every joint in the chain.
+  // The ID for the pan-tilt module (camera head of Caren) is 13.
+  // (Mathis: other IDs I have seen in older code are 11 and 14; not sure how to find out an ID for a given module...)
   cedar::aux::UIntVectorParameterPtr _mModuleMapping;
 
 }; // class cedar::dev::schunk::PowerCubeChain

@@ -55,6 +55,7 @@ _mCanPort(new cedar::aux::UIntParameter(this, "can port", 0, cedar::aux::UIntPar
 
 cedar::dev::schunk::SMPCanBusChannel::~SMPCanBusChannel()
 {
+  prepareChannelDestructAbsolutelyRequired();
 }
 
 // todo remove
@@ -110,6 +111,7 @@ void cedar::dev::schunk::SMPCanBusChannel::openHook()
   }
 
   this->mIsOpen = true;
+  std::cout << "CAN bus is open!" << std::endl;
 }
 
 void cedar::dev::schunk::SMPCanBusChannel::addModules(const std::vector<unsigned int>& moduleMap)
