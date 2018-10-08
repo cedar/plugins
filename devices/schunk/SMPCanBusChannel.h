@@ -733,19 +733,19 @@ public:
 
   //! returns the last position
   //@param  moduleId    the number of the module
-  double getLastJointPosition(unsigned int moduleId);
+  float getLastJointPosition(unsigned int moduleId);
 
   //! returns the last velocity
   //@param  moduleId    the number of the module
-  double getLastJointVelocity(unsigned int moduleId);
+  float getLastJointVelocity(unsigned int moduleId);
 
   //! returns the last current
   //@param  moduleId    the number of the module
-  double getLastJointCurrent(unsigned int moduleId);
+  float getLastJointCurrent(unsigned int moduleId);
 
   //! returns the duration of the last moving module
   //@param  moduleId    the number of the module
-  double getLastJointDuration(unsigned int moduleId);
+  float getLastJointDuration(unsigned int moduleId);
 
   //! sends an ACK to a specified module
   //@param  moduleId    the number of the module
@@ -764,9 +764,9 @@ public:
 
   /*! prepares fixed part of the message id and sets the parameter values to move a module with the given velocity
    *@param  moduleId    the number of the module
-   *@param  position    the position of the joint (in degree)
+   *@param  velocity    the joint velocity of the joint (in degree/s (?))
    */
-  void moveVel(unsigned int moduleId, float position);
+  void moveVel(unsigned int moduleId, float velocity);
 
   //! returns true, if it's already referenced
   bool getref(unsigned int id);
@@ -875,13 +875,13 @@ private:
   bool mIsOpen;
 
   //! a buffer for the position
-  double mpos[31];
+  float mpos[31];
 
   //! a buffer for the velocity
-  double mvel[31];
+  float mvel[31];
 
   //! a buffer for the current
-  double mcur[31];
+  float mcur[31];
 
   //! a buffer for the duration of the position
   float mdur[31];

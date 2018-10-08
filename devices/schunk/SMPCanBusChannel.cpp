@@ -765,25 +765,25 @@ void cedar::dev::schunk::SMPCanBusChannel::reference(uSMPMessageID message_id)
   }
 }
 
-double cedar::dev::schunk::SMPCanBusChannel::getLastJointPosition(unsigned int i)
+float cedar::dev::schunk::SMPCanBusChannel::getLastJointPosition(unsigned int i)
 {
   //returns the stored position:
   return mpos[i];
 }
 
-double cedar::dev::schunk::SMPCanBusChannel::getLastJointVelocity(unsigned int i)
+float cedar::dev::schunk::SMPCanBusChannel::getLastJointVelocity(unsigned int i)
 {
   //returns the stored velocity:
   return mvel[i];
 }
 
-double cedar::dev::schunk::SMPCanBusChannel::getLastJointCurrent(unsigned int i)
+float cedar::dev::schunk::SMPCanBusChannel::getLastJointCurrent(unsigned int i)
 {
   //returns the stored current:
   return mcur[i];
 }
 
-double cedar::dev::schunk::SMPCanBusChannel::getLastJointDuration(unsigned int i)
+float cedar::dev::schunk::SMPCanBusChannel::getLastJointDuration(unsigned int i)
 {
   //returns the stored duration:
   return mdur[i];
