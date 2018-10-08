@@ -58,18 +58,19 @@ _mModuleMapping
   new cedar::aux::UIntVectorParameter(this, "module mapping", cedar::aux::UIntVectorParameter::LimitType::full())
 )
 {
-  // this leads to an exception saying that the underlying variables (buffers in the component) are not initialized; TODO fix this later
-//  installMeasurementType(cedar::dev::schunk::PowerCubeChain::JOINT_CURRENTS, "Joint Currents");
-//  installMeasurementType(cedar::dev::schunk::PowerCubeChain::JOINT_DURATIONS, "Joint Durations");
+  auto number_of_joints = getNumberOfJoints();
+
+  installMeasurementType(cedar::dev::schunk::PowerCubeChain::JOINT_CURRENTS, "Joint Currents");
+  installMeasurementType(cedar::dev::schunk::PowerCubeChain::JOINT_DURATIONS, "Joint Durations");
+  setMeasurementDimensionality(cedar::dev::schunk::PowerCubeChain::JOINT_CURRENTS, number_of_joints);
+  setMeasurementDimensionality(cedar::dev::schunk::PowerCubeChain::JOINT_DURATIONS, number_of_joints);
 
   registerCommandHook(cedar::dev::KinematicChain::JOINT_ANGLES, boost::bind(&cedar::dev::schunk::PowerCubeChain::sendJointAngles, this, _1));
   registerCommandHook(cedar::dev::KinematicChain::JOINT_VELOCITIES, boost::bind(&cedar::dev::schunk::PowerCubeChain::sendJointVelocities, this, _1));
   registerMeasurementHook(cedar::dev::KinematicChain::JOINT_ANGLES, boost::bind(&cedar::dev::schunk::PowerCubeChain::retrieveJointAngles, this));
   registerMeasurementHook(cedar::dev::KinematicChain::JOINT_VELOCITIES, boost::bind(&cedar::dev::schunk::PowerCubeChain::retrieveJointVelocities, this));
-//  registerMeasurementHook(cedar::dev::schunk::PowerCubeChain::JOINT_CURRENTS, boost::bind(&cedar::dev::schunk::PowerCubeChain::retrieveJointCurrents, this));
-//  registerMeasurementHook(cedar::dev::schunk::PowerCubeChain::JOINT_DURATIONS, boost::bind(&cedar::dev::schunk::PowerCubeChain::retrieveJointDurations, this));
-
-  applyDeviceSideCommandsAs(cedar::dev::KinematicChain::JOINT_ANGLES);
+  registerMeasurementHook(cedar::dev::schunk::PowerCubeChain::JOINT_CURRENTS, boost::bind(&cedar::dev::schunk::PowerCubeChain::retrieveJointCurrents, this));
+  registerMeasurementHook(cedar::dev::schunk::PowerCubeChain::JOINT_DURATIONS, boost::bind(&cedar::dev::schunk::PowerCubeChain::retrieveJointDurations, this));
 }
 
 cedar::dev::schunk::PowerCubeChain::~PowerCubeChain()
