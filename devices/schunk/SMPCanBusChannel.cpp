@@ -55,7 +55,10 @@ _mCanPort(new cedar::aux::UIntParameter(this, "can port", 0, cedar::aux::UIntPar
 
 cedar::dev::schunk::SMPCanBusChannel::~SMPCanBusChannel()
 {
-  prepareChannelDestructAbsolutelyRequired();
+  if (isOpen())
+  {
+    close();
+  }
 }
 
 // todo remove
@@ -124,6 +127,9 @@ void cedar::dev::schunk::SMPCanBusChannel::postOpenHook()
   {
     acknowledge(_mModuleMap.at(i));
 
+    // MR: removed the reference movement from the initialization
+    //    this probably only needs to be invoked when the load on a module is changed
+        
     // only reference modules that are not already referenced
     if (getref(_mModuleMap.at(i)))
     {
@@ -134,6 +140,7 @@ void cedar::dev::schunk::SMPCanBusChannel::postOpenHook()
       reference(_mModuleMap.at(i));
     }
   }
+
 
   // add all CAN IDs of the modules we are interested in
   uSMPMessageID message_id;
