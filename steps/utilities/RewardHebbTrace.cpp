@@ -76,7 +76,8 @@ cedar::proc::steps::RewardHebbTrace::RewardHebbTrace()
                 new cedar::aux::DoubleVectorParameter(this, "weight sigmas", mAssociationDimension->getValue(), 3)),
         mWeightAmplitude(new cedar::aux::DoubleParameter(this, "weight amplitude", 6)),
         mRewardThreshold(new cedar::aux::DoubleParameter(this, "reward threshold", 0.5)),
-        mLearnedThreshold(new cedar::aux::DoubleParameter(this, "rec. weight threshold", 0.5,0,1)),
+        mLearnedThreshold(new cedar::aux::DoubleParameter(this, "reciprocal weight threshold", 0.5,0,1)),
+        mRequireAssoAndTrigger(new cedar::aux::BoolParameter(this, "require asso and trigger for learning", false)),
         // outputs
         mConnectionWeights(new cedar::aux::MatData(cv::Mat::zeros(100, 100, CV_32F))),
         mWeightOutput((new cedar::aux::MatData(cv::Mat::zeros(100, 100, CV_32F)))),
@@ -166,44 +167,65 @@ cv::Mat cedar::proc::steps::RewardHebbTrace::initializeWeightMatrix()
 
 void cedar::proc::steps::RewardHebbTrace::eulerStep(const cedar::unit::Time &time)
 {
-  if (mAssoInput && mInputSum)
+  if (mAssoInput && mInputSum && mReadOutTrigger)
   {
-    cv::Mat &trigger = this->mInputSum->getData();
+    cv::Mat &rewardInput = this->mInputSum->getData();
     cedar::proc::steps::Sum::sumSlot(this->getInputSlot(mRewardInputName), this->mInputSum->getData(), false);
-    if (trigger.at<float>(0, 0) > mRewardThreshold->getValue())
+    cv::Mat currentWeights = mConnectionWeights->getData();
+    cv::Mat currentAssoMat = mAssoInput->getData();
+    cv::Mat currentBelief = mReadOutTrigger->getData();
+    double learnRate = mLearnRatePositive->getValue();
+
+    
+    for (unsigned int x = 0; x < mWeightSizeX; x++)
     {
-//      std::cout << "Surpass the trigger!" <<std::endl;
-//      this->createFieldRecruit();
-      if (!mIsRewarded && mUseRewardDuration->getValue())
+      for (unsigned int y = 0; y < mWeightSizeY; y++)
       {
-        mElapsedTime = 0;
-        mIsRewarded = true;
-      }
-      float curTime = time / cedar::unit::Time(1 * cedar::unit::milli * cedar::unit::seconds);
-      mElapsedTime += curTime;
-      //The Learning Rule is only applied for a fixed time TODO:THINK About This
-      if (mElapsedTime < mRewardDuration->getValue() || !mUseRewardDuration->getValue())
-      {
-        //Apply Learning Rule
-        double learnRate = mLearnRatePositive->getValue();
-        cv::Mat currentWeights = mConnectionWeights->getData();
-        cv::Mat currentAssoMat = mAssoInput->getData();
-        for (unsigned int x = 0; x < mWeightSizeX; x++)
-        {
-          for (unsigned int y = 0; y < mWeightSizeY; y++)
-          {
-            float weightChange = learnRate * (currentAssoMat.at<float>(x, y) - currentWeights.at<float>(x, y));
-            currentWeights.at<float>(x, y) = currentWeights.at<float>(x, y) + weightChange;
-          }
-        }
-        mConnectionWeights->setData(currentWeights);
+	float weightChange = learnRate * rewardInput.at<float>(0,0) * currentBelief.at<float>(0,0)  * (currentAssoMat.at<float>(x, y) - currentWeights.at<float>(x, y)* currentBelief.at<float>(0,0));
+	currentWeights.at<float>(x, y) = currentWeights.at<float>(x, y) + weightChange;
       }
     }
-    else if (mUseRewardDuration->getValue())
-    {
-      mIsRewarded = false;
-    }
+    mConnectionWeights->setData(currentWeights);
   }
+    
+//     if (rewardInput.at<float>(0, 0) > mRewardThreshold->getValue())
+//     {
+//       if(!this->mRequireAssoAndTrigger->getValue() || (this->mRequireAssoAndTrigger->getValue() && mReadOutTrigger)) // I am too tired to refactor this more intelligently
+//         {
+//         if(!this->mRequireAssoAndTrigger->getValue()|| (this->mRequireAssoAndTrigger->getValue() &&  mReadOutTrigger->getData().at<float>(0, 0) > 0.5))
+//         {
+//           if (!mIsRewarded && mUseRewardDuration->getValue())
+//           {
+//             mElapsedTime = 0;
+//             mIsRewarded = true;
+//           }
+//           float curTime = time / cedar::unit::Time(1 * cedar::unit::milli * cedar::unit::seconds);
+//           mElapsedTime += curTime;
+//           //The Learning Rule is only applied for a fixed time TODO:THINK About This
+//           if (mElapsedTime < mRewardDuration->getValue() || !mUseRewardDuration->getValue())
+//           {
+//             //Apply Learning Rule
+//             double learnRate = mLearnRatePositive->getValue();
+//             cv::Mat currentWeights = mConnectionWeights->getData();
+//             cv::Mat currentAssoMat = mAssoInput->getData();
+//             for (unsigned int x = 0; x < mWeightSizeX; x++)
+//             {
+//               for (unsigned int y = 0; y < mWeightSizeY; y++)
+//               {
+//                 float weightChange = learnRate * (currentAssoMat.at<float>(x, y) - currentWeights.at<float>(x, y));
+//                 currentWeights.at<float>(x, y) = currentWeights.at<float>(x, y) + weightChange;
+//               }
+//             }
+//             mConnectionWeights->setData(currentWeights);
+//           }
+//         }
+//      }
+//     }
+//     else if (mUseRewardDuration->getValue())
+//     {
+//       mIsRewarded = false;
+//     }
+ // }
 
   if(mAssoInput)
   {

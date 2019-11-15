@@ -130,6 +130,7 @@ protected:
   cedar::aux::DoubleParameterPtr mWeightAmplitude;
   cedar::aux::DoubleParameterPtr mRewardThreshold;
   cedar::aux::DoubleParameterPtr mLearnedThreshold;
+  cedar::aux::BoolParameterPtr mRequireAssoAndTrigger;
 
 private:
 

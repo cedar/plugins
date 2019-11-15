@@ -78,6 +78,7 @@ Finally, you can add all classes of a kind using these commands:
 | *RewardHebbTrace*            | A step that learns an associated input in presence of a reward signal          |
 | **Dynamics**                                                                                                  |
 | *InhibitoryNeuron*           | A single neuron with the dynamics tau * dv/dt = -sigmoid(s) * tanh(beta * (v - s)) - (1 - sigmoid(s)) * v, where v is the state of the system, beta defines the slope of change and s is the input, projected to zero dimensions by summing. |
+| *SerialOrderRecruiting*      | An Extension of the Serial Order Step, that allows a dynamic growth of serial order nodes and optionally a recruition of additional Groups toghether with the RecruitGroupsScript. |
 | *PatternMemory*              | A dynamics that relaxes to the input pattern as long as a learning input is active. |
 | **Image Processing**                                                                                          |
 | *ConvertDepthToXyz*          | A step that converts depth data into 3D object data with scale and matrix center |
