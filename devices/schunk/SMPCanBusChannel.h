@@ -720,6 +720,12 @@ public:
   //! this function closes a CAN port if it is open
   void closeHook();
 
+  //! checks whether the channel is open
+  virtual inline bool isOpen() const
+  {
+    return mIsOpen;
+  }
+
   //! adds modules that are to be controlled
   void addModules(const std::vector<unsigned int>& modules);
 
@@ -770,12 +776,6 @@ public:
 
   //! returns true, if it's already referenced
   bool getref(unsigned int id);
-
-  //! returns the state of the port
-  inline bool isOpen() const
-  {
-    return this->mIsOpen;
-  }
 
   //--------------------------------------------------------------------------------------------------------------------
   // protected methods
@@ -871,7 +871,7 @@ private:
   //! a message buffer
   sSMPBuffer* g_smp_buffer[255+1];
 
-  //! flag containing the state of the can bus
+  //! state of the CAN bus channel
   bool mIsOpen;
 
   //! a buffer for the position
